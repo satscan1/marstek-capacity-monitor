@@ -13,6 +13,9 @@ Measuring
 
 Dashboard
 - button-card detail card: the footer shows the last full discharge and full charge.
+- button-card detail card: the warranty date line is removed from the footer (manufacturer spec is not a warranty); the explanation now also names orange.
+- button-card overview card: compact columns instead of full width.
+- Standard battery card: the warranty end row is removed.
 
 Upgrade: install v0.2.1 over v0.2.0 and restart Home Assistant. Existing measurements are kept; the two dates fill in from the measurements already stored.
 

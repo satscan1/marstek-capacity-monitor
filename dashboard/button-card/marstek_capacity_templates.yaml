@@ -61,7 +61,7 @@ button_card_templates:
             none: 'Nog geen volledige ontlading gemeten (≥95% → ≤15%). Dat kan in de winter even duren.',
             missing: 'Sensor niet gevonden:',
             status: {good: 'Goed', attention: 'Onder specificatie', critical: 'Melden bij Marstek (app)', no_measurement: 'Nog geen meting'},
-            reason: (eol, life) => `Specificatie fabrikant: ${eol} % na ${life} cycli (geen garantie). Groen tot 5 punten eronder, rood vanaf 75 %.`
+            reason: (eol, life) => `Specificatie fabrikant: ${eol} % na ${life} cycli (geen garantie). Groen tot 5 punten eronder, oranje daaronder, rood bij 75 % en lager.`
           } : {
             title: 'Capacity', nominal: 'Rated', usable: 'Usable', measured: 'Measured',
             ofnew: 'remaining', expected: 'Spec', spec: 'Manufacturer spec at', margin: 'margin', floor: 'report to Marstek',
@@ -70,7 +70,7 @@ button_card_templates:
             none: 'No full discharge measured yet (≥95% → ≤15%). This can take a while in winter.',
             missing: 'Sensor not found:',
             status: {good: 'Good', attention: 'Below spec', critical: 'Report to Marstek (app)', no_measurement: 'No measurement yet'},
-            reason: (eol, life) => `Manufacturer spec: ${eol} % after ${life} cycles (not a warranty). Green up to 5 points below, red from 75 %.`
+            reason: (eol, life) => `Manufacturer spec: ${eol} % after ${life} cycles (not a warranty). Green up to 5 points below, orange below that, red at 75 % or lower.`
           };
           const g = k => states[`sensor.marstek_${id}_${k}`];
           const m = g('measured_capacity'), p = g('capacity_pct'), e = g('expected_capacity');
@@ -136,8 +136,7 @@ button_card_templates:
             ? new Date(e.state).toLocaleString(T.loc, {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'}) : '–'; };
           const foot = `<div style="margin-top:10px;font-size:11px;${muted}">
               ${T.lastDis} ${dt('last_full_discharge')} · ${T.lastChg} ${dt('last_full_charge')}<br>
-              ${T.until} ${we && we.state !== 'unknown' ? new Date(we.state).toLocaleDateString(T.loc, {month: 'short', year: 'numeric'}) : '–'}
-              · n=${a.measurement_count ?? 0} ${T.n}</div>`;
+              n=${a.measurement_count ?? 0} ${T.n}</div>`;
 
           return `<div style="display:flex;justify-content:space-between;align-items:baseline">
               <span style="font-size:15px;font-weight:600">${name} · ${T.title}</span>
@@ -171,7 +170,7 @@ button_card_templates:
           const months = [...new Set(rows.flatMap(r => r.trend.map(t => t.month)))]
             .sort().reverse().slice(0, variables.months || 6);
           const mon = k => new Date(k + '-15').toLocaleString(T.loc, {month: 'short', year: '2-digit'});
-          const th = s => `<th style="padding:4px 6px;text-align:right;font-weight:400;font-size:11px;${muted}">${s}</th>`;
+          const th = s => `<th style="padding:4px 10px;text-align:right;font-weight:400;font-size:11px;${muted}">${s}</th>`;
           const head = `<tr><th style="text-align:left;font-weight:400;font-size:11px;${muted}">${T.bat}</th>
               ${th(T.trend)}${th(T.now)}${months.map(k => th(mon(k))).join('')}${th(T.exp)}</tr>`;
           const body = rows.map(r => {
@@ -187,17 +186,17 @@ button_card_templates:
             const now = parseFloat(r.p.state);
             const cells = months.map(k => {
               const c = t.find(x => x.month === k);
-              return c ? `<td style="padding:4px 6px;text-align:right"><span style="font-weight:600;color:${col(c.pct, c.expected_pct)}">${f(c.pct)}</span><span style="font-size:10px;${muted}"> /${f(c.expected_pct)}</span></td>`
-                       : `<td style="padding:4px 6px;text-align:right;${muted}">·</td>`;
+              return c ? `<td style="padding:4px 10px;text-align:right"><span style="font-weight:600;color:${col(c.pct, c.expected_pct)}">${f(c.pct)}</span><span style="font-size:10px;${muted}"> /${f(c.expected_pct)}</span></td>`
+                       : `<td style="padding:4px 10px;text-align:right;${muted}">·</td>`;
             }).join('');
             return `<tr style="border-top:1px solid #333744">
-                <td style="padding:4px 6px 4px 0;white-space:nowrap"><span style="color:${col(now)}">●</span> ${name}</td>
-                <td style="padding:4px 6px;text-align:right;color:${d < -1 ? col(now) : '#9aa0a6'}">${arrow}</td>
-                <td style="padding:4px 6px;text-align:right;font-weight:600;color:${col(now)}">${isNaN(now) ? `<span style="font-weight:400;font-size:11px;${muted}">${T.none}</span>` : f(now, 1) + '%'}</td>
+                <td style="padding:4px 16px 4px 0;white-space:nowrap"><span style="color:${col(now)}">●</span> ${name}</td>
+                <td style="padding:4px 10px;text-align:right;color:${d < -1 ? col(now) : '#9aa0a6'}">${arrow}</td>
+                <td style="padding:4px 10px;text-align:right;font-weight:600;color:${col(now)}">${isNaN(now) ? `<span style="font-weight:400;font-size:11px;${muted}">${T.none}</span>` : f(now, 1) + '%'}</td>
                 ${cells}
-                <td style="padding:4px 6px;text-align:right;${muted}">${f(parseFloat(r.e.state), 1)}%</td></tr>`;
+                <td style="padding:4px 10px;text-align:right;${muted}">${f(parseFloat(r.e.state), 1)}%</td></tr>`;
           }).join('');
           return `<div style="font-size:15px;font-weight:600;margin-bottom:8px">${T.title}</div>
-            <div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:13px">${head}${body}</table></div>
+            <div style="overflow-x:auto"><table style="border-collapse:collapse;width:auto;font-size:13px">${head}${body}</table></div>
             <div style="margin-top:8px;font-size:11px;${muted}">${T.legend}</div>`;
         ]]]
