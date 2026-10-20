@@ -83,6 +83,9 @@ SENSORS: tuple[CapacitySensorDescription, ...] = (
         icon="mdi:chart-line-variant",
         value_fn=lambda m: _r(m, "expected_pct"),
         attrs_fn=lambda m: {
+            "cycle_life": m.spec.cycle_life,
+            "cycle_eol_pct": m.spec.cycle_eol_pct,
+        } | {
             k: m.result.get(k)
             for k in (
                 "expected_kwh",

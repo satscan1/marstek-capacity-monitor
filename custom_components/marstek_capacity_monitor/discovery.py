@@ -85,6 +85,20 @@ def _prefix(entity_id: str, pattern: re.Pattern[str]) -> str:
     return re.sub(r"(battery_?|batt_?|bat_?)$", "", head)
 
 
+NAME_STRIP_RE = re.compile(
+    r"\s*(battery\s*)?(state\s*of\s*charge|soc|battery\s*level|level)\s*$", re.I
+)
+
+
+def _friendly_battery_name(soc: State) -> str:
+    """'Venus E v3 Battery SOC' -> 'Venus E v3'. Falls back to the object id."""
+    friendly = str(soc.attributes.get("friendly_name") or "")
+    name = NAME_STRIP_RE.sub("", friendly).strip(" -_·")
+    if name:
+        return name
+    return _prefix(soc.entity_id, SOC_RE).strip("_").replace("_", " ") or soc.entity_id
+
+
 def _score_soc(entity_id: str) -> int:
     return 2 if "state_of_charge" in entity_id else 1 if "soc" in entity_id else 0
 
@@ -146,9 +160,7 @@ def find_candidates(
         if dev_id and (device := dev_reg.async_get(dev_id)):
             name = device.name_by_user or device.name
         if not name:
-            name = _prefix(soc.entity_id, SOC_RE).strip("_").replace("_", " ") or (
-                soc.entity_id
-            )
+            name = _friendly_battery_name(soc)
         found.append(Candidate(name, soc.entity_id, match.entity_id))
 
     # One proposal per SOC sensor is enough; keep a stable order.

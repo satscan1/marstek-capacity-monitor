@@ -1,0 +1,31 @@
+# Marstek Capacity Monitor - standard card (no HACS needed)
+# Replace mt1 with your battery id. For more batteries: copy the card,
+# or add their entities to the statistics graph in overview_card.yaml.
+type: vertical-stack
+cards:
+  - type: entities
+    title: MT1 · Capacity
+    entities:
+      - entity: sensor.marstek_mt1_warranty_status
+      - entity: sensor.marstek_mt1_capacity_pct
+      - entity: sensor.marstek_mt1_expected_capacity
+      - entity: sensor.marstek_mt1_margin
+      - type: section
+        label: Nominal → usable → measured
+      - entity: sensor.marstek_mt1_nominal_capacity
+      - entity: sensor.marstek_mt1_usable_capacity
+      - entity: sensor.marstek_mt1_measured_capacity
+      - type: section
+      - entity: sensor.marstek_mt1_cycles
+      - entity: sensor.marstek_mt1_warranty_end
+  # Pattern over time: remaining capacity against the manufacturer spec line
+  - type: statistics-graph
+    title: Remaining capacity vs manufacturer spec (%)
+    chart_type: line
+    period: month
+    days_to_show: 730
+    stat_types:
+      - mean
+    entities:
+      - entity: sensor.marstek_mt1_capacity_pct
+      - entity: sensor.marstek_mt1_expected_capacity

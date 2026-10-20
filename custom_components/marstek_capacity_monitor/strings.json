@@ -12,7 +12,7 @@
         "title": "Factory data and warranty",
         "description": "Defaults are the Marstek Venus E 5.12 kWh datasheet (DoD 90 %, > 6000 cycles, 80 % after 6000 cycles). Marstek gives no capacity guarantee in years.",
         "data": {
-          "nominal_kwh": "Nominal (factory) capacity",
+          "nominal_kwh": "Rated capacity (manufacturer)",
           "reserve_kwh": "Internal reserve (not usable)",
           "purchase_date": "Purchase date",
           "warranty_years": "Warranty period",
@@ -20,16 +20,16 @@
           "cycle_eol_pct": "Capacity after rated cycle life",
           "initial_cycles": "Cycles already done before monitoring",
           "red_pct": "Red threshold (report to Marstek)",
-          "tolerance_pct": "Tolerance below expected"
+          "tolerance_pct": "Tolerance below spec"
         },
         "data_description": {
           "nominal_kwh": "Total capacity of the cells, e.g. 5.12 kWh.",
           "reserve_kwh": "Part of the nominal capacity the battery never releases. Datasheet: 90 % DoD, so 5.12 − 0.51 = 4.61 kWh = 100 % of new.",
           "cycle_life": "E.g. 6000 full cycles.",
-          "cycle_eol_pct": "Factory rating: e.g. 80 % after 6000 cycles. This is the expected line.",
+          "cycle_eol_pct": "Manufacturer spec: e.g. 80 % after 6000 cycles (Marstek, Venus E Gen 3.0 product page). This is the spec line; not a warranty.",
           "initial_cycles": "Estimate: total discharged kWh so far divided by the usable capacity. Leave 0 for a new battery.",
-          "red_pct": "At or below this % of new the status turns red: the moment to report it to Marstek via the Marstek app. Default 75 %.",
-          "tolerance_pct": "Green while the measurement is at most this many points below the expected line. Default 5."
+          "red_pct": "At or below this % remaining the status turns red: the moment to report it to Marstek via the Marstek app. Default 75 %.",
+          "tolerance_pct": "Green while the measurement is at most this many points below the manufacturer spec line. Default 5."
         }
       },
       "details": {
@@ -64,7 +64,7 @@
       "init": {
         "title": "Factory data and warranty",
         "data": {
-          "nominal_kwh": "Nominal (factory) capacity",
+          "nominal_kwh": "Rated capacity (manufacturer)",
           "reserve_kwh": "Internal reserve (not usable)",
           "purchase_date": "Purchase date",
           "warranty_years": "Warranty period",
@@ -72,17 +72,17 @@
           "cycle_eol_pct": "Capacity after rated cycle life",
           "initial_cycles": "Cycles already done before monitoring",
           "red_pct": "Red threshold (report to Marstek)",
-          "tolerance_pct": "Tolerance below expected",
+          "tolerance_pct": "Tolerance below spec",
           "power_sign": "Sign of the power sensor"
         },
         "data_description": {
           "nominal_kwh": "Total capacity of the cells, e.g. 5.12 kWh.",
           "reserve_kwh": "Part of the nominal capacity the battery never releases. Datasheet: 90 % DoD, so 5.12 − 0.51 = 4.61 kWh = 100 % of new.",
           "cycle_life": "E.g. 6000 full cycles.",
-          "cycle_eol_pct": "Factory rating: e.g. 80 % after 6000 cycles. This is the expected line.",
+          "cycle_eol_pct": "Manufacturer spec: e.g. 80 % after 6000 cycles (Marstek, Venus E Gen 3.0 product page). This is the spec line; not a warranty.",
           "initial_cycles": "Estimate: total discharged kWh so far divided by the usable capacity. Leave 0 for a new battery.",
-          "red_pct": "At or below this % of new the status turns red: the moment to report it to Marstek via the Marstek app. Default 75 %.",
-          "tolerance_pct": "Green while the measurement is at most this many points below the expected line. Default 5.",
+          "red_pct": "At or below this % remaining the status turns red: the moment to report it to Marstek via the Marstek app. Default 75 %.",
+          "tolerance_pct": "Green while the measurement is at most this many points below the manufacturer spec line. Default 5.",
           "power_sign": "Automatic: detected on the first charge or discharge. Change only if detection gets it wrong."
         }
       }
@@ -97,19 +97,19 @@
         "name": "Measured capacity"
       },
       "capacity_pct": {
-        "name": "Capacity of new"
+        "name": "Remaining capacity"
       },
       "expected_capacity": {
-        "name": "Expected capacity"
+        "name": "Manufacturer spec"
       },
       "margin": {
-        "name": "Margin vs expected"
+        "name": "Margin vs spec"
       },
       "cycles": {
         "name": "Full cycles"
       },
       "nominal_capacity": {
-        "name": "Nominal capacity"
+        "name": "Rated capacity"
       },
       "usable_capacity": {
         "name": "Usable capacity"
@@ -121,10 +121,10 @@
         "name": "DC discharged (monitored)"
       },
       "warranty_status": {
-        "name": "Status",
+        "name": "Capacity status",
         "state": {
           "good": "Good",
-          "attention": "Below expected",
+          "attention": "Below spec",
           "critical": "Report to Marstek",
           "no_measurement": "No full discharge measured yet"
         }
