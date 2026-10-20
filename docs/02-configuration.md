@@ -27,6 +27,7 @@ All values are set when you add a battery. Change them later under **Settings �
 | `sensor.marstek_mt1_margin` | Margin vs spec (kWh) |
 | `sensor.marstek_mt1_cycles` | Number of full cycles |
 | `sensor.marstek_mt1_warranty_status` | Capacity status: `good` / `attention` / `critical` / `no_measurement` |
+| `sensor.marstek_mt1_last_full_discharge` · `_last_full_charge` | Date and time of the last full discharge (≥ 95 % → ≤ 15 %) and full charge (≤ 15 % → ≥ 95 %) |
 | `sensor.marstek_mt1_nominal_capacity` · `_usable_capacity` · `_red_threshold` · `_warranty_end` · `_dc_discharged` | Diagnostics. `_dc_discharged` also shows which sensors are used and how the sign was detected |
 
 After every recorded swing, the integration fires the event `marstek_capacity_monitor_session`. You can use it to forward the records yourself, for example to InfluxDB.
