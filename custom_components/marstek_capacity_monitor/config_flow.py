@@ -147,7 +147,12 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
             )
             for i, c in enumerate(self._candidates)
         ]
-        options.append(selector.SelectOptionDict(value=MANUAL, label="✎ Zelf sensoren kiezen / Choose sensors manually"))
+        manual = (
+            "✎ Zelf sensoren kiezen"
+            if (self.hass.config.language or "").startswith("nl")
+            else "✎ Choose sensors manually"
+        )
+        options.append(selector.SelectOptionDict(value=MANUAL, label=manual))
         schema = vol.Schema(
             {
                 vol.Required(CONF_CANDIDATE, default="0"): selector.SelectSelector(
@@ -183,7 +188,9 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._ac_confirmed = power
                 errors[CONF_POWER_ENTITY] = "looks_like_ac"
             else:
-                await self.async_set_unique_id(battery_id)
+                # raise_on_progress=False: an earlier, abandoned attempt with the
+                # same id must not block a new one.
+                await self.async_set_unique_id(battery_id, raise_on_progress=False)
                 self._abort_if_unique_id_configured()
                 self._data = {**user_input, CONF_BATTERY_ID: battery_id}
                 return await self.async_step_specs()

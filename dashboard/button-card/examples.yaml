@@ -1,0 +1,22 @@
+# Example cards (after adding marstek_capacity_templates.yaml to your dashboard)
+
+# Overview of all batteries (up to 6)
+type: custom:button-card
+template: marstek_capacity_overview
+variables:
+  lang: nl          # en | nl
+  months: 6
+  batteries:
+    - id: mt1
+      name: MT1 veranda
+    - id: mt2
+      name: MT2 berging
+
+---
+# Detail card for one battery
+type: custom:button-card
+template: marstek_capacity_battery
+variables:
+  battery: mt1
+  name: MT1 veranda
+  lang: nl

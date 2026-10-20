@@ -1,0 +1,201 @@
+# Marstek Capacity Monitor - button-card templates
+# Requires: custom:button-card (HACS). No card_mod needed.
+#
+# Paste the block below under `button_card_templates:` in the raw
+# configuration of your dashboard (Edit dashboard -> three dots ->
+# Raw configuration editor). Then use the cards from examples.yaml.
+#
+# Variables
+#   marstek_capacity_battery : battery (id, e.g. mt1), name, lang (en|nl), months
+#   marstek_capacity_overview: batteries (list of ids or {id, name}), lang, months
+
+button_card_templates:
+
+  marstek_capacity_base:
+    show_name: false
+    show_icon: false
+    show_state: false
+    tap_action:
+      action: none
+    variables:
+      lang: en
+      months: 6
+    styles:
+      card:
+        - background: "#1e2128"
+        - border: "1px solid #333744"
+        - border-radius: 12px
+        - padding: 14px
+        - color: "#e8eaed"
+        - font-size: 13px
+        - height: 100%
+      grid:
+        - grid-template-areas: '"body"'
+        - grid-template-columns: 1fr
+        - align-items: start
+      custom_fields:
+        body:
+          - justify-self: stretch
+          - white-space: normal
+          - align-self: start
+          - text-align: left
+
+  # -------------------------------------------------------------------------
+  # One battery: three capacities, expectation, monthly trend
+  # -------------------------------------------------------------------------
+  marstek_capacity_battery:
+    template: marstek_capacity_base
+    variables:
+      battery: mt1
+      name: ""
+    custom_fields:
+      body: |
+        [[[
+          const id = variables.battery;
+          const nl = variables.lang === 'nl';
+          const T = nl ? {
+            title: 'Capaciteit', nominal: 'Opgegeven', usable: 'Bruikbaar', measured: 'Gemeten',
+            ofnew: 'nog beschikbaar', expected: 'Specificatie', spec: 'Specificatie fabrikant bij', margin: 'marge', floor: 'melden bij Marstek',
+            age: 'jaar', cycles: 'cycli', trend: 'Trend', exp: 'spec.',
+            until: 'garantie t/m', n: 'metingen', last: 'laatst gemeten', loc: 'nl-NL',
+            none: 'Nog geen volledige ontlading gemeten (≥95% → ≤15%). Dat kan in de winter even duren.',
+            missing: 'Sensor niet gevonden:',
+            status: {good: 'Goed', attention: 'Onder specificatie', critical: 'Melden bij Marstek (app)', no_measurement: 'Nog geen meting'},
+            reason: (eol, life) => `Specificatie fabrikant: ${eol} % na ${life} cycli (geen garantie). Groen tot 5 punten eronder, rood vanaf 75 %.`
+          } : {
+            title: 'Capacity', nominal: 'Rated', usable: 'Usable', measured: 'Measured',
+            ofnew: 'remaining', expected: 'Spec', spec: 'Manufacturer spec at', margin: 'margin', floor: 'report to Marstek',
+            age: 'yr', cycles: 'cycles', trend: 'Trend', exp: 'spec',
+            until: 'warranty until', n: 'measurements', last: 'last measured', loc: 'en-GB',
+            none: 'No full discharge measured yet (≥95% → ≤15%). This can take a while in winter.',
+            missing: 'Sensor not found:',
+            status: {good: 'Good', attention: 'Below spec', critical: 'Report to Marstek (app)', no_measurement: 'No measurement yet'},
+            reason: (eol, life) => `Manufacturer spec: ${eol} % after ${life} cycles (not a warranty). Green up to 5 points below, red from 75 %.`
+          };
+          const g = k => states[`sensor.marstek_${id}_${k}`];
+          const m = g('measured_capacity'), p = g('capacity_pct'), e = g('expected_capacity');
+          const st = g('warranty_status'), we = g('warranty_end'), mg = g('margin');
+          if (!m || !p || !e) return `<span style="color:#ef5350">${T.missing} sensor.marstek_${id}_…</span>`;
+          const f = (v, d = 2) => (v === null || v === undefined || v === '' || isNaN(v)) ? '–'
+            : Number(v).toLocaleString(T.loc, {minimumFractionDigits: d, maximumFractionDigits: d});
+          const a = m.attributes, ea = e.attributes;
+          const meas = parseFloat(m.state), pct = parseFloat(p.state), exp = parseFloat(e.state);
+          const floor = p.attributes.red_pct ?? 75, tol = p.attributes.tolerance_pct ?? 5;
+          const col = (v, x = exp) => isNaN(v) ? '#9aa0a6' : v <= floor ? '#ef5350' : v >= x - tol ? '#66bb6a' : '#ffa726';
+          const name = variables.name || id.toUpperCase();
+          const status = st ? (T.status[st.state] || st.state) : '';
+          const muted = 'color:#9aa0a6';
+
+          // Three capacities, strictly apart
+          const box = (lbl, val, sub, c) => `
+            <div style="flex:1;background:#262a33;border-radius:8px;padding:8px 10px">
+              <div style="font-size:11px;${muted}">${lbl}</div>
+              <div style="font-size:18px;font-weight:600;color:${c}">${val}</div>
+              <div style="font-size:11px;${muted}">${sub}</div></div>`;
+          const boxes = `<div style="display:flex;gap:8px;margin:10px 0">
+            ${box(T.nominal, f(a.nominal_kwh) + ' kWh', '100 %', '#e8eaed')}
+            ${box(T.usable, f(a.usable_kwh) + ' kWh', '− ' + f(a.reserve_kwh) + ' kWh', '#42a5f5')}
+            ${box(T.measured, isNaN(meas) ? '–' : f(meas) + ' kWh', isNaN(pct) ? '' : f(pct, 1) + ' % ' + T.ofnew, col(pct))}
+          </div>`;
+
+          // Bar: measured vs expected vs warranty floor (0-100 % of usable)
+          const bar = `<div style="position:relative;height:10px;background:#333744;border-radius:5px;margin:14px 0 4px">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:${isNaN(pct) ? 0 : Math.min(pct, 100)}%;background:${col(pct)};border-radius:5px"></div>
+              <div title="${T.expected}" style="position:absolute;top:-4px;bottom:-4px;left:${exp}%;width:2px;background:#e8eaed"></div>
+              <div title="${T.floor}" style="position:absolute;top:-4px;bottom:-4px;left:${floor}%;width:2px;background:#ef5350"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;${muted}">
+              <span><span style="color:#ef5350">▎</span>${T.floor} ${f(floor, 0)} %</span>
+              <span><span style="color:#e8eaed">▎</span>${T.expected} ${f(exp, 1)} %</span>
+            </div>`;
+
+          const expLine = `<div style="margin-top:8px">${T.spec} ${f(ea.cycles, 0)} ${T.cycles}: <b>${f(ea.expected_kwh)} kWh</b>
+              (${f(exp, 1)} %) · ${f(ea.age_years, 1)} ${T.age}
+              ${mg && !isNaN(parseFloat(mg.state)) ? ` · ${T.margin} <b style="color:${col(pct)}">${parseFloat(mg.state) >= 0 ? '+' : ''}${f(mg.state)} kWh</b>` : ''}
+              <div style="font-size:11px;${muted}">${T.reason(f(ea.cycle_eol_pct ?? 80, 0), f(ea.cycle_life ?? 6000, 0))}</div></div>`;
+
+          // Monthly trend: trend column first, then newest -> oldest
+          const tr = (a.trend || []).slice(0, variables.months || 6);
+          let trend = `<div style="margin-top:10px;font-size:12px;${muted}">${T.none}</div>`;
+          if (tr.length) {
+            // trend over the months shown: newest vs oldest
+            const d = tr.length > 1 ? tr[0].pct - tr[tr.length - 1].pct : 0;
+            const arrow = tr.length < 2 ? '·' : d > 1 ? '▲' : d < -1 ? '▼' : '▬';
+            const ac = d < -1 ? col(pct) : '#9aa0a6';
+            const mon = k => new Date(k + '-15').toLocaleString(T.loc, {month: 'short', year: '2-digit'});
+            const cells = tr.map(t => `<td style="padding:2px 8px;text-align:right">
+                <div style="font-size:11px;${muted}">${mon(t.month)}</div>
+                <div style="font-weight:600;color:${col(t.pct, t.expected_pct)}">${f(t.pct, 0)}%</div>
+                <div style="font-size:10px;${muted}">${T.exp} ${f(t.expected_pct, 0)}</div></td>`).join('');
+            trend = `<table style="margin-top:10px;border-collapse:collapse;width:100%"><tr>
+                <td style="padding:2px 8px 2px 0;${muted};font-size:11px;vertical-align:middle">${T.trend}<div style="font-size:18px;color:${ac}">${arrow}</div></td>
+                ${cells}</tr></table>`;
+          }
+
+          const last = a.last_measurement ? new Date(a.last_measurement).toLocaleDateString(T.loc) : '–';
+          const foot = `<div style="margin-top:10px;font-size:11px;${muted}">
+              ${T.until} ${we && we.state !== 'unknown' ? new Date(we.state).toLocaleDateString(T.loc, {month: 'short', year: 'numeric'}) : '–'}
+              · n=${a.measurement_count ?? 0} ${T.n} · ${T.last} ${last}</div>`;
+
+          return `<div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:15px;font-weight:600">${name} · ${T.title}</span>
+              <span style="font-size:12px;color:${col(pct)}">${status}</span></div>
+            ${boxes}${bar}${expLine}${trend}${foot}`;
+        ]]]
+
+  # -------------------------------------------------------------------------
+  # Up to six batteries: pattern over months, newest -> oldest
+  # -------------------------------------------------------------------------
+  marstek_capacity_overview:
+    template: marstek_capacity_base
+    # no default list: button-card would merge it with yours
+    custom_fields:
+      body: |
+        [[[
+          const nl = variables.lang === 'nl';
+          const T = nl
+            ? {title: 'Capaciteit thuisbatterijen — % nog beschikbaar per maand', bat: 'Batterij', trend: 'Trend', now: 'Nu', exp: 'Specificatie', loc: 'nl-NL', none: 'geen meting', legend: 'Groen: volgens specificatie fabrikant (tot 5 punten eronder) · oranje: onder specificatie · rood: 75 % of lager, melden via de Marstek-app. Klein getal = specificatie voor die maand.'}
+            : {title: 'Home battery capacity — % remaining per month', bat: 'Battery', trend: 'Trend', now: 'Now', exp: 'Spec', loc: 'en-GB', none: 'no measurement', legend: 'Green: within manufacturer spec (up to 5 points below) · orange: below spec · red: 75 % or lower, report via the Marstek app. Small number = spec for that month.'};
+          const f = (v, d = 0) => (v === null || v === undefined || isNaN(v)) ? '–'
+            : Number(v).toLocaleString(T.loc, {minimumFractionDigits: d, maximumFractionDigits: d});
+          const muted = 'color:#9aa0a6';
+          const list = (variables.batteries || []).slice(0, 6).map(b => typeof b === 'string' ? {id: b} : b);
+          const rows = list.map(b => {
+            const m = states[`sensor.marstek_${b.id}_measured_capacity`];
+            const p = states[`sensor.marstek_${b.id}_capacity_pct`];
+            const e = states[`sensor.marstek_${b.id}_expected_capacity`];
+            return {b, m, p, e, trend: m ? (m.attributes.trend || []) : []};
+          });
+          const months = [...new Set(rows.flatMap(r => r.trend.map(t => t.month)))]
+            .sort().reverse().slice(0, variables.months || 6);
+          const mon = k => new Date(k + '-15').toLocaleString(T.loc, {month: 'short', year: '2-digit'});
+          const th = s => `<th style="padding:4px 6px;text-align:right;font-weight:400;font-size:11px;${muted}">${s}</th>`;
+          const head = `<tr><th style="text-align:left;font-weight:400;font-size:11px;${muted}">${T.bat}</th>
+              ${th(T.trend)}${th(T.now)}${months.map(k => th(mon(k))).join('')}${th(T.exp)}</tr>`;
+          const body = rows.map(r => {
+            const floor = r.p ? (r.p.attributes.red_pct ?? 75) : 75;
+            const tol = r.p ? (r.p.attributes.tolerance_pct ?? 5) : 5;
+            const expNow = r.e ? parseFloat(r.e.state) : NaN;
+            const col = (v, x = expNow) => isNaN(v) ? '#9aa0a6' : v <= floor ? '#ef5350' : v >= x - tol ? '#66bb6a' : '#ffa726';
+            const name = r.b.name || r.b.id.toUpperCase();
+            if (!r.m) return `<tr><td colspan="${months.length + 4}" style="color:#ef5350">sensor.marstek_${r.b.id}_… ?</td></tr>`;
+            const t = r.trend.filter(x => months.includes(x.month));
+            const d = t.length > 1 ? t[0].pct - t[t.length - 1].pct : 0;
+            const arrow = t.length < 2 ? '·' : d > 1 ? '▲' : d < -1 ? '▼' : '▬';
+            const now = parseFloat(r.p.state);
+            const cells = months.map(k => {
+              const c = t.find(x => x.month === k);
+              return c ? `<td style="padding:4px 6px;text-align:right"><span style="font-weight:600;color:${col(c.pct, c.expected_pct)}">${f(c.pct)}</span><span style="font-size:10px;${muted}"> /${f(c.expected_pct)}</span></td>`
+                       : `<td style="padding:4px 6px;text-align:right;${muted}">·</td>`;
+            }).join('');
+            return `<tr style="border-top:1px solid #333744">
+                <td style="padding:4px 6px 4px 0;white-space:nowrap"><span style="color:${col(now)}">●</span> ${name}</td>
+                <td style="padding:4px 6px;text-align:right;color:${d < -1 ? col(now) : '#9aa0a6'}">${arrow}</td>
+                <td style="padding:4px 6px;text-align:right;font-weight:600;color:${col(now)}">${isNaN(now) ? `<span style="font-weight:400;font-size:11px;${muted}">${T.none}</span>` : f(now, 1) + '%'}</td>
+                ${cells}
+                <td style="padding:4px 6px;text-align:right;${muted}">${f(parseFloat(r.e.state), 1)}%</td></tr>`;
+          }).join('');
+          return `<div style="font-size:15px;font-weight:600;margin-bottom:8px">${T.title}</div>
+            <div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:13px">${head}${body}</table></div>
+            <div style="margin-top:8px;font-size:11px;${muted}">${T.legend}</div>`;
+        ]]]
