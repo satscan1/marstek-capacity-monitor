@@ -6,7 +6,7 @@ Track in Home Assistant whether your Marstek home battery keeps its capacity, me
 
 > **Is my battery holding its capacity, compared to what the manufacturer specifies?**
 
-![Dashboard](screenshots/07-dashboard-en.png)
+![Marstek Capacity Monitor](screenshots/infographic-en.png)
 
 ## In short
 
