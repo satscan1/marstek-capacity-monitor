@@ -17,7 +17,6 @@ cards:
       - entity: sensor.marstek_mt1_measured_capacity
       - type: section
       - entity: sensor.marstek_mt1_cycles
-      - entity: sensor.marstek_mt1_warranty_end
   # Pattern over time: remaining capacity against the manufacturer spec line
   - type: statistics-graph
     title: Remaining capacity vs manufacturer spec (%)
