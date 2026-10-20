@@ -279,3 +279,26 @@ async def test_auto_sign_notification(hass: HomeAssistant, freezer, monkeypatch)
     assert len(created) == 1
     assert created[0][1] == f"{DOMAIN}_sign_{entry.entry_id}"
     assert "omgedraaid" in created[0][0] and POWER in created[0][0]
+
+
+async def test_abandoned_flow_does_not_block(hass: HomeAssistant) -> None:
+    """A flow left open at the factory-data step must not block a new one."""
+    hass.states.async_set(SOC, 50, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W", "device_class": "power"})
+    data = {"battery_id": "mt1", "name": "MT1", "soc_entity": SOC, "power_entity": POWER}
+    first = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    first = await hass.config_entries.flow.async_configure(first["flow_id"], data)
+    assert first["step_id"] == "specs"  # left open
+    second = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
+    second = await hass.config_entries.flow.async_configure(second["flow_id"], data)
+    assert second["step_id"] == "specs"
+
+
+async def test_scan_uses_friendly_name(hass: HomeAssistant) -> None:
+    hass.states.async_set("sensor.marstek_venus_e_v3_battery_soc", 80,
+        {"unit_of_measurement": "%", "device_class": "battery", "friendly_name": "Venus E v3 Battery SOC"})
+    hass.states.async_set("sensor.marstek_venus_e_v3_battery_power", 0,
+        {"unit_of_measurement": "W", "device_class": "power"})
+    from custom_components.marstek_capacity_monitor.discovery import find_candidates
+    cands = find_candidates(hass)
+    assert [c.name for c in cands] == ["Venus E v3"]

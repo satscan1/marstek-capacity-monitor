@@ -12,7 +12,7 @@
         "title": "Fabrieksgegevens en garantie",
         "description": "Standaardwaarden komen uit de datasheet van de Marstek Venus E 5,12 kWh (90% ontlaaddiepte, > 6000 cycli, 80% na 6000 cycli). Marstek geeft geen capaciteitsgarantie in jaren.",
         "data": {
-          "nominal_kwh": "Fabriekscapaciteit (nominaal)",
+          "nominal_kwh": "Opgegeven capaciteit (fabrikant)",
           "reserve_kwh": "Interne reserve (niet bruikbaar)",
           "purchase_date": "Aankoopdatum",
           "warranty_years": "Garantietermijn",
@@ -20,16 +20,16 @@
           "cycle_eol_pct": "Capaciteit na die cycli",
           "initial_cycles": "Cycli al gedaan vóór de monitoring",
           "red_pct": "Rode grens (melden bij Marstek)",
-          "tolerance_pct": "Marge onder verwachting"
+          "tolerance_pct": "Marge onder specificatie"
         },
         "data_description": {
           "nominal_kwh": "Totale capaciteit van de cellen, bv. 5,12 kWh.",
           "reserve_kwh": "Deel van de fabriekscapaciteit dat de batterij nooit afgeeft. Datasheet: 90% ontlaaddiepte, dus 5,12 − 0,51 = 4,61 kWh = 100% van nieuw.",
           "cycle_life": "Bv. 6000 volle cycli.",
-          "cycle_eol_pct": "Fabrieksopgave: bv. 80% na 6000 cycli. Dit is de verwachte lijn.",
+          "cycle_eol_pct": "Specificatie van de fabrikant: bv. 80% na 6000 cycli (Marstek, productpagina Venus E Gen 3.0). Dit is de specificatielijn; geen garantie.",
           "initial_cycles": "Schatting: totaal ontladen kWh tot nu toe gedeeld door de bruikbare capaciteit. Laat 0 bij een nieuwe batterij.",
           "red_pct": "Op of onder dit % van nieuw wordt de status rood: het moment om het via de Marstek-app te melden. Standaard 75%.",
-          "tolerance_pct": "Groen zolang de meting hooguit zoveel punten onder de verwachte lijn zit. Standaard 5."
+          "tolerance_pct": "Groen zolang de meting hooguit zoveel punten onder de specificatielijn van de fabrikant zit. Standaard 5."
         }
       },
       "details": {
@@ -64,7 +64,7 @@
       "init": {
         "title": "Fabrieksgegevens en garantie",
         "data": {
-          "nominal_kwh": "Fabriekscapaciteit (nominaal)",
+          "nominal_kwh": "Opgegeven capaciteit (fabrikant)",
           "reserve_kwh": "Interne reserve (niet bruikbaar)",
           "purchase_date": "Aankoopdatum",
           "warranty_years": "Garantietermijn",
@@ -72,17 +72,17 @@
           "cycle_eol_pct": "Capaciteit na die cycli",
           "initial_cycles": "Cycli al gedaan vóór de monitoring",
           "red_pct": "Rode grens (melden bij Marstek)",
-          "tolerance_pct": "Marge onder verwachting",
+          "tolerance_pct": "Marge onder specificatie",
           "power_sign": "Teken van de vermogensensor"
         },
         "data_description": {
           "nominal_kwh": "Totale capaciteit van de cellen, bv. 5,12 kWh.",
           "reserve_kwh": "Deel van de fabriekscapaciteit dat de batterij nooit afgeeft. Datasheet: 90% ontlaaddiepte, dus 5,12 − 0,51 = 4,61 kWh = 100% van nieuw.",
           "cycle_life": "Bv. 6000 volle cycli.",
-          "cycle_eol_pct": "Fabrieksopgave: bv. 80% na 6000 cycli. Dit is de verwachte lijn.",
+          "cycle_eol_pct": "Specificatie van de fabrikant: bv. 80% na 6000 cycli (Marstek, productpagina Venus E Gen 3.0). Dit is de specificatielijn; geen garantie.",
           "initial_cycles": "Schatting: totaal ontladen kWh tot nu toe gedeeld door de bruikbare capaciteit. Laat 0 bij een nieuwe batterij.",
           "red_pct": "Op of onder dit % van nieuw wordt de status rood: het moment om het via de Marstek-app te melden. Standaard 75%.",
-          "tolerance_pct": "Groen zolang de meting hooguit zoveel punten onder de verwachte lijn zit. Standaard 5.",
+          "tolerance_pct": "Groen zolang de meting hooguit zoveel punten onder de specificatielijn van de fabrikant zit. Standaard 5.",
           "power_sign": "Automatisch: wordt herkend bij de eerste laad- of ontlaadbeurt. Alleen aanpassen als de herkenning het mis heeft."
         }
       }
@@ -97,19 +97,19 @@
         "name": "Gemeten capaciteit"
       },
       "capacity_pct": {
-        "name": "Capaciteit van nieuw"
+        "name": "Nog beschikbaar"
       },
       "expected_capacity": {
-        "name": "Verwachte capaciteit"
+        "name": "Specificatie fabrikant"
       },
       "margin": {
-        "name": "Marge t.o.v. verwachting"
+        "name": "Marge t.o.v. specificatie"
       },
       "cycles": {
         "name": "Volle cycli"
       },
       "nominal_capacity": {
-        "name": "Fabriekscapaciteit"
+        "name": "Opgegeven capaciteit"
       },
       "usable_capacity": {
         "name": "Bruikbare capaciteit"
@@ -121,10 +121,10 @@
         "name": "DC ontladen (gemonitord)"
       },
       "warranty_status": {
-        "name": "Status",
+        "name": "Status beschikbare capaciteit",
         "state": {
           "good": "Goed",
-          "attention": "Onder verwachting",
+          "attention": "Onder specificatie",
           "critical": "Melden bij Marstek",
           "no_measurement": "Nog geen volledige ontlading gemeten"
         }
