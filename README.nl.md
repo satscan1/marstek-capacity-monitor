@@ -6,7 +6,7 @@ Volg in Home Assistant of je Marstek-thuisbatterij zijn capaciteit houdt, gemete
 
 > **Houdt mijn batterij zijn capaciteit vast, vergeleken met wat de fabrikant specificeert?**
 
-![Dashboard](screenshots/08-dashboard-nl.png)
+![Marstek Capacity Monitor](screenshots/infographic-nl.png)
 
 ## In het kort
 
