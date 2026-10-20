@@ -18,7 +18,7 @@ energy integration) -> Result (one session record per completed swing).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from statistics import median
 from typing import Any
 
@@ -129,6 +129,15 @@ def is_full_discharge(rec: dict[str, Any]) -> bool:
         and rec.get("valid", True)
         and rec.get("soc_start", 0) >= FULL_HIGH_PCT
         and rec.get("soc_end", 100) <= FULL_LOW_PCT
+    )
+
+
+def is_full_charge(rec: dict[str, Any]) -> bool:
+    return (
+        rec.get("direction") == "charge"
+        and rec.get("valid", True)
+        and rec.get("soc_start", 100) <= FULL_LOW_PCT
+        and rec.get("soc_end", 0) >= FULL_HIGH_PCT
     )
 
 
@@ -335,6 +344,10 @@ class SwingTracker:
 # ---------------------------------------------------------------------------
 
 
+def _utc(ts: float) -> datetime:
+    return datetime.fromtimestamp(ts, tz=timezone.utc)
+
+
 def evaluate(
     spec: BatterySpec,
     records: list[dict[str, Any]],
@@ -355,6 +368,7 @@ def evaluate(
 
     window_start = now.timestamp() - MEASURE_WINDOW_DAYS * 86400
     full = sorted((r for r in records if is_full_discharge(r)), key=lambda r: r["ts"])
+    charges = sorted((r for r in records if is_full_charge(r)), key=lambda r: r["ts"])
     recent = [r for r in full if r["ts"] >= window_start]
     caps = [
         c for c in (capacity_from_record(spec, r) for r in recent[-MEDIAN_OF_LAST:]) if c
@@ -422,6 +436,8 @@ def evaluate(
         "loss_kwh": round(usable - measured_kwh, 3) if measured_kwh is not None else None,
         "measurement_count": len(caps),
         "last_measurement": datetime.fromtimestamp(recent[-1]["ts"]) if recent else None,
+        "last_full_discharge": _utc(full[-1]["ts"]) if full else None,
+        "last_full_charge": _utc(charges[-1]["ts"]) if charges else None,
         "age_years": round(age_years(spec, today), 2) if spec.purchase_date else None,
         "cycles": round(cycles, 1),
         "expected_pct": round(exp, 1),

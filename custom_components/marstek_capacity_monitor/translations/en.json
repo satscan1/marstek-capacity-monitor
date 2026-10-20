@@ -131,6 +131,12 @@
       },
       "red_threshold": {
         "name": "Red threshold"
+      },
+      "last_full_discharge": {
+        "name": "Last full discharge"
+      },
+      "last_full_charge": {
+        "name": "Last full charge"
       }
     }
   },

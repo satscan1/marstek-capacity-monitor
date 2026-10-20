@@ -25,6 +25,13 @@ EXCLUDE_RE = re.compile(
     r"cutoff|cut_off|limit|min_|_min|max_|_max|target|reserve|setpoint|set_|"
     r"threshold|backup|rated|forcible|force_|minimum|maximum"
 )
+# Names that point to something that is not a home battery: vehicles,
+# phones and sums of several batteries.
+NOT_HOME_BATTERY_RE = re.compile(
+    r"(^|_)(car|auto|vehicle|ev|byd|atto|tesla|model_[3sxy]|zoe|leaf|id_?[3-7]|kona|niro|"
+    r"phone|pixel|iphone|galaxy|tablet|ipad|watch|laptop|"
+    r"total|totaal|house|huis|sum|som|combined|all|alle|mtall)($|_)"
+)
 # Names that point to the AC / grid side instead of the battery (DC) side
 AC_RE = re.compile(r"(^|_)ac($|_)|grid|(^|_)net($|_)|inverter|p1|meter|socket|plug")
 
@@ -52,7 +59,7 @@ def is_soc(state: State, entry: er.RegistryEntry | None = None) -> bool:
     if state.attributes.get("unit_of_measurement") != PERCENTAGE:
         return False
     text = _text(state, entry)
-    if EXCLUDE_RE.search(text):
+    if EXCLUDE_RE.search(text) or NOT_HOME_BATTERY_RE.search(text):
         return False
     return state.attributes.get("device_class") == "battery" or bool(SOC_RE.search(text))
 
@@ -61,7 +68,7 @@ def is_battery_power(state: State, entry: er.RegistryEntry | None = None) -> boo
     if state.attributes.get("unit_of_measurement") not in POWER_UNITS:
         return False
     text = _text(state, entry)
-    if EXCLUDE_RE.search(text) or AC_RE.search(text):
+    if EXCLUDE_RE.search(text) or AC_RE.search(text) or NOT_HOME_BATTERY_RE.search(text):
         return False
     return bool(POWER_RE.search(text))
 

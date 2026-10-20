@@ -302,3 +302,18 @@ async def test_scan_uses_friendly_name(hass: HomeAssistant) -> None:
     from custom_components.marstek_capacity_monitor.discovery import find_candidates
     cands = find_candidates(hass)
     assert [c.name for c in cands] == ["Venus E v3"]
+
+
+async def test_scan_skips_cars_and_totals(hass: HomeAssistant) -> None:
+    """Seen in a real installation: an EV and a 'house total' sum were proposed."""
+    W = {"unit_of_measurement": "W", "device_class": "power"}
+    P = {"unit_of_measurement": "%", "device_class": "battery"}
+    hass.states.async_set("sensor.venus_5_12kwh_veranda_marstek_battery_state_of_charge", 80, P)
+    hass.states.async_set("sensor.venus_5_12kwh_veranda_marstek_battery_power", 0, W)
+    hass.states.async_set("sensor.byd_atto_3_batterijniveau", 70, P)
+    hass.states.async_set("sensor.byd_atto_3_battery_power", 0, W)
+    hass.states.async_set("sensor.house_total_battery_soc", 60, P)
+    hass.states.async_set("sensor.house_total_battery_power", 0, W)
+    from custom_components.marstek_capacity_monitor.discovery import find_candidates
+    names = [c.soc_entity for c in find_candidates(hass)]
+    assert names == ["sensor.venus_5_12kwh_veranda_marstek_battery_state_of_charge"]

@@ -213,3 +213,21 @@ def test_fixed_sign_is_never_flipped():
     recs, _ = simulate(tr, 11, 40, 1.5, t, invert=True)
     assert tr.s["sign"] == 1
     assert recs[0]["valid"] is False  # no energy in the discharge bucket
+
+
+def test_last_full_charge_and_discharge():
+    spec = calc.BatterySpec(reserve_kwh=0.61)
+    now = datetime(2026, 10, 20)
+    t1 = datetime(2026, 10, 10, 18).timestamp()
+    t2 = datetime(2026, 10, 12, 14).timestamp()
+    recs = [
+        {"ts": t1, "direction": "discharge", "soc_start": 100, "soc_end": 11, "delta_soc": 89, "e_dc_kwh": 4.42, "valid": True},
+        {"ts": t2, "direction": "charge", "soc_start": 11, "soc_end": 100, "delta_soc": 89, "e_dc_kwh": 4.6, "valid": True},
+        {"ts": t2 + 3600, "direction": "charge", "soc_start": 40, "soc_end": 100, "delta_soc": 60, "e_dc_kwh": 3.1, "valid": True},
+    ]
+    res = calc.evaluate(spec, recs, 0, now)
+    assert res["last_full_discharge"].timestamp() == pytest.approx(t1)
+    assert res["last_full_charge"].timestamp() == pytest.approx(t2)  # the 40 -> 100 charge is not full
+    assert res["last_full_discharge"].tzinfo is not None
+    empty = calc.evaluate(spec, [], 0, now)
+    assert empty["last_full_discharge"] is None and empty["last_full_charge"] is None
