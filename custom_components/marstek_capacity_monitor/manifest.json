@@ -1,0 +1,13 @@
+{
+  "domain": "marstek_capacity_monitor",
+  "name": "Marstek Capacity Monitor",
+  "codeowners": ["@satscan1"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/satscan1/marstek-capacity-monitor",
+  "integration_type": "device",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/satscan1/marstek-capacity-monitor/issues",
+  "requirements": [],
+  "version": "0.2.0"
+}

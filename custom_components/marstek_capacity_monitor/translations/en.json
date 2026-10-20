@@ -1,0 +1,158 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add battery",
+        "description": "Found {count} battery/batteries with a state of charge and a DC battery power sensor. Pick one, or choose the sensors yourself. Maximum {max} batteries.",
+        "data": {
+          "candidate": "Battery"
+        }
+      },
+      "specs": {
+        "title": "Factory data and warranty",
+        "description": "Defaults are the Marstek Venus E 5.12 kWh datasheet (DoD 90 %, > 6000 cycles, 80 % after 6000 cycles). Marstek gives no capacity guarantee in years.",
+        "data": {
+          "nominal_kwh": "Nominal (factory) capacity",
+          "reserve_kwh": "Internal reserve (not usable)",
+          "purchase_date": "Purchase date",
+          "warranty_years": "Warranty period",
+          "cycle_life": "Rated cycle life",
+          "cycle_eol_pct": "Capacity after rated cycle life",
+          "initial_cycles": "Cycles already done before monitoring",
+          "red_pct": "Red threshold (report to Marstek)",
+          "tolerance_pct": "Tolerance below expected"
+        },
+        "data_description": {
+          "nominal_kwh": "Total capacity of the cells, e.g. 5.12 kWh.",
+          "reserve_kwh": "Part of the nominal capacity the battery never releases. Datasheet: 90 % DoD, so 5.12 − 0.51 = 4.61 kWh = 100 % of new.",
+          "cycle_life": "E.g. 6000 full cycles.",
+          "cycle_eol_pct": "Factory rating: e.g. 80 % after 6000 cycles. This is the expected line.",
+          "initial_cycles": "Estimate: total discharged kWh so far divided by the usable capacity. Leave 0 for a new battery.",
+          "red_pct": "At or below this % of new the status turns red: the moment to report it to Marstek via the Marstek app. Default 75 %.",
+          "tolerance_pct": "Green while the measurement is at most this many points below the expected line. Default 5."
+        }
+      },
+      "details": {
+        "title": "Battery and sensors",
+        "description": "Check the proposal. The power sensor must measure the battery (DC) side, not the AC / grid side. Whether charging is positive or negative is detected automatically.",
+        "data": {
+          "battery_id": "Short id",
+          "name": "Name",
+          "soc_entity": "State of charge sensor (%)",
+          "power_entity": "DC battery power sensor (W)"
+        },
+        "data_description": {
+          "battery_id": "Used in entity ids, e.g. mt1 gives sensor.marstek_mt1_capacity_pct. Lowercase letters, digits and _.",
+          "soc_entity": "The battery's own SOC in %.",
+          "power_entity": "Power measured on the battery (DC) side. W or kW."
+        }
+      }
+    },
+    "error": {
+      "invalid_id": "Use 1-20 lowercase letters, digits or _.",
+      "same_entity": "SOC and power must be different sensors.",
+      "reserve_too_large": "The reserve must be smaller than the nominal capacity.",
+      "looks_like_ac": "This sensor looks like the AC / grid side, not the battery (DC) side. AC values include conversion losses and give a wrong capacity. Choose the battery power sensor, or submit again to use this one anyway."
+    },
+    "abort": {
+      "already_configured": "This battery id is already in use.",
+      "max_batteries": "The maximum of 6 batteries has been reached."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Factory data and warranty",
+        "data": {
+          "nominal_kwh": "Nominal (factory) capacity",
+          "reserve_kwh": "Internal reserve (not usable)",
+          "purchase_date": "Purchase date",
+          "warranty_years": "Warranty period",
+          "cycle_life": "Rated cycle life",
+          "cycle_eol_pct": "Capacity after rated cycle life",
+          "initial_cycles": "Cycles already done before monitoring",
+          "red_pct": "Red threshold (report to Marstek)",
+          "tolerance_pct": "Tolerance below expected",
+          "power_sign": "Sign of the power sensor"
+        },
+        "data_description": {
+          "nominal_kwh": "Total capacity of the cells, e.g. 5.12 kWh.",
+          "reserve_kwh": "Part of the nominal capacity the battery never releases. Datasheet: 90 % DoD, so 5.12 − 0.51 = 4.61 kWh = 100 % of new.",
+          "cycle_life": "E.g. 6000 full cycles.",
+          "cycle_eol_pct": "Factory rating: e.g. 80 % after 6000 cycles. This is the expected line.",
+          "initial_cycles": "Estimate: total discharged kWh so far divided by the usable capacity. Leave 0 for a new battery.",
+          "red_pct": "At or below this % of new the status turns red: the moment to report it to Marstek via the Marstek app. Default 75 %.",
+          "tolerance_pct": "Green while the measurement is at most this many points below the expected line. Default 5.",
+          "power_sign": "Automatic: detected on the first charge or discharge. Change only if detection gets it wrong."
+        }
+      }
+    },
+    "error": {
+      "reserve_too_large": "The reserve must be smaller than the nominal capacity."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "measured_capacity": {
+        "name": "Measured capacity"
+      },
+      "capacity_pct": {
+        "name": "Capacity of new"
+      },
+      "expected_capacity": {
+        "name": "Expected capacity"
+      },
+      "margin": {
+        "name": "Margin vs expected"
+      },
+      "cycles": {
+        "name": "Full cycles"
+      },
+      "nominal_capacity": {
+        "name": "Nominal capacity"
+      },
+      "usable_capacity": {
+        "name": "Usable capacity"
+      },
+      "warranty_end": {
+        "name": "Warranty end"
+      },
+      "dc_discharged": {
+        "name": "DC discharged (monitored)"
+      },
+      "warranty_status": {
+        "name": "Status",
+        "state": {
+          "good": "Good",
+          "attention": "Below expected",
+          "critical": "Report to Marstek",
+          "no_measurement": "No full discharge measured yet"
+        }
+      },
+      "red_threshold": {
+        "name": "Red threshold"
+      }
+    }
+  },
+  "services": {
+    "reset_measurements": {
+      "name": "Reset measurements",
+      "description": "Forget all measurements of one battery. Cannot be undone.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Battery",
+          "description": "The battery whose measurements are removed."
+        }
+      }
+    }
+  },
+  "selector": {
+    "power_sign": {
+      "options": {
+        "auto": "Automatic",
+        "charge_positive": "Charging is positive",
+        "charge_negative": "Charging is negative"
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "Marstek Capacity Monitor",
+  "homeassistant": "2025.1.0",
+  "render_readme": true,
+  "zip_release": true,
+  "filename": "marstek_capacity_monitor.zip"
+}
