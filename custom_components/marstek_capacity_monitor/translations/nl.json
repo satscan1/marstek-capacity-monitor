@@ -131,6 +131,12 @@
       },
       "red_threshold": {
         "name": "Rode grens"
+      },
+      "last_full_discharge": {
+        "name": "Laatste volledige ontlading"
+      },
+      "last_full_charge": {
+        "name": "Laatste volledige lading"
       }
     }
   },

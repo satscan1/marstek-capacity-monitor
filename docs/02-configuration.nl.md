@@ -27,6 +27,7 @@ Alle waarden stel je in bij het toevoegen van een batterij. Later wijzigen kan v
 | `sensor.marstek_mt1_margin` | Marge ten opzichte van de specificatie (kWh) |
 | `sensor.marstek_mt1_cycles` | Aantal volle cycli |
 | `sensor.marstek_mt1_warranty_status` | Status beschikbare capaciteit: `good` / `attention` / `critical` / `no_measurement` |
+| `sensor.marstek_mt1_last_full_discharge` · `_last_full_charge` | Datum en tijd van de laatste volledige ontlading (≥ 95 % → ≤ 15 %) en volledige lading (≤ 15 % → ≥ 95 %) |
 | `sensor.marstek_mt1_nominal_capacity` · `_usable_capacity` · `_red_threshold` · `_warranty_end` · `_dc_discharged` | Diagnostiek. `_dc_discharged` toont ook welke sensoren gebruikt worden en hoe het teken is herkend |
 
 Na elke vastgelegde beurt verstuurt de integratie het event `marstek_capacity_monitor_session`. Daarmee kun je de records zelf doorsturen, bijvoorbeeld naar InfluxDB.

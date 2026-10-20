@@ -124,6 +124,20 @@ SENSORS: tuple[CapacitySensorDescription, ...] = (
         },
     ),
     CapacitySensorDescription(
+        key="last_full_discharge",
+        translation_key="last_full_discharge",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        icon="mdi:battery-arrow-down",
+        value_fn=lambda m: _r(m, "last_full_discharge"),
+    ),
+    CapacitySensorDescription(
+        key="last_full_charge",
+        translation_key="last_full_charge",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        icon="mdi:battery-arrow-up",
+        value_fn=lambda m: _r(m, "last_full_charge"),
+    ),
+    CapacitySensorDescription(
         key="nominal_capacity",
         translation_key="nominal_capacity",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
