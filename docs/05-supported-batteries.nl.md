@@ -7,11 +7,31 @@
 | Venus E v1 / v2 | RS485 via ESPHome (LilyGo, M5Stack) of via een RS485-netwerkbrug (Elfin EW11) met een Modbus-integratie | register 32104 | register 32102 |
 | Venus E v3, Venus A, Venus D | Ingebouwde LAN-poort met Modbus TCP | register 34002 | register 30001 |
 
-**Elk Marstek-model met Modbus werkt**, via RS485 of via LAN, zolang een HA-koppeling de laadtoestand en het DC-vermogen als sensor levert. De tabel geeft de gecontroleerde modellen; alleen de registers verschillen, de gegevens zijn hetzelfde. Bij een ander model vul je bij het toevoegen de eigen fabrieksgegevens in (capaciteit, ontlaaddiepte, cycli); de standaardwaarden zijn die van de Venus E 5,12 kWh.
+**Modbus is niet nodig.** Elke koppeling werkt, zolang die de laadtoestand en het **DC**-vermogen van de batterij als sensor in Home Assistant levert: ESPHome, Modbus (RS485 of LAN) of een andere integratie. De tabel geeft de gecontroleerde modellen en Modbus-routes; alleen de registers verschillen, de gegevens zijn hetzelfde.
+
+**MQTT (hm2mqtt):** getest met een nagebootste Venus E v1/v2: de scan vindt *Battery State of Charge* en *Battery Power*, en beide tekens werken. Nog niet bevestigd met een echte batterij; of oudere v1/v2-firmware *Battery Power* meestuurt, is onbekend. Voor de celbalans met hm2mqtt: zet in hm2mqtt *Cell Data* aan en schakel in Home Assistant de entiteiten *Max Cell Voltage* en *Min Cell Voltage* in (die staan standaard uit). Ervaringen zijn welkom via Issues.
+
+**Celtemperaturen:** sommige koppelingen (waaronder MQTT bij de v1/v2) geven MOSFET-temperaturen door als "celtemperatuur". Deze tool gebruikt alleen echte celtemperaturen (optioneel, als context bij elke meting), nooit MOS-temperaturen; de scan slaat sensoren met MOS, board of internal in de naam over. Voor de celbalans gebruikt hij de hoogste en laagste cel**spanning**.
 
 Integraties zoals [marstek_venus_modbus](https://github.com/ViperRNMC/marstek_venus_modbus) en [Omnibattery](https://github.com/ffunes/Omnibattery), en de gangbare ESPHome-configuraties, leveren beide sensoren.
 
 **Niet ondersteund:** koppelingen die alleen het AC-vermogen leveren, zoals de meeste cloudkoppelingen. AC-waarden bevatten omzetverlies en geven daardoor een verkeerde capaciteit. Kies je toch een sensor die op AC lijkt, dan krijg je een waarschuwing.
+
+## Fabrieksgegevens per model
+
+Bij het toevoegen kies je het model; deze waarden worden dan ingevuld. Je kunt ze later aanpassen via **Configureren**.
+
+| Model | Opgegeven capaciteit | Reserve (ontlaaddiepte) | Cycli · capaciteit daarna | Garantietermijn |
+|---|---|---|---|---|
+| Venus E v1 / v2 | 5,12 kWh | 0,51 kWh (90 %) | 6.000 · 80 % | 10 jaar |
+| Venus E v3 | 5,12 kWh | 0,51 kWh (90 %) | 6.000 · 80 % | 10 jaar |
+| Venus D | 2,56 kWh per pakket (1–6 pakketten) | 10 % van opgegeven (90 %) | 6.000 · 80 % ¹ | 10 jaar ² |
+| Ander model | zelf invullen | zelf invullen | zelf invullen | zelf invullen |
+
+¹ Marstek noemt voor de Venus D meer dan 10.000 cycli, maar geen capaciteitspercentage; de monitor gebruikt de voorzichtigere lijn van de Venus E.
+² Niet genoemd voor de Venus D; controleer je eigen voorwaarden.
+
+De Venus A heeft nog geen vooraf ingevulde waarden: er is geen openbare capaciteit gevonden. Kies *Ander model* en vul de fabrieksgegevens zelf in.
 
 ## Ontlaaddiepte per model
 

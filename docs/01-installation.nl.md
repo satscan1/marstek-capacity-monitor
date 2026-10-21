@@ -31,8 +31,12 @@ Kopieer `custom_components/marstek_capacity_monitor` naar `/config/custom_compon
 Ga naar **Instellingen → Apparaten & diensten → Integratie toevoegen → Marstek Capacity Monitor**.
 
 1. Kies een gevonden batterij, of kies zelf de sensoren.
-2. Controleer de korte code (`mt1` … `mt6`), de naam en de twee sensoren.
-3. Vul de fabrieksgegevens in: fabriekscapaciteit, reserve, aankoopdatum, garantietermijn en cycli. De standaardwaarden komen uit de datasheet van de Venus E.
+2. Controleer de korte code (`mt1` … `mt6`), de naam en de twee sensoren. Optioneel: de hoogste en laagste celspanning, voor de [celbalans](03-how-it-works.nl.md#celbalans). Die worden ingevuld als de scan ze vindt.
+3. Kies het model en vul de installatiedatum in. Bij een Venus E v1/v2, Venus E v3 of Venus D worden de fabrieksgegevens voor je ingevuld (Venus D: ook het aantal pakketten). Bij een ander model vul je de fabrieksgegevens zelf in.
+
+Alle fabrieksgegevens kun je later aanpassen via **Configureren**.
+
+Na het toevoegen toont de batterij **verzamelt data** tot de eerste volledige ontlading (≥ 95 % → ≤ 15 %). De statusregel op de kaart vertelt wat de volgende stap is.
 
 ## Kaarten toevoegen
 

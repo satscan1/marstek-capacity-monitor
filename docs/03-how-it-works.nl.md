@@ -58,3 +58,38 @@ De marge laat zien hoeveel kWh de batterij boven of onder de specificatie zit. A
 De metingen zijn een **hulpmiddel bij een melding**, geen bewijs: ze laten zien hoe de capaciteit zich over maanden ontwikkelt.
 
 De bronnen voor deze getallen staan in [Ondersteunde batterijen](05-supported-batteries.nl.md#bronnen-voor-de-specificaties-van-de-fabrikant).
+
+## Status meting
+
+Naast de status van de capaciteit heeft elke batterij een **status meting**. Die vertelt of de meting zelf werkt:
+
+| Status | Betekenis |
+|---|---|
+| Meet | De sensoren leveren gegevens en er is minstens één volledige ontlading gemeten |
+| Verzamelt data | De sensoren leveren gegevens; wacht op de eerste volledige ontlading |
+| Geen recente data | Beide sensoren hebben een uur niets doorgegeven; controleer de koppeling van de batterij |
+| Sensor niet beschikbaar | De sensor voor laadtoestand of vermogen is niet beschikbaar |
+
+De kaart toont de volgende stap op weg naar een meting: laden tot 95 % of meer, daarna ontladen tot 15 % of lager. Een ontlading die onderbroken is (gat in de gegevens) telt niet mee; de kaart meldt dat.
+
+## Celbalans
+
+Optioneel, als je koppeling de hoogste en laagste celspanning levert.
+
+* **Gebeurtenis:** het einde van een volle lading (laadtoestand ≥ 95 %).
+* **Context:** de batterij staat 5 minuten in rust (vermogen binnen ±50 W), zodat belasting de spanningen niet vertekent. LFP-cellen verschillen midden in de band nauwelijks; verschillen worden pas zichtbaar bij bijna vol.
+* **Resultaat:** het verschil tussen de hoogste en laagste cel, in mV. Eén meting per volle lading; voor de volgende meting moet de batterij eerst onder de 90 % komen. De kaart toont het midden (mediaan) per maand, trendkolom eerst, nieuw → oud.
+
+Het celverschil heeft **nog geen kleuren**: Marstek publiceert geen normaalwaarde. Grenzen komen er pas als genoeg gegevens van echte batterijen ze onderbouwen.
+
+## Celtemperatuur (experimenteel)
+
+Optioneel. Als je de hoogste en/of laagste celtemperatuur instelt, bewaart de monitor bij elke volledige ontlading de gemiddelde celtemperatuur bij die meting. De kaart toont die per maand onder de capaciteit (bijv. *spec. 98 · 16 °C*) en in de grafiek.
+
+Waarom: een koude batterij geeft minder af. Een lagere meting in de winter wordt dan verklaard door de temperatuur, in plaats van aangezien voor slijtage. De temperatuur is alleen context; hij verandert de gemeten capaciteit en de kleuren niet.
+
+Alleen **cel**temperaturen horen hier. Sommige koppelingen geven MOSFET-temperaturen (van de schakeltransistors) door als "celtemperatuur"; de scan stelt nooit sensoren voor met *mos*, *internal* of *board* in de naam.
+
+## Grafiek
+
+Druk op het knopje **Grafiek** onder de status om een grafiek te openen of te sluiten (oud → nieuw, van links naar rechts): de gemeten capaciteit per maand, de specificatie van de fabrikant als grijze stippellijn en 75 % als rode lijn. Standaard zie je de laatste 3 jaar; met *hele garantie* de hele garantietijd. Ga met de muis over een stip voor het getal en de celtemperatuur in die maand. Zie [06 – Dashboard en galerij](06-dashboard-gallery.nl.md) voor de kaart genummerd uitgelegd.
