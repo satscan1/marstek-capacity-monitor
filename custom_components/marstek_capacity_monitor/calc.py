@@ -386,21 +386,38 @@ class SwingTracker:
             self.s["sign_confirmed"] = True
             return False
         if against >= 0.2 and against > 2 * along:
-            self.s["sign"] *= -1
+            self._flip_sign()
             self.s["sign_confirmed"] = True
-            self.s["sign_flipped"] = not self.s["sign_flipped"]
-            self.s["e_charge_kwh"], self.s["e_discharge_kwh"] = (
-                self.s["e_discharge_kwh"],
-                self.s["e_charge_kwh"],
-            )
-            for pt in (st, ex):
-                pt["e_charge"], pt["e_discharge"] = pt["e_discharge"], pt["e_charge"]
-            if self.s["power_w"] is not None:
-                self.s["power_w"] = -self.s["power_w"]
-            if self.s.get("bridge"):
-                self.s["bridge"]["p"] = -self.s["bridge"]["p"]
             return True
         return False
+
+    def _flip_sign(self) -> None:
+        """Reverse the sign: move the counted energy to the right buckets."""
+        self.s["sign"] *= -1
+        self.s["sign_flipped"] = not self.s["sign_flipped"]
+        self.s["e_charge_kwh"], self.s["e_discharge_kwh"] = (
+            self.s["e_discharge_kwh"],
+            self.s["e_charge_kwh"],
+        )
+        sw = self.s.get("swing") or {}
+        for pt in (sw.get("start"), sw.get("extreme")):
+            if pt:
+                pt["e_charge"], pt["e_discharge"] = pt["e_discharge"], pt["e_charge"]
+        if self.s["power_w"] is not None:
+            self.s["power_w"] = -self.s["power_w"]
+        if self.s.get("bridge"):
+            self.s["bridge"]["p"] = -self.s["bridge"]["p"]
+
+    def adopt_sign(self, other: "SwingTracker") -> bool:
+        """Take over a sign that another tracker (the history replay) already
+        learned, if this one has not learned it yet. Returns True if flipped."""
+        if self.s["sign_confirmed"] or not other.s["sign_confirmed"]:
+            return False
+        flipped = other.s["sign"] != self.s["sign"]
+        if flipped:
+            self._flip_sign()
+        self.s["sign_confirmed"] = True
+        return flipped
 
     def _make_record(self, sw: dict[str, Any]) -> dict[str, Any] | None:
         st, ex = sw["start"], sw["extreme"]
@@ -431,6 +448,60 @@ class SwingTracker:
             "bridged_s": sw.get("bridged_s"),
             "cumulative_discharge_kwh": round(self.s["e_discharge_kwh"], 3),
         }
+
+
+# ---------------------------------------------------------------------------
+# History: replay the recorder history once, when a battery is added
+# ---------------------------------------------------------------------------
+
+HISTORY_DAYS = 30  # ask the recorder for this much (it usually keeps 10 days)
+IDLE_W = 50.0  # below this the battery stands still; quiet sensors are normal then
+TICK_S = 60.0
+SOC_JUMP_PCT = 2.0  # SOC step after a quiet time that cannot be "standing still"
+
+
+def replay_history(
+    tracker: SwingTracker, events: list[tuple[float, str, float | None]]
+) -> list[dict[str, Any]]:
+    """Feed recorded SOC ("s") and power ("p") values through a tracker.
+
+    The recorder only stores changes. A battery that stands still (|power| <=
+    IDLE_W) may report nothing for hours; that time is filled in with ticks.
+    A (dis)charging battery whose power did not change for more than MAX_GAP_S
+    is treated as a data gap (e.g. Home Assistant was off): that swing does not
+    count. Returns the completed swing records, marked as coming from history.
+    """
+    out: list[dict[str, Any]] = []
+    soc_before_gap: float | None = None
+    for ts, kind, value in sorted(events, key=lambda e: e[0]):
+        p, last = tracker.s["power_w"], tracker.s["power_ts"]
+        if p is not None and last is not None and abs(p) <= IDLE_W and ts - last > MAX_GAP_S:
+            # Quiet time: the battery stood still, or Home Assistant was off.
+            # Fill it in, but check the SOC afterwards (see below).
+            if soc_before_gap is None:
+                soc_before_gap = tracker.s.get("soc")
+            t = last + TICK_S
+            while t < ts:
+                tracker.tick(t)
+                t += TICK_S
+        if kind == "p":
+            rec = tracker.update_power(value, ts)
+        elif value is not None:
+            if soc_before_gap is not None and abs(value - soc_before_gap) >= SOC_JUMP_PCT:
+                # The SOC moved during the quiet time: the battery was not
+                # idle, Home Assistant was off. The energy is unknown.
+                tracker._invalidate_swing("data_gap")  # noqa: SLF001
+            soc_before_gap = None
+            rec = tracker.update_soc(value, ts)
+        else:
+            rec = None
+        if rec:
+            rec["source"] = "history"
+            # The energy counter of the replay starts at 0; the age of the
+            # battery is taken from the live counter instead.
+            rec.pop("cumulative_discharge_kwh", None)
+            out.append(rec)
+    return out
 
 
 # ---------------------------------------------------------------------------
