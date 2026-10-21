@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.3.1 — 2026-10-21
+
+**Icon and automatic checks.**
+
+- The integration now has its own icon, shown in Home Assistant 2026.3 and later.
+- Every change on GitHub is checked automatically (HACS validation and hassfest).
+- Preparation for the HACS default list.
+
+Upgrade: update in HACS and restart Home Assistant. Measuring, settings and cards are unchanged.
+
 ## v0.3.0 — 2026-10-21
 
 **Plug & play: pick your model and installation date. Plus a monitor status per battery, an optional cell balance check, cell temperature as context, a chart on the battery card and measurements kept for the whole 10-year warranty.**
