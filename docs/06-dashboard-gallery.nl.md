@@ -16,9 +16,11 @@ De batterijkaart is gemaakt voor **een derde van de breedte**: drie batterijen n
 | 5 | Overzicht twee derde breed, daaronder 3 + 2 |
 | 6 | Overzicht twee derde breed, daaronder 3 + 3 |
 
-Naast het overzicht is vanaf 3 batterijen een derde vrij voor een eigen kaart. Zet je daar niets neer, dan schuift Home Assistant de eerste batterij omhoog naast het overzicht; wil je de batterijen op een nieuwe rij, zet er dan een kaart neer (in de galerij een tekstkaart "Vrije plek").
+Naast het overzicht is vanaf 3 batterijen een derde vrij voor een eigen kaart. Zet je daar niets neer, dan schuift Home Assistant de eerste batterij omhoog naast het overzicht; wil je de batterijen op een nieuwe rij, zet er dan een kaart neer (de galerij en de kant-en-klare dashboards gebruiken een tekstkaart "Vrije plek").
 
-Gebruik hiervoor de standaardindeling van Home Assistant met **secties** ("Sections"). Een voorbeeld staat in [`dashboard/button-card/layout-sections.yaml`](../dashboard/button-card/layout-sections.yaml). Je geeft elke kaart een breedte met `grid_options`: in een sectie van drie kolommen is `columns: 12` een derde en `columns: 24` twee derde. Bij 4 batterijen gebruik je `columns: 18` per batterij.
+Deze indeling staat al klaar in de [kant-en-klare dashboards](01-installation.nl.md#snelste-manier-kant-en-klaar-dashboard), één per aantal batterijen.
+
+Zelf indelen? Gebruik hiervoor de standaardindeling van Home Assistant met **secties** ("Sections"). Een voorbeeld staat in [`dashboard/button-card/layout-sections.yaml`](../dashboard/button-card/layout-sections.yaml). Je geeft elke kaart een breedte met `grid_options`: in een sectie van drie kolommen is `columns: 12` een derde en `columns: 24` twee derde. Bij 4 batterijen gebruik je `columns: 18` per batterij.
 
 ## De batterijkaart
 

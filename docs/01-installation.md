@@ -40,7 +40,25 @@ After adding, the battery shows **collecting data** until its first full dischar
 
 ## Add the cards
 
-| Folder | Requires | Content |
-|---|---|---|
-| `dashboard/button-card/` | [button-card](https://github.com/custom-cards/button-card) (HACS) | Overview of up to 6 batteries: per month, trend column first, newest → oldest. Plus a detail card per battery. Set the language with `lang: en` or `nl`. |
-| `dashboard/standard/` | nothing | Entities card and statistics graph (remaining capacity vs spec per month) |
+The cards use [button-card](https://github.com/custom-cards/button-card). Install it first: in HACS search for **button-card** → **Download**, then refresh the page in your browser (Ctrl+F5).
+
+### Quickest way: ready-made dashboard
+
+[`dashboard/ready-made/en/`](../dashboard/ready-made/en/) has a complete dashboard per number of batteries: `1-battery.yaml` up to `6-batteries.yaml`. Everything is in it, in the [layout](06-dashboard-gallery.md#layout) of the gallery.
+
+1. Go to **Settings → Dashboards → Add dashboard → New dashboard from scratch**. Give it a name, for example *Battery capacity*, and open it.
+2. Click the **pencil** at the top right, then the **three dots → Raw configuration editor**.
+3. Open the file for your number of batteries on GitHub, copy everything (button *Copy raw file*) and paste it over what is in the editor (Ctrl+A, then Ctrl+V).
+4. Did you keep the suggested codes `mt1`, `mt2`, … when adding the batteries? Then you do not need to change anything. Otherwise replace them with your own codes; you see them in the sensor names, for example `sensor.marstek_mt1_capacity_pct`. Change the names on the cards at `name:`.
+5. Click **Save** and close the editor.
+
+### In an existing dashboard
+
+1. **Templates (once per dashboard):** open the dashboard, click the **pencil**, then the **three dots → Raw configuration editor**. Copy everything from [`marstek_capacity_templates.yaml`](../dashboard/button-card/marstek_capacity_templates.yaml) and paste it at the very top, above the line `views:`. Is there already a line `button_card_templates:` (from other cards)? Then paste only what is below it, under your existing templates. Save and close the editor.
+2. **Cards:** still in edit mode: **Add card** → at the bottom **Manual**. [`examples.yaml`](../dashboard/button-card/examples.yaml) has two examples, separated by a line `---`: first the overview of all your batteries, then the card for one battery. Paste one example at a time, not the whole file. Replace `mt1` everywhere with your own code; the examples use Dutch text, so change `lang: nl` to `lang: en`. Save. Repeat this per battery and for the overview.
+
+How to arrange the cards and what everything on the card means: [06 – Dashboard and gallery](06-dashboard-gallery.md).
+
+### Without button-card
+
+[`dashboard/standard/`](../dashboard/standard/) has an entities card and a statistics graph (remaining capacity vs spec per month) that work with Home Assistant's standard cards. Add them as in step 2 of *In an existing dashboard*.

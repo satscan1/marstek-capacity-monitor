@@ -39,7 +39,7 @@ De bruikbare band verschilt per model; zie [Ondersteunde batterijen](05-supporte
 
 De getoonde waarde is de **mediaan van de laatste 3** volledige ontladingen van het afgelopen jaar.
 
-Gedeeltelijke ontladingen tellen bewust niet mee: een procent onderin levert meer kWh dan een procent bovenin. Valt er tijdens een beurt een gat van meer dan 5 minuten in de vermogensgegevens, bijvoorbeeld door een herstart, dan telt die beurt niet mee.
+Gedeeltelijke ontladingen tellen bewust niet mee: een procent onderin levert meer kWh dan een procent bovenin. Een herstart van Home Assistant van hooguit 10 minuten wordt overbrugd: de energie in die minuten wordt geschat uit het vermogen vlak ervoor en vlak erna (meestal minder dan 0,5 % verschil). Duurt de herstart langer, of valt er terwijl Home Assistant draait een gat van meer dan 5 minuten in de vermogensgegevens, dan telt die beurt niet mee.
 
 ## Specificatie fabrikant en kleuren
 
@@ -67,7 +67,7 @@ Naast de status van de capaciteit heeft elke batterij een **status meting**. Die
 |---|---|
 | Meet | De sensoren leveren gegevens en er is minstens één volledige ontlading gemeten |
 | Verzamelt data | De sensoren leveren gegevens; wacht op de eerste volledige ontlading |
-| Geen recente data | Beide sensoren hebben een uur niets doorgegeven; controleer de koppeling van de batterij |
+| Geen recente data | De batterij was aan het laden of ontladen (meer dan 50 W), maar laadtoestand en vermogen hebben een uur geen nieuwe waarde doorgegeven; controleer de koppeling van de batterij. Een batterij die stilstaat (leeg of vol, rond 0 W) geeft vaak urenlang dezelfde waarden; dat telt niet mee |
 | Sensor niet beschikbaar | De sensor voor laadtoestand of vermogen is niet beschikbaar |
 
 De kaart toont de volgende stap op weg naar een meting: laden tot 95 % of meer, daarna ontladen tot 15 % of lager. Een ontlading die onderbroken is (gat in de gegevens) telt niet mee; de kaart meldt dat.

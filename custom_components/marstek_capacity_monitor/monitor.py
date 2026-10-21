@@ -9,7 +9,12 @@ from typing import Any
 
 from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN, UnitOfPower
+from homeassistant.const import (
+    EVENT_HOMEASSISTANT_STOP,
+    STATE_UNAVAILABLE,
+    STATE_UNKNOWN,
+    UnitOfPower,
+)
 from homeassistant.core import Event, EventStateChangedData, HomeAssistant, State, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import (
@@ -57,6 +62,7 @@ from .const import (
     SIGNAL_STATUS,
     SIGNAL_UPDATE,
     SIGN_AUTO,
+    IDLE_POWER_W,
     STALE_SECONDS,
     STATUS_COLLECTING,
     STATUS_MEASURING,
@@ -193,10 +199,9 @@ class BatteryMonitor:
             self.cells = CellBalanceTracker(data.get("cells"))
             self.cell_records = data.get("cell_records", [])
             self.cell_result = evaluate_cells(self.cell_records)
-            # Any time spent while HA was down is a gap: never integrate it.
-            self.tracker.s["power_w"] = None
-            self.tracker.s["power_ts"] = None
-            self.tracker._invalidate_swing("restart")  # noqa: SLF001
+            # HA was down: a short gap (<= 10 min) is bridged with the average
+            # of the power before and after; a longer one invalidates the swing.
+            self.tracker.start_after_restart(self._now_ts())
         self._recalculate()
 
         self._unsubs.append(
@@ -216,6 +221,9 @@ class BatteryMonitor:
             async_track_time_interval(
                 self.hass, self._on_recalc, timedelta(seconds=RECALC_SECONDS)
             )
+        )
+        self._unsubs.append(
+            self.hass.bus.async_listen(EVENT_HOMEASSISTANT_STOP, self._on_ha_stop)
         )
         if self.has_cells:
             self._unsubs.append(
@@ -242,10 +250,7 @@ class BatteryMonitor:
         self.records = []
         self.tracker = self._new_tracker()
         self.cell_records = []
-        self.temp_max_entity: str | None = entry_setting(entry, CONF_TEMP_MAX_ENTITY) or None
-        self.temp_min_entity: str | None = entry_setting(entry, CONF_TEMP_MIN_ENTITY) or None
-        # (ts, lowest, highest) once a minute; 2 days is enough for any swing
-        self._temps: deque[tuple[float, float | None, float | None]] = deque(maxlen=2880)
+        self._temps.clear()
         self.cells = CellBalanceTracker()
         self.cell_result = evaluate_cells([])
         await self._store.async_save(self._data())
@@ -353,6 +358,26 @@ class BatteryMonitor:
         seen = getattr(state, "last_reported", None) or state.last_updated
         return (now - seen).total_seconds()
 
+    @staticmethod
+    def _idle(pow_s: State | None) -> bool:
+        """The battery stands still (empty or full): last power close to 0 W.
+
+        Then SOC and power can stay the same for hours (ESPHome, for one, only
+        sends a value when it changes); that is not a broken connection.
+        """
+        if pow_s is None or pow_s.state in BAD_STATES:
+            return False
+        try:
+            value = abs(float(pow_s.state))
+        except ValueError:
+            return False
+        unit = pow_s.attributes.get("unit_of_measurement")
+        if unit == UnitOfPower.KILO_WATT:
+            value *= 1000
+        elif unit == UnitOfPower.MEGA_WATT:
+            value *= 1_000_000
+        return value <= IDLE_POWER_W
+
     def _compute_status(self) -> dict[str, Any]:
         now = dt_util.utcnow()
         soc_s = self.hass.states.get(self.soc_entity)
@@ -366,7 +391,11 @@ class BatteryMonitor:
         full = sum(1 for r in self.records if is_full_discharge(r))
         if missing:
             state = STATUS_SENSOR_MISSING
-        elif ages and min(ages) > STALE_SECONDS:
+        elif (
+            ages
+            and min(ages) > STALE_SECONDS
+            and not self._idle(pow_s)
+        ):
             state = STATUS_NO_RECENT_DATA
         elif full:
             state = STATUS_MEASURING
@@ -393,8 +422,15 @@ class BatteryMonitor:
         """Recompute the status; only notify when something visible changed,
         to keep the recorder write load low."""
         new = self._compute_status()
-        key = {k: v for k, v in new.items() if k != "last_data_minutes"}
-        old = {k: v for k, v in self.status.items() if k != "last_data_minutes"}
+
+        def key_of(st: dict[str, Any]) -> dict[str, Any]:
+            key = {k: v for k, v in st.items() if k != "last_data_minutes"}
+            if st.get("state") == STATUS_NO_RECENT_DATA:
+                # update the shown time once an hour, not every minute
+                key["hours"] = (st.get("last_data_minutes") or 0) // 60
+            return key
+
+        key, old = key_of(new), key_of(self.status)
         self.status = new
         if force or key != old:
             async_dispatcher_send(self.hass, self.status_signal)
@@ -402,8 +438,10 @@ class BatteryMonitor:
     # -- event handlers -----------------------------------------------------
 
     def _handle_power(self, state: State | None) -> None:
-        self.tracker.update_power(self._power_w(state), self._now_ts())
+        record = self.tracker.update_power(self._power_w(state), self._now_ts())
         self._check_cells()
+        if record is not None:
+            self._process_record(record)
         self._store.async_delay_save(self._data, SAVE_DELAY_SECONDS)
 
     def _handle_soc(self, state: State | None) -> None:
@@ -416,6 +454,10 @@ class BatteryMonitor:
         if record is None:
             self._store.async_delay_save(self._data, SAVE_DELAY_SECONDS)
             return
+        self._process_record(record)
+
+    def _process_record(self, record: dict[str, Any]) -> None:
+        """A charge or discharge swing has completed: store and publish it."""
         if self.has_temps:
             self._sample_temps()
             record.update(self._temps_between(record["start_ts"], record["ts"]))
@@ -463,10 +505,24 @@ class BatteryMonitor:
 
     @callback
     def _on_tick(self, _now: datetime) -> None:
-        self.tracker.tick(self._now_ts())
+        record = self.tracker.tick(self._now_ts())
         self._sample_temps()
         self._check_cells()
+        if record is not None:
+            self._process_record(record)
         self._update_status()
+        # Keep a save pending, so Home Assistant writes the current state when
+        # it stops (final write); at most one write per SAVE_DELAY_SECONDS.
+        self._store.async_delay_save(self._data, SAVE_DELAY_SECONDS)
+
+    @callback
+    def _on_ha_stop(self, _event: Event) -> None:
+        """HA is stopping: integrate up to now, so the saved power timestamp is
+        exact and a short restart can be bridged (written at the final write)."""
+        record = self.tracker.tick(self._now_ts())
+        if record is not None:
+            self._process_record(record)
+        self._store.async_delay_save(self._data, SAVE_DELAY_SECONDS)
 
     @callback
     def _on_recalc(self, _now: datetime) -> None:

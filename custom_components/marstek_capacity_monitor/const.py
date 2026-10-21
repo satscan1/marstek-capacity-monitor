@@ -91,6 +91,9 @@ MONITOR_STATUSES = [
     STATUS_SENSOR_MISSING,
 ]
 STALE_SECONDS = 3600  # no new SOC or power value for an hour
+# An idle battery (empty or full, standing still) sends the same SOC and power
+# for hours; that is not a broken connection. Below this power it counts as idle.
+IDLE_POWER_W = 50
 
 STORAGE_VERSION = 1
 TICK_SECONDS = 60

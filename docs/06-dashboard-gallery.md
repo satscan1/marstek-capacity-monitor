@@ -16,9 +16,11 @@ The battery card is made for **one third of the width**: three batteries side by
 | 5 | Overview two thirds wide, then 3 + 2 |
 | 6 | Overview two thirds wide, then 3 + 3 |
 
-From 3 batteries on, one third next to the overview is free for a card of your own. If you leave it empty, Home Assistant moves the first battery up next to the overview; to start the batteries on a new row, put a card there (the gallery uses a text card "Free place").
+From 3 batteries on, one third next to the overview is free for a card of your own. If you leave it empty, Home Assistant moves the first battery up next to the overview; to start the batteries on a new row, put a card there (the ready-made dashboards use a text card "Free spot").
 
-Use Home Assistant's standard **Sections** layout. An example is in [`dashboard/button-card/layout-sections.yaml`](../dashboard/button-card/layout-sections.yaml). Give each card a width with `grid_options`: in a section three columns wide, `columns: 12` is one third and `columns: 24` is two thirds. With 4 batteries use `columns: 18` per battery.
+This layout is ready in the [ready-made dashboards](01-installation.md#quickest-way-ready-made-dashboard), one per number of batteries.
+
+Arranging it yourself? Use Home Assistant's standard **Sections** layout. An example is in [`dashboard/button-card/layout-sections.yaml`](../dashboard/button-card/layout-sections.yaml). Give each card a width with `grid_options`: in a section three columns wide, `columns: 12` is one third and `columns: 24` is two thirds. With 4 batteries use `columns: 18` per battery.
 
 ## The battery card
 

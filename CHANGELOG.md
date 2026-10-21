@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.3.2 — 2026-10-21
+
+**Measurements survive a restart, ready-made dashboards and no false "no recent data" at night.**
+
+- Fix: a battery standing still (empty or full, around 0 W) no longer shows *no recent data · check the connection*. Its state of charge and power simply do not change for hours. The status now only appears when the battery was charging or discharging (more than 50 W) and no new value came in for an hour. The minutes shown are now updated every hour.
+- Fix: a Home Assistant restart in the middle of a full discharge no longer throws the measurement away. A restart of up to 10 minutes is bridged: the energy in that gap is estimated from the power just before and just after. Such a measurement is marked `bridged_s` (seconds bridged).
+- New: ready-made dashboards for 1 to 6 batteries, in English and Dutch, in `dashboard/ready-made/`. Paste one into a new dashboard and you are done.
+- Fix: *Reset measurements* (service `reset_measurements`) gave an error and did nothing.
+- Installation guide: step by step how to add the cards, in a new or an existing dashboard.
+
+Upgrade: update in HACS and restart Home Assistant. Measurements, settings and cards are unchanged.
+
 ## v0.3.1 — 2026-10-21
 
 **Icon and automatic checks.**

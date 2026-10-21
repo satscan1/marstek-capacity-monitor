@@ -26,7 +26,7 @@ Track in Home Assistant whether your Marstek home battery keeps its capacity, me
 2. **Settings → Devices & services → Add integration → Marstek Capacity Monitor**.
 3. Pick the battery that was found, choose its model and fill in the installation date. Done.
 
-Then add the cards from [`dashboard/`](dashboard/). Full instructions: [docs/01-installation.md](docs/01-installation.md).
+Then add the cards: quickest with a [ready-made dashboard](dashboard/ready-made/en/) for 1 to 6 batteries that you paste in one go. Full instructions: [docs/01-installation.md](docs/01-installation.md).
 
 ## Documentation
 
