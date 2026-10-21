@@ -17,7 +17,7 @@ Track in Home Assistant whether your Marstek home battery keeps its capacity, me
 - **Plug & play:** pick your model and installation date; the factory data are filled in for you.
 - **Shows whether it works:** a status per battery, and "collecting data" until the first full discharge.
 - **Optional cell balance check:** the spread between the highest and lowest cell after a full charge.
-- **Cell temperature as context (experimental)** and a **chart** on the battery card (last 3 years or the whole 10-year warranty): one press on the Chart button.
+- **Cell temperature as context (experimental)** and a **chart** on the battery card (the most recent 3 years): one press on the Chart button.
 - **Light and local:** everything inside Home Assistant, no InfluxDB or cloud.
 
 ## Install in 3 steps

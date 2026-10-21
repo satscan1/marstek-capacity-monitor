@@ -18,7 +18,7 @@ Behalte in Home Assistant im Blick, ob dein Marstek-Heimspeicher seine Kapazitä
 - **Eigene Karten und ein Dashboard mit einem Klick:** kein button-card nötig.
 - **Zeigt, ob es funktioniert:** ein Status pro Batterie und „sammelt Daten“ bis zur ersten vollständigen Entladung. Gab es in den letzten Tagen schon eine, gibt es sofort eine erste Messung.
 - **Optional:** Zellspannungsdifferenz nach Vollladung und Zelltemperatur als Kontext (experimentell).
-- **Diagramm** auf der Batteriekarte (letzte 3 Jahre oder die gesamte Garantiezeit von 10 Jahren): ein Klick auf „Diagramm“.
+- **Diagramm** auf der Batteriekarte (die jüngsten 3 Jahre): ein Klick auf „Diagramm“.
 - **Schlank und lokal:** alles in Home Assistant, ohne InfluxDB und ohne Cloud.
 
 ## Installation in 3 Schritten
