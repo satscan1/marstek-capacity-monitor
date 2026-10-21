@@ -33,6 +33,7 @@ TEXT = {
             "Marstek Capacity Monitor: ready-made dashboard for {count}",
             "",
             "Needs button-card (HACS -> search \"button-card\" -> Download).",
+            "From version 0.4.0 it also works without: see docs/01-installation.md.",
             "",
             "1. Settings -> Dashboards -> Add dashboard -> New dashboard from scratch.",
             "   Give it a name and open it.",
@@ -58,6 +59,7 @@ TEXT = {
             "Marstek Capacity Monitor: kant-en-klaar dashboard voor {count}",
             "",
             "Nodig: button-card (HACS -> zoek \"button-card\" -> Downloaden).",
+            "Vanaf versie 0.4.0 kan het ook zonder: zie docs/01-installation.nl.md.",
             "",
             "1. Instellingen -> Dashboards -> Voeg dashboard toe -> Leeg nieuw dashboard.",
             "   Geef het een naam en open het.",
@@ -65,9 +67,35 @@ TEXT = {
             "3. Selecteer alles wat er staat (Ctrl+A) en plak dit hele bestand eroverheen.",
             "4. Heb je je batterijen andere codes gegeven dan {codes}?",
             "   Vervang ze hieronder (Ctrl+F helpt). De namen kun je aanpassen bij name:.",
-            "5. Opslaan en de editor sluiten.",
+            "5. Bewaar en sluit de editor.",
             "",
             "Indeling en wat de kaarten laten zien: docs/06-dashboard-gallery.nl.md",
+        ],
+    },
+    "de": {
+        "file": lambda n: f"{n}-batterie{'' if n == 1 else 'n'}.yaml",
+        "count": lambda n: f"{n} Batterie{'' if n == 1 else 'n'}",
+        "title": "Batteriekapazität",
+        "free": (
+            "**Freier Platz**\n\n"
+            "Diesen Platz kannst du für eine eigene Karte nutzen.\n\n"
+            f"[Was die Karten zeigen]({DOCS}/06-dashboard-gallery.de.md)"
+        ),
+        "head": [
+            "Marstek Capacity Monitor: fertiges Dashboard für {count}",
+            "",
+            "Benötigt: button-card (HACS -> \"button-card\" suchen -> Herunterladen).",
+            "Ab Version 0.4.0 geht es auch ohne: siehe docs/01-installation.de.md.",
+            "",
+            "1. Einstellungen -> Dashboards -> Dashboard hinzufügen -> Neues Dashboard von Grund auf.",
+            "   Gib ihm einen Namen und öffne es.",
+            "2. Stift (oben rechts) -> drei Punkte -> Raw-Konfigurationseditor.",
+            "3. Markiere alles, was dort steht (Strg+A), und ersetze es durch den Inhalt dieser Datei (Strg+V).",
+            "4. Haben deine Batterien andere Codes als {codes}?",
+            "   Ersetze sie unten (Strg+F hilft). Die Namen kannst du bei name: ändern.",
+            "5. Speichere und schließe den Editor.",
+            "",
+            "Aufteilung und was die Karten zeigen: docs/06-dashboard-gallery.de.md",
         ],
     },
 }

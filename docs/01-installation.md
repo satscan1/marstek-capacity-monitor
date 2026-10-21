@@ -1,6 +1,6 @@
 # Installation
 
-*[Nederlands](01-installation.nl.md)*
+*[Nederlands](01-installation.nl.md) · [Deutsch](01-installation.de.md)*
 
 ## What you need
 
@@ -36,13 +36,55 @@ Go to **Settings → Devices & services → Add integration → Marstek Capacity
 
 You can change all factory data later under **Configure**.
 
-After adding, the battery shows **collecting data** until its first full discharge (≥ 95 % → ≤ 15 %). The status line on the card tells you the next step.
+When you add a battery, the tool looks in the Home Assistant history (usually the last 10 days) for a full discharge that already happened. If there is one, you get a first measurement right away. Otherwise the battery shows **collecting data** until its first full discharge (≥ 95 % → ≤ 15 %). The status line on the card tells you the next step.
 
 ## Add the cards
 
-The cards use [button-card](https://github.com/custom-cards/button-card). Install it first: in HACS search for **button-card** → **Download**, then refresh the page in your browser (Ctrl+F5).
+From version 0.4.0 the integration has its own cards. You do not need to install anything else: no button-card and no templates. Add at least one battery first. Then restart Home Assistant and refresh the page in your browser (Ctrl+F5, on a Mac Cmd+Shift+R); do the same after every update.
 
-### Quickest way: ready-made dashboard
+### Quickest way: dashboard in one click
+
+1. Go to **Settings → Dashboards → Add dashboard**.
+2. At the bottom, under **Community dashboards**, pick **Marstek battery capacity**.
+3. Give it a name (for example *Battery capacity*) and click **Create**.
+
+The dashboard puts your batteries in the [layout](06-dashboard-gallery.md#layout) of the gallery by itself, for 1 to 6 batteries. If you add a battery later, it appears by itself too.
+
+This choice is in Home Assistant 2026.5 and newer. With an older version: make a **New dashboard from scratch**, open it, click the **pencil**, then the **three dots → Raw configuration editor**, replace everything with these two lines and save:
+
+```yaml
+strategy:
+  type: custom:marstek-capacity
+```
+
+### Single cards in your own dashboard
+
+Open your dashboard, click the **pencil** and then **Add card**. Search for **Marstek**:
+
+- **Marstek capacity (battery)**: one battery, with the chart. Without settings it takes your first battery.
+- **Marstek capacity (overview)**: all your batteries per month.
+
+The cards find your batteries, their names and the Home Assistant language by themselves. To change something, use the card's code editor:
+
+```yaml
+type: custom:marstek-capacity-card
+battery: mt2        # the battery code (see the sensor names, e.g. sensor.marstek_mt2_capacity_pct)
+name: Garage        # other name on the card
+months: 6           # number of months in the trend
+lang: en            # en, nl or de; default is the Home Assistant language
+```
+
+For the overview you can choose which batteries it shows: `batteries: [mt1, mt2]`.
+
+How to arrange the cards and what everything on the card means: [06 – Dashboard and gallery](06-dashboard-gallery.md).
+
+### With button-card (as before 0.4.0)
+
+If you already use the button-card cards, they keep working. There is no need to switch, but you can: the new cards look the same.
+
+These cards use [button-card](https://github.com/custom-cards/button-card). Install it first: in HACS search for **button-card** → **Download**, then refresh the page in your browser (Ctrl+F5).
+
+#### Ready-made dashboard with button-card
 
 [`dashboard/ready-made/en/`](../dashboard/ready-made/en/) has a complete dashboard per number of batteries: `1-battery.yaml` up to `6-batteries.yaml`. Everything is in it, in the [layout](06-dashboard-gallery.md#layout) of the gallery.
 
@@ -52,13 +94,13 @@ The cards use [button-card](https://github.com/custom-cards/button-card). Instal
 4. Did you keep the suggested codes `mt1`, `mt2`, … when adding the batteries? Then you do not need to change anything. Otherwise replace them with your own codes; you see them in the sensor names, for example `sensor.marstek_mt1_capacity_pct`. Change the names on the cards at `name:`.
 5. Click **Save** and close the editor.
 
-### In an existing dashboard
+#### In an existing dashboard
 
 1. **Templates (once per dashboard):** open the dashboard, click the **pencil**, then the **three dots → Raw configuration editor**. Copy everything from [`marstek_capacity_templates.yaml`](../dashboard/button-card/marstek_capacity_templates.yaml) and paste it at the very top, above the line `views:`. Is there already a line `button_card_templates:` (from other cards)? Then paste only what is below it, under your existing templates. Save and close the editor.
 2. **Cards:** still in edit mode: **Add card** → at the bottom **Manual**. [`examples.yaml`](../dashboard/button-card/examples.yaml) has two examples, separated by a line `---`: first the overview of all your batteries, then the card for one battery. Paste one example at a time, not the whole file. Replace `mt1` everywhere with your own code; the examples use Dutch text, so change `lang: nl` to `lang: en`. Save. Repeat this per battery and for the overview.
 
 How to arrange the cards and what everything on the card means: [06 – Dashboard and gallery](06-dashboard-gallery.md).
 
-### Without button-card
+#### Only Home Assistant standard cards
 
 [`dashboard/standard/`](../dashboard/standard/) has an entities card and a statistics graph (remaining capacity vs spec per month) that work with Home Assistant's standard cards. Add them as in step 2 of *In an existing dashboard*.

@@ -6,13 +6,19 @@ side, against factory data and warranty terms.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import voluptuous as vol
 
+from homeassistant.components.frontend import add_extra_js_url
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ServiceValidationError
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.typing import ConfigType
+from homeassistant.loader import async_get_integration
 
 from .const import DOMAIN
 from .monitor import BatteryMonitor
@@ -23,6 +29,25 @@ SERVICE_RESET = "reset_measurements"
 ATTR_ENTRY_ID = "config_entry_id"
 
 type MonitorConfigEntry = ConfigEntry[BatteryMonitor]
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+CARD_URL = f"/{DOMAIN}_frontend"
+
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Serve the integration's own card and dashboard, on every frontend page.
+
+    No button-card and no manual resource needed: after installing, the cards
+    are in the card picker and the dashboard is offered under
+    Settings -> Dashboards -> Add dashboard (HA 2026.5 and later).
+    """
+    integration = await async_get_integration(hass, DOMAIN)
+    await hass.http.async_register_static_paths(
+        [StaticPathConfig(CARD_URL, str(Path(__file__).parent / "frontend"), True)]
+    )
+    # ?v= so a browser loads the new file after an update (31-day cache)
+    add_extra_js_url(hass, f"{CARD_URL}/marstek-capacity-card.js?v={integration.version}")
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: MonitorConfigEntry) -> bool:
