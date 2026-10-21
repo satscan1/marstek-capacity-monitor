@@ -39,7 +39,7 @@ The usable band differs per model; see [Supported batteries](05-supported-batter
 
 The value shown is the **median of the last 3** full discharges in the past year.
 
-Partial discharges are deliberately ignored, because one percent near the bottom delivers more kWh than one near the top. If the power data has a gap of more than 5 minutes during a swing, for example after a restart, that swing does not count.
+Partial discharges are deliberately ignored, because one percent near the bottom delivers more kWh than one near the top. A Home Assistant restart of up to 10 minutes is bridged: the energy in those minutes is estimated from the power just before and just after (usually less than 0.5 % difference). If the restart takes longer, or the power data has a gap of more than 5 minutes while Home Assistant is running, that swing does not count.
 
 ## Manufacturer spec and colours
 
@@ -67,7 +67,7 @@ Next to the capacity status, every battery has a **monitor status** that tells y
 |---|---|
 | Measuring | Sensors deliver data and at least one full discharge has been measured |
 | Collecting data | Sensors deliver data; waiting for the first full discharge |
-| No recent data | Neither sensor reported anything for an hour; check the battery connection |
+| No recent data | The battery was charging or discharging (more than 50 W), but the state of charge and the power reported no new value for an hour; check the battery connection. A battery standing still (empty or full, around 0 W) often sends the same values for hours; that does not count |
 | Sensor unavailable | The state of charge or power sensor is unavailable |
 
 The card shows the next step on the way to a measurement: charge to 95 % or more, then discharge to 15 % or lower. A discharge that was interrupted (gap in the data) does not count; the card says so.

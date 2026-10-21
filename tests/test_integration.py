@@ -539,3 +539,108 @@ async def test_scan_suggests_cell_temperature_not_mos(hass: HomeAssistant) -> No
     }
     assert sugg["temp_max_entity"] == "sensor.venus_v3_max_cell_temperature"
     assert sugg["temp_min_entity"] == "sensor.venus_v3_min_cell_temperature"
+
+
+
+async def _status_after_quiet(hass, freezer, power, unit="W", minutes=90):
+    hass.states.async_set(SOC, 11, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, power, {"unit_of_measurement": unit})
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    freezer.tick(timedelta(minutes=minutes))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+    return hass.states.get("sensor.marstek_mt1_monitor_status")
+
+
+async def test_idle_battery_is_not_stale(hass: HomeAssistant, freezer) -> None:
+    """Empty battery standing still at -10 W: values do not change, connection is fine."""
+    mon = await _status_after_quiet(hass, freezer, -10)
+    assert mon.state == "collecting"
+
+
+async def test_idle_in_kw_is_not_stale(hass: HomeAssistant, freezer) -> None:
+    mon = await _status_after_quiet(hass, freezer, 0.01, "kW")
+    assert mon.state == "collecting"
+
+
+async def test_frozen_values_while_discharging_are_stale(hass: HomeAssistant, freezer) -> None:
+    mon = await _status_after_quiet(hass, freezer, 0.8, "kW")
+    assert mon.state == "no_recent_data"
+    assert mon.attributes["last_data_minutes"] >= 60
+
+
+async def test_stale_minutes_refresh_hourly(hass: HomeAssistant, freezer) -> None:
+    mon = await _status_after_quiet(hass, freezer, 800, minutes=61)
+    assert mon.state == "no_recent_data"
+    first = mon.attributes["last_data_minutes"]
+    freezer.tick(timedelta(minutes=70))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+    mon = hass.states.get("sensor.marstek_mt1_monitor_status")
+    assert mon.attributes["last_data_minutes"] >= first + 60
+
+
+async def test_reset_measurements(hass: HomeAssistant) -> None:
+    hass.states.async_set(SOC, 50, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    await hass.services.async_call(
+        DOMAIN, "reset_measurements", {"config_entry_id": entry.entry_id}, blocking=True
+    )
+    await hass.async_block_till_done()
+    assert entry.runtime_data.records == []
+
+
+async def test_restart_during_discharge_is_bridged(hass: HomeAssistant, hass_storage, freezer) -> None:
+    """Saved state from before a restart 2 minutes ago: the discharge keeps counting."""
+    now = dt_util.utcnow().timestamp()
+    entry = _entry()
+    point = {"soc": 97.0, "ts": now - 3600, "e_charge": 0.0, "e_discharge": 0.0}
+    hass_storage[f"{DOMAIN}.{entry.entry_id}"] = {
+        "version": 1,
+        "key": f"{DOMAIN}.{entry.entry_id}",
+        "data": {
+            "tracker": {
+                "e_charge_kwh": 0.0, "e_discharge_kwh": 1.5,
+                "power_w": -1500.0, "power_ts": now - 120, "soc": 60.0,
+                "swing": {"direction": "discharge", "start": point,
+                          "extreme": {**point, "soc": 60.0, "e_discharge": 1.5}, "valid": True},
+                "sign": 1, "sign_confirmed": True, "sign_flipped": False,
+            },
+            "records": [],
+        },
+    }
+    hass.states.async_set(SOC, 60, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, -1500, {"unit_of_measurement": "W"})
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    mon = hass.states.get("sensor.marstek_mt1_monitor_status")
+    assert mon.attributes["phase"] == "full_discharge_running"
+    assert mon.attributes["interrupted"] is None
+    sw = entry.runtime_data.tracker.s["swing"]
+    assert sw["valid"] is True and sw["bridged_s"] == 120
+
+
+async def test_stop_saves_exact_power_time(hass: HomeAssistant, freezer) -> None:
+    """When HA stops, power is integrated up to that moment (for the restart bridge)."""
+    from homeassistant.const import EVENT_HOMEASSISTANT_STOP
+
+    hass.states.async_set(SOC, 60, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, -800, {"unit_of_measurement": "W"})
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    freezer.tick(timedelta(seconds=45))
+    hass.bus.async_fire(EVENT_HOMEASSISTANT_STOP)
+    await hass.async_block_till_done()
+    s = entry.runtime_data.tracker.s
+    assert s["power_ts"] == pytest.approx(dt_util.utcnow().timestamp(), abs=1)
+    assert s["e_discharge_kwh"] == pytest.approx(800 * 45 / 3_600_000, rel=0.01)

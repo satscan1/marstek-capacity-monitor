@@ -33,6 +33,9 @@ FULL_LOW_PCT = 15.0  # ... and ends at or below 15 %
 MEDIAN_OF_LAST = 3  # measured capacity = median of the last 3 full discharges
 MEASURE_WINDOW_DAYS = 365
 MAX_GAP_S = 300.0  # no power value for longer than this -> swing unreliable
+# A Home Assistant restart of up to 10 minutes is bridged: the energy in the gap
+# is estimated from the power just before and just after (average). Longer -> invalid.
+MAX_BRIDGE_S = 600.0
 MAX_RECORDS = 500  # other swings kept (recent context only)
 MAX_FULL_RECORDS = 3000  # full discharges are kept for the whole warranty period
 TREND_MONTHS = 120  # monthly trend over 10 years (warranty period)
@@ -177,6 +180,7 @@ def new_tracker_state() -> dict[str, Any]:
         "sign": 1,  # multiplier applied to incoming power (auto-detected)
         "sign_confirmed": False,
         "sign_flipped": False,
+        "bridge": None,  # {"ts", "p"}: last power before a restart, to bridge the gap
     }
 
 
@@ -208,25 +212,78 @@ class SwingTracker:
             self._invalidate_swing("data_gap")
             self.s["power_ts"] = ts
             return
-        kwh = p * dt / 3_600_000.0  # left Riemann sum
+        self._add_energy(p * dt / 3_600_000.0)  # left Riemann sum
+        self.s["power_ts"] = ts
+
+    def _add_energy(self, kwh: float) -> None:
         if kwh >= 0:
             self.s["e_charge_kwh"] += kwh
         else:
             self.s["e_discharge_kwh"] += -kwh
-        self.s["power_ts"] = ts
 
-    def update_power(self, power_w: float | None, ts: float) -> None:
+    def start_after_restart(self, ts: float) -> None:
+        """Home Assistant was down. Keep the last power value so a short gap
+        (<= MAX_BRIDGE_S) can be bridged when the first new value arrives."""
+        last_ts, p = self.s.get("power_ts"), self.s.get("power_w")
+        self.s["power_w"] = None
+        self.s["power_ts"] = None
+        if last_ts is None or p is None or ts - last_ts > MAX_BRIDGE_S:
+            self.s["bridge"] = None
+            self._invalidate_swing("restart")
+        else:
+            self.s["bridge"] = {"ts": last_ts, "p": p}
+
+    def _close_bridge(self, p_new: float | None, ts: float) -> dict[str, Any] | None:
+        """Fill the restart gap with the average of the power before and after.
+        Too late (> MAX_BRIDGE_S) -> the swing does not count.
+
+        SOC values that came in while the bridge was open are held back and
+        replayed here, after the gap energy is added, so swing points always
+        include it. Returns a session record if that replay completes a swing."""
+        br = self.s.get("bridge")
+        if not br:
+            return None
+        gap = ts - br["ts"]
+        if gap > MAX_BRIDGE_S:
+            self.s["bridge"] = None
+            self._invalidate_swing("restart")
+        elif p_new is None:
+            return None  # still waiting for the first value after the restart
+        else:
+            if gap > 0:
+                self._add_energy((br["p"] + p_new) / 2 * gap / 3_600_000.0)
+                sw = self.s.get("swing")
+                if sw is not None:
+                    sw["bridged_s"] = round(sw.get("bridged_s", 0) + gap)
+            self.s["bridge"] = None
+        pending = br.get("soc")
+        if pending is None:
+            return None
+        return self.update_soc(pending, ts)
+
+    def update_power(self, power_w: float | None, ts: float) -> dict[str, Any] | None:
         """New power value (W). The learned sign is applied, so after a
-        correction positive always means charging. None = unknown."""
+        correction positive always means charging. None = unknown.
+        Returns a session record only when a restart bridge closes and the
+        held-back SOC completes a swing (rare); otherwise None."""
+        if self.s.get("bridge"):
+            new = None if power_w is None else power_w * self.s["sign"]
+            self.s["power_w"] = new
+            self.s["power_ts"] = ts if new is not None else None
+            return self._close_bridge(new, ts)
         self._integrate(ts)
         self.s["power_w"] = None if power_w is None else power_w * self.s["sign"]
         if power_w is None:
             self.s["power_ts"] = None
+        return None
 
-    def tick(self, ts: float) -> None:
+    def tick(self, ts: float) -> dict[str, Any] | None:
         """Call periodically (<= every 60 s), like the max sub-interval of the
         HA Riemann helper, so a constant power is still integrated."""
+        if self.s.get("bridge"):
+            return self._close_bridge(None, ts)  # gives up once the gap is too long
         self._integrate(ts)
+        return None
 
     @property
     def cumulative_discharge_kwh(self) -> float:
@@ -251,6 +308,11 @@ class SwingTracker:
     def update_soc(self, soc: float, ts: float) -> dict[str, Any] | None:
         """New SOC value. Returns a session record when a swing of >= 20
         points has completed, otherwise None."""
+        if self.s.get("bridge"):
+            # Restart gap not filled yet: hold the SOC back (see _close_bridge).
+            self.s["soc"] = soc
+            self.s["bridge"]["soc"] = soc
+            return None
         self._integrate(ts)
         self.s["soc"] = soc
         sw = self.s.get("swing")
@@ -326,6 +388,8 @@ class SwingTracker:
                 pt["e_charge"], pt["e_discharge"] = pt["e_discharge"], pt["e_charge"]
             if self.s["power_w"] is not None:
                 self.s["power_w"] = -self.s["power_w"]
+            if self.s.get("bridge"):
+                self.s["bridge"]["p"] = -self.s["bridge"]["p"]
             return True
         return False
 
@@ -355,6 +419,7 @@ class SwingTracker:
             "avg_power_dc_w": round(e / dur_h * 1000, 0),
             "valid": bool(sw.get("valid", True)) and e > 0,
             "reason": sw.get("reason"),
+            "bridged_s": sw.get("bridged_s"),
             "cumulative_discharge_kwh": round(self.s["e_discharge_kwh"], 3),
         }
 
