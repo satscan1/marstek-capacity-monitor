@@ -25,15 +25,18 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .calc import (
+    HISTORY_DAYS,
     MAX_CELL_RECORDS,
     BatterySpec,
     CellBalanceTracker,
     SwingTracker,
     evaluate,
     evaluate_cells,
+    is_full_charge,
     is_full_discharge,
     prune_records,
     measurement_phase,
+    replay_history,
     to_mv,
 )
 from .const import (
@@ -129,6 +132,8 @@ class BatteryMonitor:
         self.cell_records: list[dict[str, Any]] = []
         self.cell_result: dict[str, Any] = evaluate_cells([])
         self.status: dict[str, Any] = {}
+        self._history_until: float | None = None
+        self._seed_task = None
         self._store: Store = Store(
             hass, STORAGE_VERSION, f"{DOMAIN}.{entry.entry_id}"
         )
@@ -202,6 +207,21 @@ class BatteryMonitor:
             # HA was down: a short gap (<= 10 min) is bridged with the average
             # of the power before and after; a longer one invalidates the swing.
             self.tracker.start_after_restart(self._now_ts())
+            # Batteries from before 0.4.0 have no flag: never replay for them
+            # (their own measurements already cover that period).
+            self._history_until = data.get("history_until")
+        else:
+            # Newly added battery: look in the recorder history for full
+            # discharges that happened before now.
+            self._history_until = self._now_ts()
+        if self._history_until is not None:
+            # Tied to the config entry: cancelled on unload or reload; the
+            # flag stays in the store, so it runs again on the next start.
+            self._seed_task = self.entry.async_create_background_task(
+                self.hass,
+                self._async_seed_from_history(self._history_until),
+                f"{DOMAIN} history {self.entry.entry_id}",
+            )
         self._recalculate()
 
         self._unsubs.append(
@@ -239,6 +259,68 @@ class BatteryMonitor:
         self._sample_temps()
         self._update_status()
 
+    async def _async_seed_from_history(self, until: float) -> None:
+        """Replay the recorded SOC and power once, day by day (new battery only).
+
+        Only swings that ended before `until` (the moment the battery was
+        added) are used, so they never overlap with live measurements.
+        """
+        found: list[dict[str, Any]] = []
+        replay = self._new_tracker()
+        if "recorder" in self.hass.config.components:
+            from homeassistant.components.recorder import get_instance, history  # noqa: PLC0415
+
+            end = dt_util.utc_from_timestamp(until)
+            day = end - timedelta(days=HISTORY_DAYS)
+
+            def _load(entity_id: str, start, stop, first: bool) -> list[State]:
+                return history.state_changes_during_period(
+                    self.hass, start, stop, entity_id, include_start_time_state=first
+                ).get(entity_id, [])
+
+            try:
+                rec = get_instance(self.hass)
+                first = True
+                while day < end:
+                    stop = min(day + timedelta(days=1), end)
+                    pow_states = await rec.async_add_executor_job(
+                        _load, self.power_entity, day, stop, first
+                    )
+                    soc_states = await rec.async_add_executor_job(
+                        _load, self.soc_entity, day, stop, first
+                    )
+                    events = [
+                        (st.last_updated.timestamp(), "p", self._power_w(st))
+                        for st in pow_states
+                    ] + [
+                        (st.last_updated.timestamp(), "s", self._soc(st))
+                        for st in soc_states
+                    ]
+                    found += replay_history(replay, events)
+                    first = False
+                    day = stop
+            except Exception:  # noqa: BLE001 - history is a bonus, never fatal
+                _LOGGER.debug("%s: no history available", self.entry.title, exc_info=True)
+                found = []
+        found = [
+            r
+            for r in found
+            if r["ts"] < until and (is_full_discharge(r) or is_full_charge(r))
+        ]
+        if found:
+            self.records = prune_records(sorted(found + self.records, key=lambda r: r["ts"]))
+            _LOGGER.info(
+                "%s: %s full discharge(s) found in the history",
+                self.entry.title,
+                sum(1 for r in found if is_full_discharge(r)),
+            )
+        if self.tracker.adopt_sign(replay):
+            _LOGGER.info("%s: power sign taken over from the history", self.entry.title)
+        self._history_until = None
+        await self._store.async_save(self._data())
+        self._recalculate()
+        self._update_status(force=True)
+
     async def async_stop(self) -> None:
         for unsub in self._unsubs:
             unsub()
@@ -247,6 +329,9 @@ class BatteryMonitor:
 
     async def async_reset(self) -> None:
         """Forget all measurements of this battery (service call)."""
+        if self._seed_task is not None and not self._seed_task.done():
+            self._seed_task.cancel()
+        self._history_until = None
         self.records = []
         self.tracker = self._new_tracker()
         self.cell_records = []
@@ -283,6 +368,8 @@ class BatteryMonitor:
             "records": self.records,
             "cells": self.cells.s,
             "cell_records": self.cell_records,
+            # set while the one-time history check has not finished yet
+            "history_until": self._history_until,
         }
 
     @staticmethod

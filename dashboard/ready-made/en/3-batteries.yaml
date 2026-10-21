@@ -1,6 +1,7 @@
 # Marstek Capacity Monitor: ready-made dashboard for 3 batteries
 #
 # Needs button-card (HACS -> search "button-card" -> Download).
+# From version 0.4.0 it also works without: see docs/01-installation.md.
 #
 # 1. Settings -> Dashboards -> Add dashboard -> New dashboard from scratch.
 #    Give it a name and open it.
@@ -59,7 +60,32 @@ button_card_templates:
         [[[
           const id = variables.battery;
           const nl = variables.lang === 'nl';
-          const T = nl ? {
+          const T = variables.lang === 'de' ? {
+            title: 'Kapazität', nominal: 'Nennwert', usable: 'Nutzbar', measured: 'Gemessen',
+            ofnew: 'noch verfügbar', expected: 'Herstellerangabe', spec: 'Herstellerangabe bei', margin: 'Abstand', floor: 'an Marstek melden',
+            age: 'Jahre', cycles: 'Zyklen', trend: 'Trend', exp: 'Herst.',
+            until: 'Garantie bis', n: 'Messungen', lastDis: 'letzte vollständige Entladung', lastChg: 'letzte vollständige Ladung', loc: 'de-DE',
+            none: 'Noch keine vollständige Entladung gemessen (≥ 95 % → ≤ 15 %). Das kann im Winter eine Weile dauern.',
+            missing: 'Sensor nicht gefunden:',
+            status: {good: 'Gut', attention: 'Unter Herstellerangabe', critical: 'An Marstek melden (App)', no_measurement: 'Sammelt Daten'},
+            collecting: 'sammelt Daten',
+            mon: {
+              measuring: n => `Messung läuft · ${n} vollständige Entladung${n === 1 ? '' : 'en'} gemessen`,
+              collecting: 'Messung läuft · sammelt Daten für die erste Messung',
+              no_recent_data: m => `Keine neuen Daten seit ${m} min · Verbindung zur Batterie prüfen`,
+              sensor_missing: e => `Sensor nicht verfügbar: ${e}`,
+              waiting_full_charge: s => `Nächster Schritt: auf 95 % oder mehr voll laden (jetzt ${s} %)`,
+              ready: s => `Batterie voll (${s} %): eine Entladung auf 15 % oder weniger ergibt eine Messung`,
+              full_discharge_running: (f, s) => `Vollständige Entladung läuft: von ${f} % auf jetzt ${s} %, Messung bei 15 % oder weniger`,
+              interrupted: 'letzte Entladung zählte nicht (unterbrochen)'
+            },
+            chart: 'Diagramm', win3: '3 Jahre', winAll: 'ganze Garantie', now: 'jetzt', chartTitle: 'Noch verfügbar pro Monat (%)', noData: 'Noch keine Messungen in diesem Zeitraum. Das Diagramm füllt sich nach der ersten vollständigen Entladung.',
+            legCap: 'gemessen', legSpec: 'erwartet laut Hersteller', legRed: 'an Marstek melden',
+            how: '<b>Wie liest man das?</b> Jeder Punkt ist ein Monat: wie viel Prozent der nutzbaren Kapazität damals noch vorhanden war. Die graue gestrichelte Linie zeigt, was der Hersteller in diesem Alter erwartet. Achte vor allem darauf, dass die Punkte nahe an oder über dieser Linie bleiben; ein langsamer Rückgang ist normal. Sinken sie in Richtung der roten Linie, melde es an Marstek.',
+            howAll: ' Die helle Fläche rechts ist die noch kommende Garantiezeit.',
+            cell: {title: 'Zellspannungsdifferenz nach Vollladung', none: 'Noch keine Messung: folgt nach der nächsten Vollladung, sobald die Batterie 5 Minuten geruht hat.', note: 'Differenz zwischen höchster und niedrigster Zelle, gemessen in Ruhe bei voller Batterie. Ohne Farbe: Marstek nennt keinen Normalwert.', last: 'zuletzt'},
+            reason: (eol, life) => `Herstellerangabe: ${eol} % nach ${life} Zyklen (keine Garantie). Grün bis 5 Punkte darunter, orange noch tiefer, rot bei 75 % oder weniger.`
+          } : nl ? {
             title: 'Capaciteit', nominal: 'Opgegeven', usable: 'Bruikbaar', measured: 'Gemeten',
             ofnew: 'nog beschikbaar', expected: 'Specificatie', spec: 'Specificatie fabrikant bij', margin: 'marge', floor: 'melden bij Marstek',
             age: 'jaar', cycles: 'cycli', trend: 'Trend', exp: 'spec.',
@@ -288,7 +314,9 @@ button_card_templates:
       body: |
         [[[
           const nl = variables.lang === 'nl';
-          const T = nl
+          const T = variables.lang === 'de'
+            ? {title: 'Kapazität Heimspeicher — % noch verfügbar pro Monat', bat: 'Batterie', trend: 'Trend', now: 'Jetzt', exp: 'Herstellerangabe', loc: 'de-DE', none: 'sammelt Daten', mon: {measuring: 'Messung läuft', collecting: 'sammelt Daten', no_recent_data: 'keine aktuellen Daten', sensor_missing: 'Sensor nicht verfügbar'}, legend: 'Grün: im Rahmen der Herstellerangabe (bis 5 Punkte darunter) · orange: unter Herstellerangabe · rot: 75 % oder weniger, über die Marstek-App melden. Kleine Zahl = Herstellerangabe für diesen Monat. ✓ Messung läuft · ⏳ sammelt Daten · ⚠ Verbindung prüfen.'}
+            : nl
             ? {title: 'Capaciteit thuisbatterijen — % nog beschikbaar per maand', bat: 'Batterij', trend: 'Trend', now: 'Nu', exp: 'Specificatie', loc: 'nl-NL', none: 'verzamelt data', mon: {measuring: 'meting werkt', collecting: 'verzamelt data', no_recent_data: 'geen recente data', sensor_missing: 'sensor niet beschikbaar'}, legend: 'Groen: volgens specificatie fabrikant (tot 5 punten eronder) · oranje: onder specificatie · rood: 75 % of lager, melden via de Marstek-app. Klein getal = specificatie voor die maand. ✓ meting werkt · ⏳ verzamelt data · ⚠ controleer de koppeling.'}
             : {title: 'Home battery capacity — % remaining per month', bat: 'Battery', trend: 'Trend', now: 'Now', exp: 'Spec', loc: 'en-GB', none: 'collecting data', mon: {measuring: 'monitor working', collecting: 'collecting data', no_recent_data: 'no recent data', sensor_missing: 'sensor unavailable'}, legend: 'Green: within manufacturer spec (up to 5 points below) · orange: below spec · red: 75 % or lower, report via the Marstek app. Small number = spec for that month. ✓ monitor working · ⏳ collecting data · ⚠ check the connection.'};
           const f = (v, d = 0) => (v === null || v === undefined || isNaN(v)) ? '–'
