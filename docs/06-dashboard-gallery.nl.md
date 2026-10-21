@@ -30,7 +30,7 @@ Zelf indelen? Gebruik hiervoor de standaardindeling van Home Assistant met **sec
 
 1. **Status**: *Goed*, *Onder specificatie*, *Melden bij Marstek (app)* of *Verzamelt data*. De kleur volgt de laatste meting.
 2. **Grafiek**: druk op dit knopje om de grafiek te openen, druk nog eens om hem te sluiten. De rest van de kaart doet niets als je erop klikt.
-3. **Periode**: standaard zie je de laatste **3 jaar**. Met *hele garantie* zie je de hele garantietijd (tot 10 jaar). Het lichte vlak rechts is de garantietijd die nog komt.
+3. **Periode**: *recente 3 jaar van garantieperiode*: de grafiek toont de meest recente 3 jaar sinds de installatie.
 4. **Grafiek**: elke stip is een maand, met hoeveel procent van de bruikbare capaciteit er toen nog was. De grijze stippellijn is wat de fabrikant op die leeftijd verwacht, de rode lijn is 75 %. Ga met de muis over een stip voor het precieze getal en de celtemperatuur in die maand (als je temperatuursensoren hebt gekoppeld).
 5. **Hoe lees je dit?** Korte uitleg onder de grafiek: kijk of de stippen dicht bij of boven de grijze lijn blijven. Langzaam dalen is normaal; zakken ze richting de rode lijn, meld het dan bij Marstek.
 6. **Werkt de meting?** Groen: de meting werkt en zoveel volledige ontladingen zijn gemeten. Blauw: nog data aan het verzamelen. Oranje of rood: geen nieuwe gegevens of een sensor ontbreekt. De regel eronder zegt wat de volgende stap is (bijvoorbeeld *volledig laden tot 95 %*).
@@ -41,10 +41,6 @@ Zelf indelen? Gebruik hiervoor de standaardindeling van Home Assistant met **sec
 11. **Laatste volle ontlading en volle lading**, en het aantal metingen.
 
 Heb je sensoren voor de hoogste en laagste celspanning gekoppeld, dan staat onder de trend ook het **celverschil na volle lading** (zie Demo 2 in de galerij).
-
-Met *hele garantie* ziet de grafiek er zo uit:
-
-![Hele garantie](../screenshots/gallery/card-full-warranty-nl.png)
 
 ## Het overzicht
 

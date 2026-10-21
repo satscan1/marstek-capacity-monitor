@@ -30,7 +30,7 @@ Selbst anordnen? Verwende den Ansichtstyp **Abschnitte** (Sections) von Home Ass
 
 1. **Status**: *Gut*, *Unter Herstellerangabe*, *An Marstek melden (App)* oder *Sammelt Daten*. Die Farbe folgt der letzten Messung.
 2. **Diagramm**: Drücke auf diese kleine Schaltfläche, um das Diagramm zu öffnen, und noch einmal, um es zu schließen. Der Rest der Karte reagiert nicht auf Klicks.
-3. **Zeitraum**: Standard sind die letzten **3 Jahre**. Mit *ganze Garantie* siehst du die ganze Garantiezeit (bis 10 Jahre); die helle Fläche rechts ist die noch kommende Garantiezeit.
+3. **Zeitraum**: *jüngste 3 Jahre der Garantiezeit*: Das Diagramm zeigt die jüngsten 3 Jahre seit der Inbetriebnahme.
 4. **Diagramm**: Jeder Punkt ist ein Monat, mit dem Prozentsatz der nutzbaren Kapazität, der damals noch vorhanden war. Die graue gestrichelte Linie zeigt, was der Hersteller in diesem Alter erwartet, die rote Linie liegt bei 75 %. Fährst du mit der Maus über einen Punkt, siehst du den genauen Wert und die Zelltemperatur in diesem Monat (wenn du Temperatursensoren verknüpft hast).
 5. **Wie liest man das?** Eine kurze Erklärung unter dem Diagramm: Achte darauf, dass die Punkte nahe an oder über der grauen Linie bleiben. Ein langsamer Rückgang ist normal; sinken sie in Richtung der roten Linie, melde es an Marstek.
 6. **Läuft die Messung?** Grün: Die Messung läuft, mit der Zahl der gemessenen vollständigen Entladungen. Blau: sammelt noch Daten. Orange oder rot: keine neuen Daten oder ein Sensor fehlt. Die Zeile darunter nennt den nächsten Schritt (zum Beispiel *auf 95 % voll laden*).
@@ -41,10 +41,6 @@ Selbst anordnen? Verwende den Ansichtstyp **Abschnitte** (Sections) von Home Ass
 11. **Letzte vollständige Entladung und Ladung**, und die Anzahl der Messungen.
 
 Hast du Sensoren für die höchste und niedrigste Zellspannung verknüpft, erscheint unter dem Trend die **Zellspannungsdifferenz nach Vollladung** (siehe Demo 2 in der Galerie).
-
-Mit *ganze Garantie* sieht das Diagramm so aus:
-
-![Ganze Garantie](../screenshots/gallery/de/card-full-warranty-de.png)
 
 ## Die Übersicht
 
