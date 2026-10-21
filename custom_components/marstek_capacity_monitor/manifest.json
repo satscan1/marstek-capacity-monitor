@@ -9,5 +9,5 @@
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/satscan1/marstek-capacity-monitor/issues",
   "requirements": [],
-  "version": "0.3.0"
+  "version": "0.3.1"
 }
