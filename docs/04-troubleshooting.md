@@ -4,8 +4,11 @@
 
 | What you see | Why | What to do |
 |---|---|---|
-| **"No full discharge measured yet"** | The battery has not gone from 95 % or higher down to 15 % or lower since monitoring started. In autumn and winter that can take a while. | Nothing is wrong. For a quick first measurement, let the battery charge fully once and then run down completely. |
+| **"Collecting data"** | The battery has not gone from 95 % or higher down to 15 % or lower since monitoring started. In autumn and winter that can take a while. | Nothing is wrong. For a quick first measurement, let the battery charge fully once and then run down completely. |
 | **The scan finds no battery** | The scan looks for a state-of-charge sensor (%) and a power sensor with "battery power" in its name, on the same device or with the same name prefix. Some integrations use other names. | Choose **Choose sensors manually** and pick the two sensors yourself. |
+| **Status "No recent data"** | Neither the state of charge nor the power sensor reported a value for an hour. | Check the battery connection (ESPHome device, Modbus bridge, MQTT). The status returns by itself once data comes in. |
+| **Status "Sensor unavailable"** | The state of charge or power sensor is unavailable; the card names it. | Check that integration and the entity. If the entity was renamed, pick it again under **Configure** or add the battery again. |
+| **Cell spread stays empty** | A sample needs a full charge (≥ 95 %) and 5 minutes at rest. The next sample needs the battery to drop below 90 % first. | Nothing; it follows after the next full charge. Check that both cell sensors show a voltage (V or mV). |
 | **Warning: "looks like the AC / grid side"** | The chosen power sensor has "ac", "grid", "net", "p1" or "meter" in its name. AC values include conversion losses and give a wrong capacity. | Pick the battery (DC) power sensor. Only if you are sure it is the DC side: submit again to use it anyway. |
 | **Notification: "plus and minus reversed automatically"** | Your power sensor shows charging as a negative value. The monitor noticed this on the first full charge or discharge and corrected it. | Nothing. If detection got it wrong, set the sign manually under **Configure**. |
 | **A measurement seems missing after a restart** | If the power data has a gap of more than 5 minutes during a charge or discharge (for example a Home Assistant restart), that swing is not used. | Nothing; the next full discharge counts again. |

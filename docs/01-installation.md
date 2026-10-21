@@ -31,8 +31,12 @@ Copy `custom_components/marstek_capacity_monitor` to `/config/custom_components/
 Go to **Settings → Devices & services → Add integration → Marstek Capacity Monitor**.
 
 1. Pick a battery that was found, or choose the sensors yourself.
-2. Check the short id (`mt1` … `mt6`), the name and the two sensors.
-3. Enter the factory data: nominal capacity, reserve, purchase date, warranty period and cycles. The defaults come from the Venus E datasheet.
+2. Check the short id (`mt1` … `mt6`), the name and the two sensors. Optional: the highest and lowest cell voltage, for the [cell balance check](03-how-it-works.md#cell-balance). These are filled in when the scan finds them.
+3. Choose the model and fill in the installation date. For a Venus E v1/v2, Venus E v3 or Venus D the factory data are filled in for you (Venus D: also the number of packs). For another model you enter the factory data yourself.
+
+You can change all factory data later under **Configure**.
+
+After adding, the battery shows **collecting data** until its first full discharge (≥ 95 % → ≤ 15 %). The status line on the card tells you the next step.
 
 ## Add the cards
 

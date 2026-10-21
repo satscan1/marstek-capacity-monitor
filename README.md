@@ -13,14 +13,18 @@ Track in Home Assistant whether your Marstek home battery keeps its capacity, me
 - **Two sensors you already have:** state of charge and DC battery power. The integration finds them itself.
 - **Measured on a full discharge** (≥ 95 % → ≤ 15 %) and compared with the usable capacity of a new battery.
 - **Manufacturer spec** as reference: 80 % after 6,000 cycles. Green within spec, orange below, red at 75 % or lower: report via the Marstek app.
-- **Any Marstek with Modbus** (RS485 or LAN): Venus E v1, v2, v3, Venus A, Venus D.
+- **Any connection that gives the state of charge and DC power:** ESPHome, Modbus (RS485 or LAN) or another integration. Venus E v1, v2, v3, Venus A, Venus D.
+- **Plug & play:** pick your model and installation date; the factory data are filled in for you.
+- **Shows whether it works:** a status per battery, and "collecting data" until the first full discharge.
+- **Optional cell balance check:** the spread between the highest and lowest cell after a full charge.
+- **Cell temperature as context (experimental)** and a **chart** on the battery card (last 3 years or the whole 10-year warranty): one press on the Chart button.
 - **Light and local:** everything inside Home Assistant, no InfluxDB or cloud.
 
 ## Install in 3 steps
 
 1. In HACS: three dots → *Custom repositories* → URL of this repo, type *Integration*. Install **Marstek Capacity Monitor** and restart Home Assistant.
 2. **Settings → Devices & services → Add integration → Marstek Capacity Monitor**.
-3. Pick the battery that was found and check the factory data. Done.
+3. Pick the battery that was found, choose its model and fill in the installation date. Done.
 
 Then add the cards from [`dashboard/`](dashboard/). Full instructions: [docs/01-installation.md](docs/01-installation.md).
 
@@ -33,6 +37,7 @@ Then add the cards from [`dashboard/`](dashboard/). Full instructions: [docs/01-
 | [03 – How it works](docs/03-how-it-works.md) | Three capacities, measuring, conversion to 100 %, spec and colours |
 | [04 – Troubleshooting](docs/04-troubleshooting.md) | Common messages and what to do |
 | [05 – Supported batteries](docs/05-supported-batteries.md) | Models, depth of discharge per model, **sources for the manufacturer specs** |
+| [06 – Dashboard and gallery](docs/06-dashboard-gallery.md) | Layout for 1 to 6 batteries, the card explained with numbers, gallery with and without chart |
 
 Changes per version: [CHANGELOG](CHANGELOG.md).
 
@@ -62,7 +67,7 @@ Changes per version: [CHANGELOG](CHANGELOG.md).
 
 ![Device](screenshots/06-device.png)
 
-**6. button-card: overview and detail cards (English and Dutch)**
+**6. button-card: overview and battery cards, one with the chart open (English and Dutch). More examples, from 1 to 6 batteries: [gallery](docs/06-dashboard-gallery.md)**
 
 ![Dashboard](screenshots/07-dashboard-en.png)
 
