@@ -30,7 +30,7 @@ Arranging it yourself? Use Home Assistant's standard **Sections** layout. An exa
 
 1. **Status**: *Good*, *Below spec*, *Report to Marstek (app)* or *Collecting data*. The colour follows the latest measurement.
 2. **Chart**: press this small button to open the chart, press again to close it. The rest of the card does nothing when clicked.
-3. **Period**: by default the last **3 years**. *Full warranty* shows the whole warranty period (up to 10 years); the light area on the right is the warranty time still to come.
+3. **Period**: *recent 3 years of warranty*: the chart shows the most recent 3 years since installation.
 4. **Chart**: each dot is one month, with the percentage of the usable capacity that was left. The grey dashed line is what the manufacturer expects at that age, the red line is 75 %. Hover over a dot for the exact value and the cell temperature that month (if you linked temperature sensors).
 5. **How to read this?** A short explanation below the chart: check that the dots stay close to or above the grey line. A slow decline is normal; if they sink towards the red line, report it to Marstek.
 6. **Is the monitor working?** Green: working, with the number of full discharges measured. Blue: still collecting data. Orange or red: no new data, or a sensor is missing. The line below tells the next step (for example *charge fully to 95 %*).
@@ -41,10 +41,6 @@ Arranging it yourself? Use Home Assistant's standard **Sections** layout. An exa
 11. **Last full discharge and full charge**, and the number of measurements.
 
 If you linked sensors for the highest and lowest cell voltage, the **cell spread after full charge** appears below the trend (see Demo 2 in the gallery).
-
-With *full warranty* the chart looks like this:
-
-![Full warranty](../screenshots/gallery/card-full-warranty-en.png)
 
 ## The overview
 
