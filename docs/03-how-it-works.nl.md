@@ -92,4 +92,4 @@ Alleen **cel**temperaturen horen hier. Sommige koppelingen geven MOSFET-temperat
 
 ## Grafiek
 
-Druk op het knopje **Grafiek** onder de status om een grafiek te openen of te sluiten (oud → nieuw, van links naar rechts): de gemeten capaciteit per maand, de specificatie van de fabrikant als grijze stippellijn en 75 % als rode lijn. Standaard zie je de laatste 3 jaar; met *hele garantie* de hele garantietijd. Ga met de muis over een stip voor het getal en de celtemperatuur in die maand. Zie [06 – Dashboard en galerij](06-dashboard-gallery.nl.md) voor de kaart genummerd uitgelegd.
+Druk op het knopje **Grafiek** onder de status om een grafiek te openen of te sluiten (oud → nieuw, van links naar rechts): de gemeten capaciteit per maand, de specificatie van de fabrikant als grijze stippellijn en 75 % als rode lijn. De grafiek toont de meest recente 3 jaar. Ga met de muis over een stip voor het getal en de celtemperatuur in die maand. Zie [06 – Dashboard en galerij](06-dashboard-gallery.nl.md) voor de kaart genummerd uitgelegd.
