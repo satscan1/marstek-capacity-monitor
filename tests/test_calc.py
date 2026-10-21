@@ -231,3 +231,60 @@ def test_last_full_charge_and_discharge():
     assert res["last_full_discharge"].tzinfo is not None
     empty = calc.evaluate(spec, [], 0, now)
     assert empty["last_full_discharge"] is None and empty["last_full_charge"] is None
+
+
+def test_cell_tracker_rearms_below_90():
+    from custom_components.marstek_capacity_monitor.calc import CellBalanceTracker
+
+    t = CellBalanceTracker()
+    assert t.update(97, 0, 3450, 3430, 0) is None  # rest starts
+    rec = t.update(97, 0, 3450, 3430, 301)
+    assert rec["spread_mv"] == 20
+    assert t.update(97, 0, 3450, 3400, 1000) is None  # same charge: no second sample
+    t.update(85, -800, 3300, 3290, 2000)  # discharged below 90 %: re-armed
+    t.update(98, 10, 3460, 3440, 3000)
+    assert t.update(98, 10, 3460, 3440, 3301)["spread_mv"] == 20
+
+
+def test_to_mv_units():
+    from custom_components.marstek_capacity_monitor.calc import to_mv
+
+    assert to_mv(3.31, "V") == 3310
+    assert to_mv(3310, "mV") == 3310
+    assert to_mv(3.31, None) == 3310
+
+
+def test_measurement_phase():
+    from custom_components.marstek_capacity_monitor.calc import measurement_phase
+
+    assert measurement_phase({"soc": 40})["phase"] == "waiting_full_charge"
+    assert measurement_phase({"soc": 96})["phase"] == "ready"
+    running = measurement_phase(
+        {"soc": 60, "swing": {"direction": "discharge", "start": {"soc": 97}, "valid": True}}
+    )
+    assert running["phase"] == "full_discharge_running" and running["from_soc"] == 97
+
+
+def test_interrupted_only_for_full_discharge():
+    from custom_components.marstek_capacity_monitor.calc import measurement_phase
+
+    # restart while idle at 63 %: nothing to report
+    idle = measurement_phase({"soc": 63, "swing": {"direction": None, "start": {"soc": 63}, "valid": False, "reason": "restart"}})
+    assert "interrupted" not in idle
+    broken = measurement_phase({"soc": 50, "swing": {"direction": "discharge", "start": {"soc": 97}, "valid": False, "reason": "data_gap"}})
+    assert broken["interrupted"] == "data_gap"
+
+
+def test_prune_keeps_full_discharges_for_years():
+    prune_records = calc.prune_records
+    recs = []
+    for i in range(4000):
+        full = i % 10 == 0
+        recs.append({
+            "ts": i, "direction": "discharge", "valid": True,
+            "soc_start": 98 if full else 80, "soc_end": 10 if full else 50,
+        })
+    out = prune_records(recs, max_other=500, max_full=3000)
+    assert sum(1 for r in out if r["soc_start"] == 98) == 400  # all 400 full ones kept
+    assert len(out) == 900
+    assert [r["ts"] for r in out] == sorted(r["ts"] for r in out)
