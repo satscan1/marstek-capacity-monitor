@@ -1,6 +1,7 @@
 # Marstek Capacity Monitor: ready-made dashboard for 4 batteries
 #
 # Needs button-card (HACS -> search "button-card" -> Download).
+# From version 0.4.0 it also works without: see docs/01-installation.md.
 #
 # 1. Settings -> Dashboards -> Add dashboard -> New dashboard from scratch.
 #    Give it a name and open it.
@@ -59,7 +60,31 @@ button_card_templates:
         [[[
           const id = variables.battery;
           const nl = variables.lang === 'nl';
-          const T = nl ? {
+          const T = variables.lang === 'de' ? {
+            title: 'Kapazität', nominal: 'Nennwert', usable: 'Nutzbar', measured: 'Gemessen',
+            ofnew: 'noch verfügbar', expected: 'Herstellerangabe', spec: 'Herstellerangabe bei', margin: 'Abstand', floor: 'an Marstek melden',
+            age: 'Jahre', cycles: 'Zyklen', trend: 'Trend', exp: 'Herst.',
+            until: 'Garantie bis', n: 'Messungen', lastDis: 'letzte vollständige Entladung', lastChg: 'letzte vollständige Ladung', loc: 'de-DE',
+            none: 'Noch keine vollständige Entladung gemessen (≥ 95 % → ≤ 15 %). Das kann im Winter eine Weile dauern.',
+            missing: 'Sensor nicht gefunden:',
+            status: {good: 'Gut', attention: 'Unter Herstellerangabe', critical: 'An Marstek melden (App)', no_measurement: 'Sammelt Daten'},
+            collecting: 'sammelt Daten',
+            mon: {
+              measuring: n => `Messung läuft · ${n} vollständige Entladung${n === 1 ? '' : 'en'} gemessen`,
+              collecting: 'Messung läuft · sammelt Daten für die erste Messung',
+              no_recent_data: m => `Keine neuen Daten seit ${m} min · Verbindung zur Batterie prüfen`,
+              sensor_missing: e => `Sensor nicht verfügbar: ${e}`,
+              waiting_full_charge: s => `Nächster Schritt: auf 95 % oder mehr voll laden (jetzt ${s} %)`,
+              ready: s => `Batterie voll (${s} %): eine Entladung auf 15 % oder weniger ergibt eine Messung`,
+              full_discharge_running: (f, s) => `Vollständige Entladung läuft: von ${f} % auf jetzt ${s} %, Messung bei 15 % oder weniger`,
+              interrupted: 'letzte Entladung zählte nicht (unterbrochen)'
+            },
+            chart: 'Diagramm', win3: 'jüngste 3 Jahre der Garantiezeit', chartTitle: 'Noch verfügbar pro Monat (%)', noData: 'Noch keine Messungen in diesem Zeitraum. Das Diagramm füllt sich nach der ersten vollständigen Entladung.',
+            legCap: 'gemessen', legSpec: 'erwartet laut Hersteller', legRed: 'an Marstek melden',
+            how: '<b>Wie liest man das?</b> Jeder Punkt ist ein Monat: wie viel Prozent der nutzbaren Kapazität damals noch vorhanden war. Die graue gestrichelte Linie zeigt, was der Hersteller in diesem Alter erwartet. Achte vor allem darauf, dass die Punkte nahe an oder über dieser Linie bleiben; ein langsamer Rückgang ist normal. Sinken sie in Richtung der roten Linie, melde es an Marstek.',
+            cell: {title: 'Zellspannungsdifferenz nach Vollladung', none: 'Noch keine Messung: folgt nach der nächsten Vollladung, sobald die Batterie 5 Minuten geruht hat.', note: 'Differenz zwischen höchster und niedrigster Zelle, gemessen in Ruhe bei voller Batterie. Ohne Farbe: Marstek nennt keinen Normalwert.', last: 'zuletzt'},
+            reason: (eol, life) => `Herstellerangabe: ${eol} % nach ${life} Zyklen (keine Garantie). Grün bis 5 Punkte darunter, orange noch tiefer, rot bei 75 % oder weniger.`
+          } : nl ? {
             title: 'Capaciteit', nominal: 'Opgegeven', usable: 'Bruikbaar', measured: 'Gemeten',
             ofnew: 'nog beschikbaar', expected: 'Specificatie', spec: 'Specificatie fabrikant bij', margin: 'marge', floor: 'melden bij Marstek',
             age: 'jaar', cycles: 'cycli', trend: 'Trend', exp: 'spec.',
@@ -78,10 +103,9 @@ button_card_templates:
               full_discharge_running: (f, s) => `Volledige ontlading bezig: van ${f} % naar nu ${s} %, meting bij 15 % of lager`,
               interrupted: 'vorige ontlading telde niet mee (onderbroken)'
             },
-            chart: 'Grafiek', win3: '3 jaar', winAll: 'hele garantie', now: 'nu', chartTitle: 'Nog beschikbaar per maand (%)', noData: 'Nog geen metingen in deze periode. De grafiek vult zich na de eerste volledige ontlading.',
+            chart: 'Grafiek', win3: 'recente 3 jaar van garantieperiode', chartTitle: 'Nog beschikbaar per maand (%)', noData: 'Nog geen metingen in deze periode. De grafiek vult zich na de eerste volledige ontlading.',
             legCap: 'gemeten', legSpec: 'verwacht volgens fabrikant', legRed: 'melden bij Marstek',
             how: '<b>Hoe lees je dit?</b> Elke stip is een maand: hoeveel procent van de bruikbare capaciteit er toen nog was. De grijze stippellijn is wat de fabrikant op die leeftijd verwacht. Kijk vooral of de stippen dicht bij of boven die lijn blijven; langzaam dalen is normaal. Zakken ze richting de rode lijn, meld het dan bij Marstek.',
-            howAll: ' Het lichte vlak rechts is de garantietijd die nog komt.',
             cell: {title: 'Celverschil na volle lading', none: 'Nog geen meting: volgt na de volgende volle lading, als de batterij 5 minuten in rust is.', note: 'Verschil tussen hoogste en laagste cel, gemeten in rust bij een volle batterij. Zonder kleur: Marstek geeft geen normaalwaarde.', last: 'laatste'},
             reason: (eol, life) => `Specificatie fabrikant: ${eol} % na ${life} cycli (geen garantie). Groen tot 5 punten eronder, oranje daaronder, rood bij 75 % en lager.`
           } : {
@@ -103,10 +127,9 @@ button_card_templates:
               full_discharge_running: (f, s) => `Full discharge running: from ${f} % to now ${s} %, measured at 15 % or lower`,
               interrupted: 'last discharge did not count (interrupted)'
             },
-            chart: 'Chart', win3: '3 years', winAll: 'full warranty', now: 'now', chartTitle: 'Remaining per month (%)', noData: 'No measurements in this period yet. The chart fills after the first full discharge.',
+            chart: 'Chart', win3: 'recent 3 years of warranty', chartTitle: 'Remaining per month (%)', noData: 'No measurements in this period yet. The chart fills after the first full discharge.',
             legCap: 'measured', legSpec: 'expected by manufacturer', legRed: 'report to Marstek',
             how: '<b>How to read this?</b> Each dot is one month: how much of the usable capacity was left. The grey dashed line is what the manufacturer expects at that age. Mainly check that the dots stay close to or above that line; a slow decline is normal. If they sink towards the red line, report it to Marstek.',
-            howAll: ' The light area on the right is the warranty time still to come.',
             cell: {title: 'Cell spread after full charge', none: 'No measurement yet: follows after the next full charge, once the battery has rested for 5 minutes.', note: 'Difference between the highest and lowest cell, measured at rest with a full battery. No colours: Marstek gives no normal value.', last: 'last'},
             reason: (eol, life) => `Manufacturer spec: ${eol} % after ${life} cycles (not a warranty). Green up to 5 points below, orange below that, red at 75 % or lower.`
           };
@@ -222,8 +245,8 @@ button_card_templates:
           }
 
           // Chart, opened with the small button under the status (top right).
-          // Default: last 3 years. "Full warranty" shows the whole period (up to 10 years).
-          const open = !!(this && this._mcChart), whole = !!(this && this._mcAll);
+          // The chart shows the most recent 3 years (never before the installation date).
+          const open = !!(this && this._mcChart);
           const act = js => `onclick="event.stopPropagation();const h=this.getRootNode().host;${js}h._config={...h._config};"`;
           const chartBtn = `<div ${act('h._mcChart=!h._mcChart;')} style="margin-top:4px;display:inline-block;font-size:11px;padding:1px 8px;border:1px solid #333744;border-radius:10px;color:#9aa0a6;cursor:pointer;user-select:none;pointer-events:auto">${T.chart} ${open ? '▾' : '▸'}</div>`;
           let chart = '';
@@ -231,10 +254,7 @@ button_card_templates:
             const km = k => { const [yy, mm] = k.split('-').map(Number); return yy * 12 + mm - 1; };
             const nd = new Date(), nowI = nd.getFullYear() * 12 + nd.getMonth();
             const startI = nowI - Math.round((ea.age_years ?? 0) * 12);
-            const wd = we && !['unknown', 'unavailable', ''].includes(we.state) ? new Date(we.state) : null;
-            const endI = wd ? wd.getFullYear() * 12 + wd.getMonth() : startI + 120;
-            const x0 = whole ? startI : Math.max(startI, nowI - 35);
-            const x1 = whole ? Math.max(endI, nowI) : nowI;
+            const x0 = Math.max(startI, nowI - 35), x1 = nowI;
             const span = Math.max(1, x1 - x0);
             const pts = (a.trend || []).filter(t => km(t.month) >= x0 && km(t.month) <= x1).slice().reverse();
             // drawn in real pixels: the card is on screen once the button was pressed
@@ -252,8 +272,6 @@ button_card_templates:
               if (yy * 12 < x0 || yy * 12 > x1) continue;
               svg += `<line x1="${X(yy * 12)}" x2="${X(yy * 12)}" y1="${H - B}" y2="${H - B + 4}" stroke="${dim}" stroke-width="1"/><text x="${X(yy * 12)}" y="${H - 3}" font-size="10" fill="${dim}" text-anchor="middle">${yy}</text>`;
             }
-            if (whole && x1 > nowI)
-              svg += `<rect x="${X(nowI)}" y="${Tp}" width="${X(x1) - X(nowI)}" height="${H - Tp - B}" fill="#ffffff" fill-opacity="0.035"/><text x="${X(nowI) + 2}" y="${H - B - 4}" font-size="10" fill="${dim}">${T.now}</text>`;
             svg += `<line x1="${L}" x2="${W - R}" y1="${Y(floor)}" y2="${Y(floor)}" stroke="#ef5350" stroke-opacity="0.55" stroke-width="1" stroke-dasharray="4 4"/><text x="${W - R + 3}" y="${Y(floor) + 3.5}" font-size="10" fill="#ef5350" fill-opacity="0.7">${f(floor, 0)}%</text>`;
             const sp = pts.map(t => [km(t.month), t.expected_pct]);
             if (!isNaN(exp) && (!sp.length || sp[sp.length - 1][0] < nowI)) sp.push([nowI, exp]);
@@ -262,13 +280,12 @@ button_card_templates:
             const monL = k => new Date(k + '-15').toLocaleString(T.loc, {month: 'short', year: 'numeric'});
             svg += pts.map(t => `<circle cx="${X(km(t.month))}" cy="${Y(t.pct)}" r="${pts.length > 40 ? 2.2 : 3}" fill="${col(t.pct, t.expected_pct)}"><title>${monL(t.month)}: ${f(t.pct, 1)} % (${T.legSpec} ${f(t.expected_pct, 0)} %${t.temp_c != null ? `, ${f(t.temp_c, 0)} °C` : ''})</title></circle>`).join('');
             if (pts.length) { const t = pts[pts.length - 1]; svg += `<text x="${X(km(t.month))}" y="${Y(t.pct) - 6}" font-size="10" fill="#e8eaed" text-anchor="middle">${f(t.pct, 0)}</text>`; }
-            const win = (lbl, val) => val === whole ? `<span style="color:#e8eaed">${lbl}</span>` : `<span ${act(`h._mcAll=${val};`)} style="color:#42a5f5;cursor:pointer;pointer-events:auto">${lbl}</span>`;
             chart = `<div style="margin-top:8px;padding:8px 10px;background:#22262e;border-radius:8px">
-                <div style="display:flex;justify-content:space-between;font-size:11px;${muted}"><span>${T.chartTitle}</span><span>${win(T.win3, false)} · ${win(T.winAll, true)}</span></div>
-                ${pts.length || whole ? `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:100%;height:auto;display:block;margin-top:4px">${svg}</svg>` : ''}
+                <div style="display:flex;flex-wrap:wrap;justify-content:space-between;column-gap:10px;font-size:11px;${muted}"><span>${T.chartTitle}</span><span>${T.win3}</span></div>
+                ${pts.length ? `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:100%;height:auto;display:block;margin-top:4px">${svg}</svg>` : ''}
                 ${pts.length ? '' : `<div style="font-size:11px;${muted};margin:4px 0">${T.noData}</div>`}
                 <div style="font-size:10px;${muted};margin-top:2px"><span style="color:#66bb6a">●</span> ${T.legCap} · <span style="color:#9aa0a6">┄</span> ${T.legSpec} · <span style="color:#ef5350">┄</span> ${T.legRed}</div>
-                <div style="font-size:11px;${muted};margin-top:6px;line-height:1.35">${T.how}${whole ? T.howAll : ''}</div>
+                <div style="font-size:11px;${muted};margin-top:6px;line-height:1.35">${T.how}</div>
               </div>`;
           }
 
@@ -288,7 +305,9 @@ button_card_templates:
       body: |
         [[[
           const nl = variables.lang === 'nl';
-          const T = nl
+          const T = variables.lang === 'de'
+            ? {title: 'Kapazität Heimspeicher — % noch verfügbar pro Monat', bat: 'Batterie', trend: 'Trend', now: 'Jetzt', exp: 'Herstellerangabe', loc: 'de-DE', none: 'sammelt Daten', mon: {measuring: 'Messung läuft', collecting: 'sammelt Daten', no_recent_data: 'keine aktuellen Daten', sensor_missing: 'Sensor nicht verfügbar'}, legend: 'Grün: im Rahmen der Herstellerangabe (bis 5 Punkte darunter) · orange: unter Herstellerangabe · rot: 75 % oder weniger, über die Marstek-App melden. Kleine Zahl = Herstellerangabe für diesen Monat. ✓ Messung läuft · ⏳ sammelt Daten · ⚠ Verbindung prüfen.'}
+            : nl
             ? {title: 'Capaciteit thuisbatterijen — % nog beschikbaar per maand', bat: 'Batterij', trend: 'Trend', now: 'Nu', exp: 'Specificatie', loc: 'nl-NL', none: 'verzamelt data', mon: {measuring: 'meting werkt', collecting: 'verzamelt data', no_recent_data: 'geen recente data', sensor_missing: 'sensor niet beschikbaar'}, legend: 'Groen: volgens specificatie fabrikant (tot 5 punten eronder) · oranje: onder specificatie · rood: 75 % of lager, melden via de Marstek-app. Klein getal = specificatie voor die maand. ✓ meting werkt · ⏳ verzamelt data · ⚠ controleer de koppeling.'}
             : {title: 'Home battery capacity — % remaining per month', bat: 'Battery', trend: 'Trend', now: 'Now', exp: 'Spec', loc: 'en-GB', none: 'collecting data', mon: {measuring: 'monitor working', collecting: 'collecting data', no_recent_data: 'no recent data', sensor_missing: 'sensor unavailable'}, legend: 'Green: within manufacturer spec (up to 5 points below) · orange: below spec · red: 75 % or lower, report via the Marstek app. Small number = spec for that month. ✓ monitor working · ⏳ collecting data · ⚠ check the connection.'};
           const f = (v, d = 0) => (v === null || v === undefined || isNaN(v)) ? '–'

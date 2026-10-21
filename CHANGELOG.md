@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.4.0 — 2026-10-21
+
+**Plug & play cards: no button-card, a dashboard in one click, and a first measurement from history.**
+
+- New: the integration brings its own cards, **Marstek capacity (battery)** and **Marstek capacity (overview)**. After restarting Home Assistant (with at least one battery added) they are in the card picker; no button-card, no templates, no resources. They find your batteries, their names and the Home Assistant language by themselves, and look the same as the button-card cards.
+- New: **dashboard in one click**: Settings → Dashboards → Add dashboard → *Marstek battery capacity* (Home Assistant 2026.5 and later). It arranges 1 to 6 batteries by itself and picks up new batteries. Older versions: two lines in the raw configuration editor (see the installation guide).
+- New: when you add a battery, the recorder history (usually 10 days) is checked for full discharges that already happened, so there can be a measurement right away.
+- New: **German** (Deutsch): settings screens, cards, the one-click dashboard, ready-made dashboards (`dashboard/ready-made/de/`) and the guides [README.de.md](README.de.md), [01 – Installation](docs/01-installation.de.md) and [06 – Dashboard und Galerie](docs/06-dashboard-gallery.de.md). The cards follow the Home Assistant language; `lang: de` forces German.
+- The chart always shows the most recent 3 years; the header says *recent 3 years of warranty*. The *full warranty* choice is gone (it read as one phrase with *3 years* and added little while a battery is still young). Applies to the button-card templates too: paste the new `marstek_capacity_templates.yaml` again if you use them.
+- The button-card templates and ready-made dashboards keep working.
+- Home Assistant 2025.3 or newer is required (it already was in practice; now HACS says so too).
+
+Upgrade: update in HACS, restart Home Assistant and refresh your browser (Ctrl+F5). Measurements and settings are unchanged.
+
 ## v0.3.2 — 2026-10-21
 
 **Measurements survive a restart, ready-made dashboards and no false "no recent data" at night.**

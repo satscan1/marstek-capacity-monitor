@@ -1,6 +1,6 @@
 # Marstek Capacity Monitor
 
-*[Nederlands](README.nl.md)*
+*[Nederlands](README.nl.md) · [Deutsch](README.de.md)*
 
 Track in Home Assistant whether your Marstek home battery keeps its capacity, measured on the **DC side** (the battery itself, not the wall socket). Up to **6 batteries**.
 
@@ -17,7 +17,7 @@ Track in Home Assistant whether your Marstek home battery keeps its capacity, me
 - **Plug & play:** pick your model and installation date; the factory data are filled in for you.
 - **Shows whether it works:** a status per battery, and "collecting data" until the first full discharge.
 - **Optional cell balance check:** the spread between the highest and lowest cell after a full charge.
-- **Cell temperature as context (experimental)** and a **chart** on the battery card (last 3 years or the whole 10-year warranty): one press on the Chart button.
+- **Cell temperature as context (experimental)** and a **chart** on the battery card (the most recent 3 years): one press on the Chart button.
 - **Light and local:** everything inside Home Assistant, no InfluxDB or cloud.
 
 ## Install in 3 steps
@@ -26,7 +26,7 @@ Track in Home Assistant whether your Marstek home battery keeps its capacity, me
 2. **Settings → Devices & services → Add integration → Marstek Capacity Monitor**.
 3. Pick the battery that was found, choose its model and fill in the installation date. Done.
 
-Then add the cards: quickest with a [ready-made dashboard](dashboard/ready-made/en/) for 1 to 6 batteries that you paste in one go. Full instructions: [docs/01-installation.md](docs/01-installation.md).
+Then restart Home Assistant and go to **Settings → Dashboards → Add dashboard → Marstek battery capacity** (Home Assistant 2026.5+; older versions: see the guide). The dashboard arranges your batteries (1 to 6) by itself. The cards are part of the integration; button-card is no longer needed. Full instructions: [docs/01-installation.md](docs/01-installation.md).
 
 ## Documentation
 
@@ -67,7 +67,7 @@ Changes per version: [CHANGELOG](CHANGELOG.md).
 
 ![Device](screenshots/06-device.png)
 
-**6. button-card: overview and battery cards, one with the chart open (English and Dutch). More examples, from 1 to 6 batteries: [gallery](docs/06-dashboard-gallery.md)**
+**6. The cards: overview and battery cards, one with the chart open (English and Dutch). More examples, from 1 to 6 batteries: [gallery](docs/06-dashboard-gallery.md)**
 
 ![Dashboard](screenshots/07-dashboard-en.png)
 
