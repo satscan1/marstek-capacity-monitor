@@ -26,7 +26,7 @@ Volg in Home Assistant of je Marstek-thuisbatterij zijn capaciteit houdt, gemete
 2. **Instellingen → Apparaten & diensten → Integratie toevoegen → Marstek Capacity Monitor**.
 3. Kies de gevonden batterij, kies het model en vul de installatiedatum in. Klaar.
 
-Voeg daarna de kaarten uit [`dashboard/`](dashboard/) toe. Volledige uitleg: [docs/01-installation.nl.md](docs/01-installation.nl.md).
+Voeg daarna de kaarten toe: het snelst met een [kant-en-klaar dashboard](dashboard/ready-made/nl/) voor 1 tot 6 batterijen, dat je in één keer plakt. Volledige uitleg: [docs/01-installation.nl.md](docs/01-installation.nl.md).
 
 ## Documentatie
 

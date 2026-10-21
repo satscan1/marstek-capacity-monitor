@@ -288,3 +288,90 @@ def test_prune_keeps_full_discharges_for_years():
     assert sum(1 for r in out if r["soc_start"] == 98) == 400  # all 400 full ones kept
     assert len(out) == 900
     assert [r["ts"] for r in out] == sorted(r["ts"] for r in out)
+
+
+def _restart(tr, down_s, t):
+    """Save/load like Home Assistant does, then start again `down_s` later."""
+    tr2 = calc.SwingTracker(dict(tr.s))
+    tr2.start_after_restart(t + down_s)
+    return tr2
+
+
+def test_short_restart_is_bridged():
+    tr = calc.SwingTracker()
+    tr.update_soc(100, T0)
+    _, t = simulate(tr, 100, 50, 2.5, T0)
+    tr.s["power_w"] = -3000.0  # still discharging when HA stops (simulate ends at 0 W)
+    tr = _restart(tr, 60, t)
+    _, t = simulate(tr, 50, 11, 1.95, t + 120)  # first new value 2 min after stop
+    recs, _ = simulate(tr, 11, 30, 1.0, t)
+    assert len(recs) == 1
+    r = recs[0]
+    assert r["valid"] is True and calc.is_full_discharge(r)
+    assert r["bridged_s"] == 120
+    # gap: average of 3000 W before and 3000 W after, for 120 s = 0.1 kWh
+    assert r["e_dc_kwh"] == pytest.approx(2.5 + 0.1 + 1.95, abs=0.01)
+
+
+def test_unavailable_first_then_value_is_bridged():
+    tr = calc.SwingTracker()
+    tr.update_soc(100, T0)
+    _, t = simulate(tr, 100, 50, 2.5, T0)
+    tr.s["power_w"] = -3000.0
+    tr = _restart(tr, 30, t)
+    tr.update_power(None, t + 40)  # ESPHome not connected yet
+    tr.tick(t + 60)
+    assert tr.s["bridge"] is not None
+    _, t = simulate(tr, 50, 11, 1.95, t + 90)
+    recs, _ = simulate(tr, 11, 30, 1.0, t)
+    assert recs[0]["valid"] is True and recs[0]["bridged_s"] == 90
+
+
+def test_long_restart_is_not_bridged():
+    tr = calc.SwingTracker()
+    tr.update_soc(100, T0)
+    _, t = simulate(tr, 100, 50, 2.5, T0)
+    tr.s["power_w"] = -3000.0
+    tr = _restart(tr, 900, t)  # 15 minutes down
+    _, t = simulate(tr, 50, 11, 1.95, t + 960)
+    recs, _ = simulate(tr, 11, 30, 1.0, t)
+    assert recs[0]["valid"] is False and recs[0]["reason"] == "restart"
+
+
+def test_no_value_within_ten_minutes_invalidates():
+    tr = calc.SwingTracker()
+    tr.update_soc(100, T0)
+    _, t = simulate(tr, 100, 50, 2.5, T0)
+    tr.s["power_w"] = -3000.0
+    tr = _restart(tr, 30, t)
+    tr.tick(t + 700)  # still no power value
+    assert tr.s["bridge"] is None
+    assert tr.s["swing"]["valid"] is False and tr.s["swing"]["reason"] == "restart"
+
+
+def test_restart_without_saved_power_is_not_bridged():
+    tr = calc.SwingTracker()
+    tr.update_soc(100, T0)
+    _, t = simulate(tr, 100, 50, 2.5, T0)
+    tr.s["power_ts"] = None
+    tr = _restart(tr, 30, t)
+    assert tr.s["swing"]["valid"] is False
+
+
+def test_soc_before_power_after_restart_keeps_gap_energy():
+    """After a restart ESPHome may send the SOC before the power: the held-back
+    SOC is replayed once the gap is filled, so the record includes the gap."""
+    tr = calc.SwingTracker()
+    tr.update_soc(100, T0)
+    _, t = simulate(tr, 100, 12, 4.4, T0)
+    tr.s["power_w"] = -1000.0
+    tr = _restart(tr, 30, t)
+    assert tr.update_soc(11, t + 200) is None  # last SOC step happened while down
+    assert tr.s["swing"]["extreme"]["soc"] == 12  # held back
+    assert tr.update_power(0.0, t + 240) is None
+    assert tr.s["swing"]["extreme"]["soc"] == 11
+    recs, _ = simulate(tr, 11, 30, 1.0, t + 300)
+    r = recs[0]
+    assert r["valid"] and r["bridged_s"] == 240
+    # gap: (1000 + 0) / 2 W for 240 s = 0.0333 kWh, included in the record
+    assert r["e_dc_kwh"] == pytest.approx(4.4 + 0.0333, abs=0.002)
