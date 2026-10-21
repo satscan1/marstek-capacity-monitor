@@ -6,6 +6,7 @@ cards:
   - type: entities
     title: MT1 · Capacity
     entities:
+      - entity: sensor.marstek_mt1_monitor_status
       - entity: sensor.marstek_mt1_warranty_status
       - entity: sensor.marstek_mt1_capacity_pct
       - entity: sensor.marstek_mt1_expected_capacity
@@ -17,6 +18,8 @@ cards:
       - entity: sensor.marstek_mt1_measured_capacity
       - type: section
       - entity: sensor.marstek_mt1_cycles
+      # Only when you filled in the cell voltage sensors:
+      # - entity: sensor.marstek_mt1_cell_spread
   # Pattern over time: remaining capacity against the manufacturer spec line
   - type: statistics-graph
     title: Remaining capacity vs manufacturer spec (%)

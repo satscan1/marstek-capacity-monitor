@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import deque
 from datetime import date, datetime, timedelta
 import logging
 from typing import Any
@@ -18,8 +19,24 @@ from homeassistant.helpers.event import (
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
-from .calc import MAX_RECORDS, BatterySpec, SwingTracker, evaluate
+from .calc import (
+    MAX_CELL_RECORDS,
+    BatterySpec,
+    CellBalanceTracker,
+    SwingTracker,
+    evaluate,
+    evaluate_cells,
+    is_full_discharge,
+    prune_records,
+    measurement_phase,
+    to_mv,
+)
 from .const import (
+    CONF_CELL_MAX_ENTITY,
+    CONF_CELL_MIN_ENTITY,
+    CONF_MODEL,
+    CONF_TEMP_MAX_ENTITY,
+    CONF_TEMP_MIN_ENTITY,
     CONF_CYCLE_EOL,
     CONF_CYCLE_LIFE,
     CONF_INITIAL_CYCLES,
@@ -37,8 +54,14 @@ from .const import (
     EVENT_SESSION,
     RECALC_SECONDS,
     SAVE_DELAY_SECONDS,
+    SIGNAL_STATUS,
     SIGNAL_UPDATE,
     SIGN_AUTO,
+    STALE_SECONDS,
+    STATUS_COLLECTING,
+    STATUS_MEASURING,
+    STATUS_NO_RECENT_DATA,
+    STATUS_SENSOR_MISSING,
     SIGN_NEGATIVE,
     STORAGE_VERSION,
     TICK_SECONDS,
@@ -89,6 +112,17 @@ class BatteryMonitor:
         self.soc_entity: str = entry.data[CONF_SOC_ENTITY]
         self.power_entity: str = entry.data[CONF_POWER_ENTITY]
         self.sign_mode: str = entry_setting(entry, CONF_POWER_SIGN) or SIGN_AUTO
+        self.model: str | None = entry_setting(entry, CONF_MODEL)
+        self.cell_max_entity: str | None = entry_setting(entry, CONF_CELL_MAX_ENTITY) or None
+        self.cell_min_entity: str | None = entry_setting(entry, CONF_CELL_MIN_ENTITY) or None
+        self.temp_max_entity: str | None = entry_setting(entry, CONF_TEMP_MAX_ENTITY) or None
+        self.temp_min_entity: str | None = entry_setting(entry, CONF_TEMP_MIN_ENTITY) or None
+        # (ts, lowest, highest) once a minute; 2 days is enough for any swing
+        self._temps: deque[tuple[float, float | None, float | None]] = deque(maxlen=2880)
+        self.cells = CellBalanceTracker()
+        self.cell_records: list[dict[str, Any]] = []
+        self.cell_result: dict[str, Any] = evaluate_cells([])
+        self.status: dict[str, Any] = {}
         self._store: Store = Store(
             hass, STORAGE_VERSION, f"{DOMAIN}.{entry.entry_id}"
         )
@@ -102,11 +136,63 @@ class BatteryMonitor:
     def signal(self) -> str:
         return SIGNAL_UPDATE.format(self.entry.entry_id)
 
+    @property
+    def status_signal(self) -> str:
+        return SIGNAL_STATUS.format(self.entry.entry_id)
+
+    @property
+    def has_cells(self) -> bool:
+        return bool(self.cell_max_entity and self.cell_min_entity)
+
+    @property
+    def has_temps(self) -> bool:
+        return bool(self.temp_max_entity or self.temp_min_entity)
+
+    def _temp_c(self, entity_id: str | None) -> float | None:
+        state = self.hass.states.get(entity_id) if entity_id else None
+        if state is None or state.state in BAD_STATES:
+            return None
+        try:
+            value = float(state.state)
+        except ValueError:
+            return None
+        if state.attributes.get("unit_of_measurement") == "°F":
+            value = (value - 32) * 5 / 9
+        return value if -40 <= value <= 100 else None
+
+    def _sample_temps(self) -> None:
+        if not self.has_temps:
+            return
+        lo, hi = self._temp_c(self.temp_min_entity), self._temp_c(self.temp_max_entity)
+        if lo is None and hi is None:
+            return
+        self._temps.append((self._now_ts(), lo, hi))
+
+    def _temps_between(self, start: float, end: float) -> dict[str, float]:
+        """Average, lowest and highest cell temperature during a swing."""
+        rows = [t for t in self._temps if start <= t[0] <= end]
+        if not rows:
+            return {}
+        mids = [
+            (lo + hi) / 2 if lo is not None and hi is not None else (lo if lo is not None else hi)
+            for _, lo, hi in rows
+        ]
+        los = [lo for _, lo, _ in rows if lo is not None] or mids
+        his = [hi for _, _, hi in rows if hi is not None] or mids
+        return {
+            "temp_c": round(sum(mids) / len(mids), 1),
+            "temp_min_c": round(min(los), 1),
+            "temp_max_c": round(max(his), 1),
+        }
+
     async def async_start(self) -> None:
         data = await self._store.async_load()
         if data:
             self.tracker = self._new_tracker(data.get("tracker"))
             self.records = data.get("records", [])
+            self.cells = CellBalanceTracker(data.get("cells"))
+            self.cell_records = data.get("cell_records", [])
+            self.cell_result = evaluate_cells(self.cell_records)
             # Any time spent while HA was down is a gap: never integrate it.
             self.tracker.s["power_w"] = None
             self.tracker.s["power_ts"] = None
@@ -131,9 +217,19 @@ class BatteryMonitor:
                 self.hass, self._on_recalc, timedelta(seconds=RECALC_SECONDS)
             )
         )
+        if self.has_cells:
+            self._unsubs.append(
+                async_track_state_change_event(
+                    self.hass,
+                    [self.cell_max_entity, self.cell_min_entity],
+                    self._on_cell,
+                )
+            )
         # Seed with current values
         self._handle_power(self.hass.states.get(self.power_entity))
         self._handle_soc(self.hass.states.get(self.soc_entity))
+        self._sample_temps()
+        self._update_status()
 
     async def async_stop(self) -> None:
         for unsub in self._unsubs:
@@ -145,8 +241,16 @@ class BatteryMonitor:
         """Forget all measurements of this battery (service call)."""
         self.records = []
         self.tracker = self._new_tracker()
+        self.cell_records = []
+        self.temp_max_entity: str | None = entry_setting(entry, CONF_TEMP_MAX_ENTITY) or None
+        self.temp_min_entity: str | None = entry_setting(entry, CONF_TEMP_MIN_ENTITY) or None
+        # (ts, lowest, highest) once a minute; 2 days is enough for any swing
+        self._temps: deque[tuple[float, float | None, float | None]] = deque(maxlen=2880)
+        self.cells = CellBalanceTracker()
+        self.cell_result = evaluate_cells([])
         await self._store.async_save(self._data())
         self._recalculate()
+        self._update_status(force=True)
 
     # -- helpers ------------------------------------------------------------
 
@@ -169,7 +273,12 @@ class BatteryMonitor:
         return "auto_reversed" if self.tracker.s.get("sign_flipped") else "auto_normal"
 
     def _data(self) -> dict[str, Any]:
-        return {"tracker": self.tracker.s, "records": self.records}
+        return {
+            "tracker": self.tracker.s,
+            "records": self.records,
+            "cells": self.cells.s,
+            "cell_records": self.cell_records,
+        }
 
     @staticmethod
     def _now_ts() -> float:
@@ -208,10 +317,93 @@ class BatteryMonitor:
         )
         async_dispatcher_send(self.hass, self.signal)
 
+    def _cell_mv(self, entity_id: str | None) -> float | None:
+        state = self.hass.states.get(entity_id) if entity_id else None
+        if state is None or state.state in BAD_STATES:
+            return None
+        try:
+            value = float(state.state)
+        except ValueError:
+            return None
+        return to_mv(value, state.attributes.get("unit_of_measurement"))
+
+    def _check_cells(self) -> None:
+        if not self.has_cells:
+            return
+        record = self.cells.update(
+            self.tracker.s.get("soc"),
+            self.tracker.s.get("power_w"),
+            self._cell_mv(self.cell_max_entity),
+            self._cell_mv(self.cell_min_entity),
+            self._now_ts(),
+        )
+        if record is None:
+            return
+        self.cell_records.append(record)
+        del self.cell_records[:-MAX_CELL_RECORDS]
+        self.cell_result = evaluate_cells(self.cell_records)
+        self.hass.async_create_task(self._store.async_save(self._data()))
+        _LOGGER.debug("%s: cell spread recorded %s", self.entry.title, record)
+        async_dispatcher_send(self.hass, self.signal)
+
+    @staticmethod
+    def _age_s(state: State | None, now: datetime) -> float | None:
+        if state is None:
+            return None
+        seen = getattr(state, "last_reported", None) or state.last_updated
+        return (now - seen).total_seconds()
+
+    def _compute_status(self) -> dict[str, Any]:
+        now = dt_util.utcnow()
+        soc_s = self.hass.states.get(self.soc_entity)
+        pow_s = self.hass.states.get(self.power_entity)
+        missing = [
+            e
+            for e, st in ((self.soc_entity, soc_s), (self.power_entity, pow_s))
+            if st is None or st.state in BAD_STATES
+        ]
+        ages = [a for a in (self._age_s(soc_s, now), self._age_s(pow_s, now)) if a is not None]
+        full = sum(1 for r in self.records if is_full_discharge(r))
+        if missing:
+            state = STATUS_SENSOR_MISSING
+        elif ages and min(ages) > STALE_SECONDS:
+            state = STATUS_NO_RECENT_DATA
+        elif full:
+            state = STATUS_MEASURING
+        else:
+            state = STATUS_COLLECTING
+        phase = measurement_phase(self.tracker.s)
+        soc = phase.get("soc")
+        return {
+            "state": state,
+            "phase": phase["phase"],
+            "soc": round(soc) if soc is not None else None,
+            "from_soc": phase.get("from_soc"),
+            "interrupted": phase.get("interrupted"),
+            "full_discharges": full,
+            "power_sign": self.power_sign_state,
+            "missing": missing,
+            "last_data_minutes": round(min(ages) / 60) if ages else None,
+            "model": self.model,
+            "cell_check": self.has_cells,
+            "temperature_check": self.has_temps,
+        }
+
+    def _update_status(self, force: bool = False) -> None:
+        """Recompute the status; only notify when something visible changed,
+        to keep the recorder write load low."""
+        new = self._compute_status()
+        key = {k: v for k, v in new.items() if k != "last_data_minutes"}
+        old = {k: v for k, v in self.status.items() if k != "last_data_minutes"}
+        self.status = new
+        if force or key != old:
+            async_dispatcher_send(self.hass, self.status_signal)
+
     # -- event handlers -----------------------------------------------------
 
     def _handle_power(self, state: State | None) -> None:
         self.tracker.update_power(self._power_w(state), self._now_ts())
+        self._check_cells()
         self._store.async_delay_save(self._data, SAVE_DELAY_SECONDS)
 
     def _handle_soc(self, state: State | None) -> None:
@@ -219,11 +411,16 @@ class BatteryMonitor:
         if soc is None:
             return
         record = self.tracker.update_soc(soc, self._now_ts())
+        self._check_cells()
+        self._update_status()
         if record is None:
             self._store.async_delay_save(self._data, SAVE_DELAY_SECONDS)
             return
+        if self.has_temps:
+            self._sample_temps()
+            record.update(self._temps_between(record["start_ts"], record["ts"]))
         self.records.append(record)
-        del self.records[:-MAX_RECORDS]
+        self.records = prune_records(self.records)
         self.last_session = record
         self.hass.async_create_task(self._store.async_save(self._data()))
         self.hass.bus.async_fire(
@@ -250,6 +447,7 @@ class BatteryMonitor:
                 notification_id=f"{DOMAIN}_sign_{self.entry.entry_id}",
             )
         self._recalculate()
+        self._update_status()
 
     @callback
     def _on_power(self, event: Event[EventStateChangedData]) -> None:
@@ -260,8 +458,15 @@ class BatteryMonitor:
         self._handle_soc(event.data["new_state"])
 
     @callback
+    def _on_cell(self, _event: Event[EventStateChangedData]) -> None:
+        self._check_cells()
+
+    @callback
     def _on_tick(self, _now: datetime) -> None:
         self.tracker.tick(self._now_ts())
+        self._sample_temps()
+        self._check_cells()
+        self._update_status()
 
     @callback
     def _on_recalc(self, _now: datetime) -> None:
