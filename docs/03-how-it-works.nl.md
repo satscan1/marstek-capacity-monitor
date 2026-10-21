@@ -39,7 +39,7 @@ De bruikbare band verschilt per model; zie [Ondersteunde batterijen](05-supporte
 
 De getoonde waarde is de **mediaan van de laatste 3** volledige ontladingen van het afgelopen jaar.
 
-Gedeeltelijke ontladingen tellen bewust niet mee: een procent onderin levert meer kWh dan een procent bovenin. Een herstart van Home Assistant van hooguit 10 minuten wordt overbrugd: de energie in die minuten wordt geschat uit het vermogen vlak ervoor en vlak erna (meestal minder dan 0,5 % verschil). Duurt de herstart langer, of valt er terwijl Home Assistant draait een gat van meer dan 5 minuten in de vermogensgegevens, dan telt die beurt niet mee.
+Gedeeltelijke ontladingen tellen bewust niet mee: een procent onderin levert meer kWh dan een procent bovenin. Een herstart van Home Assistant van hooguit 10 minuten wordt overbrugd: de energie in die minuten wordt geschat uit het vermogen vlak ervoor en vlak erna (meestal minder dan 0,5 % verschil). Is de vermogenssensor even niet beschikbaar (bijvoorbeeld een haperende Modbus-verbinding), dan wordt dat op dezelfde manier overbrugd, tot 5 minuten. Duurt de herstart of de onderbreking langer, dan telt die beurt niet mee.
 
 ## Specificatie fabrikant en kleuren
 

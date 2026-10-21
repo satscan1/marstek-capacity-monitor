@@ -39,7 +39,7 @@ The usable band differs per model; see [Supported batteries](05-supported-batter
 
 The value shown is the **median of the last 3** full discharges in the past year.
 
-Partial discharges are deliberately ignored, because one percent near the bottom delivers more kWh than one near the top. A Home Assistant restart of up to 10 minutes is bridged: the energy in those minutes is estimated from the power just before and just after (usually less than 0.5 % difference). If the restart takes longer, or the power data has a gap of more than 5 minutes while Home Assistant is running, that swing does not count.
+Partial discharges are deliberately ignored, because one percent near the bottom delivers more kWh than one near the top. A Home Assistant restart of up to 10 minutes is bridged: the energy in those minutes is estimated from the power just before and just after (usually less than 0.5 % difference). If the power sensor is briefly unavailable (for example a flaky Modbus connection), that is bridged the same way, up to 5 minutes. If the restart or the outage takes longer, that swing does not count.
 
 ## Manufacturer spec and colours
 
