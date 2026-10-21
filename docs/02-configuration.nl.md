@@ -2,7 +2,7 @@
 
 *[English](02-configuration.md)*
 
-Alle waarden stel je in bij het toevoegen van een batterij. Later wijzigen kan via **Instellingen → Apparaten & diensten → Marstek Capacity Monitor → Configureren**.
+Alle waarden stel je in bij het toevoegen van een batterij. Later wijzigen kan via **Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren**.
 
 | Instelling | Standaard | Betekenis |
 |---|---|---|

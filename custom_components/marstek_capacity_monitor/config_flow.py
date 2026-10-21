@@ -58,6 +58,11 @@ from .discovery import (
 
 CONF_CANDIDATE = "candidate"
 MANUAL = "manual"
+MANUAL_LABEL = {
+    "en": "✎ Choose sensors manually",
+    "nl": "✎ Zelf sensoren kiezen",
+    "de": "✎ Sensoren selbst wählen",
+}
 
 SLUG_RE = re.compile(r"^[a-z0-9_]{1,20}$")
 
@@ -209,10 +214,8 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
             )
             for i, c in enumerate(self._candidates)
         ]
-        manual = (
-            "✎ Zelf sensoren kiezen"
-            if (self.hass.config.language or "").startswith("nl")
-            else "✎ Choose sensors manually"
+        manual = MANUAL_LABEL.get(
+            (self.hass.config.language or "en")[:2], MANUAL_LABEL["en"]
         )
         options.append(selector.SelectOptionDict(value=MANUAL, label=manual))
         schema = vol.Schema(

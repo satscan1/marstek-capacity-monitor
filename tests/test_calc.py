@@ -405,3 +405,63 @@ def test_long_unavailable_power_invalidates_swing():
     _, t2 = simulate(tr, 50, 11, 1.95, t + 660)
     recs, _ = simulate(tr, 11, 30, 1.0, t2)
     assert recs[0]["valid"] is False and recs[0]["reason"] == "data_gap"
+
+
+def _history(soc_from, soc_to, kwh, t0, idle_before_s=0, freeze_at=None):
+    """Recorded events of a linear swing, as the recorder stores them (changes only)."""
+    ev = [(t0, "s", float(soc_from)), (t0, "p", 0.0)]
+    t0 += idle_before_s
+    delta = soc_to - soc_from
+    steps = int(abs(delta))
+    power = (kwh * 3_600_000.0 / (steps * 60.0)) * (1 if delta > 0 else -1)
+    for i in range(1, steps + 1):
+        t = t0 + i * 60.0
+        if freeze_at is not None and freeze_at[0] <= i < freeze_at[1]:
+            continue  # nothing recorded (Home Assistant was off)
+        ev.append((t - 59, "p", power + (i % 2)))  # measured power wobbles a little
+        ev.append((t, "s", soc_from + delta * i / steps))
+    ev.append((t + 1, "p", 0.0))
+    return ev, t + 1
+
+
+def test_history_replay_finds_full_discharge():
+    ev, t = _history(100, 11, 4.42, T0, idle_before_s=4 * 3600)  # full and idle for 4 h first
+    ev2, _ = _history(11, 30, 1.0, t)
+    recs = calc.replay_history(calc.SwingTracker(), ev + ev2)
+    full = [r for r in recs if calc.is_full_discharge(r)]
+    assert len(full) == 1
+    assert full[0]["source"] == "history"
+    assert "cumulative_discharge_kwh" not in full[0]
+    assert full[0]["e_dc_kwh"] == pytest.approx(4.42, abs=0.03)
+
+
+def test_history_frozen_power_while_discharging_does_not_count():
+    """Nothing recorded for 10 minutes while discharging: Home Assistant was off."""
+    ev, t = _history(100, 11, 4.42, T0, freeze_at=(30, 41))
+    ev2, _ = _history(11, 30, 1.0, t)
+    recs = calc.replay_history(calc.SwingTracker(), ev + ev2)
+    full = [r for r in recs if calc.is_full_discharge(r)]
+    assert full == []
+
+
+def test_history_idle_then_ha_off_does_not_count():
+    """Idle at 100 %, then Home Assistant off for 3 hours while the battery
+    discharged to 60 %: the quiet time must not count as 0 kWh."""
+    ev = [(T0, "s", 100.0), (T0, "p", 0.0)]
+    t = T0 + 3 * 3600  # nothing recorded for 3 hours
+    ev2, t2 = _history(60, 11, 2.2, t)
+    ev3, _ = _history(11, 30, 1.0, t2)
+    recs = calc.replay_history(calc.SwingTracker(), ev + ev2 + ev3)
+    assert [r for r in recs if calc.is_full_discharge(r) and r["valid"]] == []
+
+
+def test_adopt_sign_from_history():
+    hist = calc.SwingTracker()
+    hist.update_soc(100, T0)
+    recs, t = simulate(hist, 100, 11, 4.42, T0, invert=True)  # sensor shows charging as negative
+    simulate(hist, 11, 40, 1.0, t, invert=True)
+    assert hist.s["sign_confirmed"] and hist.s["sign"] == -1
+    live = calc.SwingTracker()
+    live.update_power(500.0, T0)  # raw value from the same sensor (discharging)
+    assert live.adopt_sign(hist) is True
+    assert live.s["sign"] == -1 and live.s["power_w"] == -500.0

@@ -1,0 +1,223 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Batterie hinzufügen",
+        "description": "{count} Batterie(n) mit Sensoren für Ladezustand und DC-Leistung gefunden. Wähle eine aus oder wähle die Sensoren selbst. Maximal {max} Batterien möglich.",
+        "data": {
+          "candidate": "Batterie"
+        }
+      },
+      "specs": {
+        "title": "Herstellerdaten (anderes Modell)",
+        "description": "Gib die Herstellerdaten deiner Batterie ein. Die Standardwerte sind die der Marstek Venus E 5,12 kWh (90 % Entladetiefe, > 6000 Zyklen, 80 % nach 6000 Zyklen). Marstek gibt keine Kapazitätsgarantie in Jahren.",
+        "data": {
+          "nominal_kwh": "Nennkapazität (Hersteller)",
+          "reserve_kwh": "Interne Reserve (nicht nutzbar)",
+          "purchase_date": "Datum der Inbetriebnahme",
+          "warranty_years": "Garantiezeit",
+          "cycle_life": "Angegebene Zyklenzahl",
+          "cycle_eol_pct": "Kapazität nach dieser Zyklenzahl",
+          "initial_cycles": "Zyklen vor Beginn der Überwachung",
+          "red_pct": "Rote Grenze (an Marstek melden)",
+          "tolerance_pct": "Toleranz unter der Herstellerangabe"
+        },
+        "data_description": {
+          "nominal_kwh": "Gesamtkapazität der Zellen, z. B. 5,12 kWh.",
+          "reserve_kwh": "Teil der Nennkapazität, den die Batterie nie abgibt. Datenblatt: 90 % Entladetiefe, also 5,12 − 0,51 = 4,61 kWh = 100 % im Neuzustand.",
+          "cycle_life": "Z. B. 6000 Vollzyklen.",
+          "cycle_eol_pct": "Herstellerangabe: z. B. 80 % nach 6000 Zyklen (Marstek, Produktseite Venus E Gen 3.0). Das ist die Linie der Herstellerangabe, keine Garantie.",
+          "initial_cycles": "Schätzung: bisher insgesamt entladene kWh geteilt durch die nutzbare Kapazität. Bei einer neuen Batterie 0 lassen.",
+          "red_pct": "Liegt „Noch verfügbar“ bei diesem Wert oder darunter, wird der Status rot: Zeit, es über die Marstek-App an Marstek zu melden. Standard 75 %.",
+          "tolerance_pct": "Grün, solange die Messung höchstens so viele Punkte unter der Linie der Herstellerangabe liegt. Standard 5.",
+          "purchase_date": "Das Datum, an dem die Batterie in Betrieb ging. Garantie und Alter werden ab diesem Datum gerechnet."
+        }
+      },
+      "details": {
+        "title": "Batterie und Sensoren",
+        "description": "Prüfe den Vorschlag. Der Leistungssensor muss die Batterieseite (DC) messen, nicht die AC- bzw. Netzseite. Ob Laden positiv oder negativ gezählt wird, erkennt die Integration automatisch.\n\nOptional: höchste und niedrigste Zellspannung (Zellbalance) und Zelltemperatur (wird bei jeder Messung als Kontext gespeichert). Diese Felder sind ausgefüllt, wenn sie gefunden wurden; lass sie leer, wenn deine Batterie sie nicht liefert.",
+        "data": {
+          "battery_id": "Kurzer Code",
+          "name": "Name",
+          "soc_entity": "Ladezustandssensor (%)",
+          "power_entity": "DC-Leistung der Batterie (W)",
+          "cell_max_entity": "Höchste Zellspannung (optional)",
+          "cell_min_entity": "Niedrigste Zellspannung (optional)",
+          "temp_max_entity": "Höchste Zelltemperatur (optional, experimentell)",
+          "temp_min_entity": "Niedrigste Zelltemperatur (optional, experimentell)"
+        },
+        "data_description": {
+          "battery_id": "Wird in den Entitäts-IDs verwendet, z. B. mt1 ergibt sensor.marstek_mt1_capacity_pct. Kleinbuchstaben, Ziffern und _.",
+          "soc_entity": "Der eigene Ladezustand (SOC) der Batterie in %.",
+          "power_entity": "Leistung, gemessen auf der Batterieseite (DC). W oder kW.",
+          "cell_max_entity": "Spannung der höchsten Zelle, in V oder mV. Nur Zellspannungen, keine Temperaturen.",
+          "cell_min_entity": "Spannung der niedrigsten Zelle, in V oder mV.",
+          "temp_max_entity": "Wird bei jeder Messung gespeichert: eine kalte Batterie gibt weniger ab. Nur Zelltemperaturen, keine MOS- oder Platinentemperaturen.",
+          "temp_min_entity": "Wird bei jeder Messung gespeichert: eine kalte Batterie gibt weniger ab. Nur Zelltemperaturen, keine MOS- oder Platinentemperaturen."
+        }
+      },
+      "model": {
+        "title": "Welches Marstek-Modell ist {name}?",
+        "description": "Wähle dein Modell und das Datum der Inbetriebnahme. Die Herstellerdaten (Kapazität, Entladetiefe, Zyklen) werden für dich ausgefüllt. Du kannst sie später unter Konfigurieren ändern.",
+        "data": {
+          "model": "Modell",
+          "purchase_date": "Datum der Inbetriebnahme"
+        },
+        "data_description": {
+          "purchase_date": "Das Datum, an dem die Batterie in Betrieb ging. Garantie und Alter werden ab diesem Datum gerechnet."
+        }
+      },
+      "packs": {
+        "title": "Venus D: Anzahl Batteriepacks",
+        "description": "Eine Venus D hat 2,56 kWh pro Pack. Nennkapazität und Reserve werden aus der Anzahl der Packs berechnet.",
+        "data": {
+          "packs": "Anzahl Batteriepacks"
+        }
+      }
+    },
+    "error": {
+      "invalid_id": "Verwende 1–20 Kleinbuchstaben, Ziffern oder _.",
+      "same_entity": "SOC und Leistung müssen verschiedene Sensoren sein.",
+      "reserve_too_large": "Die Reserve muss kleiner sein als die Nennkapazität.",
+      "looks_like_ac": "Dieser Sensor scheint die AC- bzw. Netzseite zu messen, nicht die Batterieseite (DC). AC-Werte enthalten Wandlungsverluste und ergeben eine falsche Kapazität. Wähle den Sensor für die Batterieleistung oder klicke erneut auf „Absenden“, um ihn trotzdem zu verwenden.",
+      "cells_both": "Gib sowohl die höchste als auch die niedrigste Zellspannung an, oder keine von beiden."
+    },
+    "abort": {
+      "already_configured": "Dieser Code wird bereits verwendet.",
+      "max_batteries": "Das Maximum von 6 Batterien ist erreicht."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Herstellerdaten und Garantie",
+        "data": {
+          "nominal_kwh": "Nennkapazität (Hersteller)",
+          "reserve_kwh": "Interne Reserve (nicht nutzbar)",
+          "purchase_date": "Datum der Inbetriebnahme",
+          "warranty_years": "Garantiezeit",
+          "cycle_life": "Angegebene Zyklenzahl",
+          "cycle_eol_pct": "Kapazität nach dieser Zyklenzahl",
+          "initial_cycles": "Zyklen vor Beginn der Überwachung",
+          "red_pct": "Rote Grenze (an Marstek melden)",
+          "tolerance_pct": "Toleranz unter der Herstellerangabe",
+          "power_sign": "Vorzeichen des Leistungssensors",
+          "cell_max_entity": "Höchste Zellspannung (optional)",
+          "cell_min_entity": "Niedrigste Zellspannung (optional)",
+          "temp_max_entity": "Höchste Zelltemperatur (optional, experimentell)",
+          "temp_min_entity": "Niedrigste Zelltemperatur (optional, experimentell)"
+        },
+        "data_description": {
+          "nominal_kwh": "Gesamtkapazität der Zellen, z. B. 5,12 kWh.",
+          "reserve_kwh": "Teil der Nennkapazität, den die Batterie nie abgibt. Datenblatt: 90 % Entladetiefe, also 5,12 − 0,51 = 4,61 kWh = 100 % im Neuzustand.",
+          "cycle_life": "Z. B. 6000 Vollzyklen.",
+          "cycle_eol_pct": "Herstellerangabe: z. B. 80 % nach 6000 Zyklen (Marstek, Produktseite Venus E Gen 3.0). Das ist die Linie der Herstellerangabe, keine Garantie.",
+          "initial_cycles": "Schätzung: bisher insgesamt entladene kWh geteilt durch die nutzbare Kapazität. Bei einer neuen Batterie 0 lassen.",
+          "red_pct": "Liegt „Noch verfügbar“ bei diesem Wert oder darunter, wird der Status rot: Zeit, es über die Marstek-App an Marstek zu melden. Standard 75 %.",
+          "tolerance_pct": "Grün, solange die Messung höchstens so viele Punkte unter der Linie der Herstellerangabe liegt. Standard 5.",
+          "power_sign": "Automatisch: wird beim ersten Laden oder Entladen erkannt. Nur ändern, wenn die Erkennung falsch liegt.",
+          "purchase_date": "Das Datum, an dem die Batterie in Betrieb ging. Garantie und Alter werden ab diesem Datum gerechnet.",
+          "cell_max_entity": "Spannung der höchsten Zelle, in V oder mV. Nur Zellspannungen, keine Temperaturen.",
+          "cell_min_entity": "Spannung der niedrigsten Zelle, in V oder mV.",
+          "temp_max_entity": "Wird bei jeder Messung gespeichert: eine kalte Batterie gibt weniger ab. Nur Zelltemperaturen, keine MOS- oder Platinentemperaturen.",
+          "temp_min_entity": "Wird bei jeder Messung gespeichert: eine kalte Batterie gibt weniger ab. Nur Zelltemperaturen, keine MOS- oder Platinentemperaturen."
+        }
+      }
+    },
+    "error": {
+      "reserve_too_large": "Die Reserve muss kleiner sein als die Nennkapazität.",
+      "cells_both": "Gib sowohl die höchste als auch die niedrigste Zellspannung an, oder keine von beiden.",
+      "same_entity": "SOC und Leistung müssen verschiedene Sensoren sein."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "measured_capacity": {
+        "name": "Gemessene Kapazität"
+      },
+      "capacity_pct": {
+        "name": "Noch verfügbar"
+      },
+      "expected_capacity": {
+        "name": "Herstellerangabe"
+      },
+      "margin": {
+        "name": "Abstand zur Herstellerangabe"
+      },
+      "cycles": {
+        "name": "Vollzyklen"
+      },
+      "nominal_capacity": {
+        "name": "Nennkapazität"
+      },
+      "usable_capacity": {
+        "name": "Nutzbare Kapazität"
+      },
+      "warranty_end": {
+        "name": "Garantie bis"
+      },
+      "dc_discharged": {
+        "name": "DC-Entladung seit Beginn der Überwachung"
+      },
+      "warranty_status": {
+        "name": "Status verfügbare Kapazität",
+        "state": {
+          "good": "Gut",
+          "attention": "Unter Herstellerangabe",
+          "critical": "An Marstek melden",
+          "no_measurement": "Noch keine vollständige Entladung gemessen"
+        }
+      },
+      "red_threshold": {
+        "name": "Rote Grenze"
+      },
+      "last_full_discharge": {
+        "name": "Letzte vollständige Entladung"
+      },
+      "last_full_charge": {
+        "name": "Letzte vollständige Ladung"
+      },
+      "monitor_status": {
+        "name": "Status Messung",
+        "state": {
+          "measuring": "Misst",
+          "collecting": "Sammelt Daten",
+          "no_recent_data": "Keine aktuellen Daten",
+          "sensor_missing": "Sensor nicht verfügbar"
+        }
+      },
+      "cell_spread": {
+        "name": "Zellspannungsdifferenz nach Vollladung"
+      }
+    }
+  },
+  "services": {
+    "reset_measurements": {
+      "name": "Messungen löschen",
+      "description": "Löscht alle Messungen einer Batterie. Das kann nicht rückgängig gemacht werden.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Batterie",
+          "description": "Die Batterie, deren Messungen gelöscht werden."
+        }
+      }
+    }
+  },
+  "selector": {
+    "power_sign": {
+      "options": {
+        "auto": "Automatisch",
+        "charge_positive": "Laden ist positiv",
+        "charge_negative": "Laden ist negativ"
+      }
+    },
+    "model": {
+      "options": {
+        "venus_e_v12": "Venus E v1 / v2 (5,12 kWh)",
+        "venus_e_v3": "Venus E v3 (5,12 kWh)",
+        "venus_d": "Venus D (2,56 kWh pro Pack)",
+        "other": "Anderes Modell: Herstellerdaten selbst eingeben"
+      }
+    }
+  }
+}

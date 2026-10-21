@@ -644,3 +644,4 @@ async def test_stop_saves_exact_power_time(hass: HomeAssistant, freezer) -> None
     s = entry.runtime_data.tracker.s
     assert s["power_ts"] == pytest.approx(dt_util.utcnow().timestamp(), abs=1)
     assert s["e_discharge_kwh"] == pytest.approx(800 * 45 / 3_600_000, rel=0.01)
+
