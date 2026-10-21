@@ -58,3 +58,38 @@ The margin shows how many kWh the battery is above or below the spec. All thresh
 The measurements **support a report**; they are not proof. They show how capacity develops over months.
 
 The sources for these figures are listed in [Supported batteries](05-supported-batteries.md#sources-for-the-manufacturer-specs).
+
+## Monitor status
+
+Next to the capacity status, every battery has a **monitor status** that tells you whether the measurement itself works:
+
+| Status | Meaning |
+|---|---|
+| Measuring | Sensors deliver data and at least one full discharge has been measured |
+| Collecting data | Sensors deliver data; waiting for the first full discharge |
+| No recent data | Neither sensor reported anything for an hour; check the battery connection |
+| Sensor unavailable | The state of charge or power sensor is unavailable |
+
+The card shows the next step on the way to a measurement: charge to 95 % or more, then discharge to 15 % or lower. A discharge that was interrupted (gap in the data) does not count; the card says so.
+
+## Cell balance
+
+Optional, when your connection provides the highest and lowest cell voltage.
+
+* **Event:** the end of a full charge (state of charge ≥ 95 %).
+* **Context:** the battery rests (power within ±50 W) for 5 minutes, so load does not distort the voltages. LFP cells hardly differ in the middle of the band; differences only show near full.
+* **Result:** the spread between the highest and lowest cell, in mV. One sample per full charge; the next sample needs the battery to drop below 90 % first. The card shows the monthly median, trend column first, new → old.
+
+There are **no colours** for the spread yet: Marstek publishes no normal value. Limits will only be added once enough data from real batteries supports them.
+
+## Cell temperature (experimental)
+
+Optional. When you set the highest and/or lowest cell temperature, the monitor stores the average cell temperature during every full discharge with that measurement. The card shows it per month under the capacity (e.g. *spec 98 · 16 °C*) and in the chart.
+
+Why: a cold battery gives less. A lower measurement in winter is then explained by the temperature instead of being mistaken for wear. The temperature is context only; it does not change the measured capacity or the colours.
+
+Only **cell** temperatures belong here. Some connections report MOSFET (switching transistor) temperatures as "cell temperature"; the scan never proposes sensors with *mos*, *internal* or *board* in the name.
+
+## Chart
+
+Press the small **Chart** button under the status to open or close a chart (old → new, left to right): the measured capacity per month, the manufacturer spec as a grey dashed line and 75 % as a red line. By default it shows the last 3 years; *full warranty* shows the whole warranty period. Hover over a dot for the value and the cell temperature that month. See [06 – Dashboard and gallery](06-dashboard-gallery.md) for the card explained with numbers.

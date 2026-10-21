@@ -13,14 +13,18 @@ Volg in Home Assistant of je Marstek-thuisbatterij zijn capaciteit houdt, gemete
 - **Twee sensoren die je al hebt:** laadtoestand en DC-vermogen van de batterij. De integratie vindt ze zelf.
 - **Gemeten bij een volle ontlading** (≥ 95 % → ≤ 15 %) en vergeleken met de bruikbare capaciteit van een nieuwe batterij.
 - **Specificatie van de fabrikant** als maatstaf: 80 % na 6.000 cycli. Groen volgens specificatie, oranje eronder, rood bij 75 % of lager: melden via de Marstek-app.
-- **Elke Marstek met Modbus** (RS485 of LAN): Venus E v1, v2, v3, Venus A, Venus D.
+- **Elke koppeling die laadtoestand en DC-vermogen levert:** ESPHome, Modbus (RS485 of LAN) of een andere integratie. Venus E v1, v2, v3, Venus A, Venus D.
+- **Plug & play:** kies je model en installatiedatum; de fabrieksgegevens worden voor je ingevuld.
+- **Laat zien of het werkt:** een status per batterij, en "verzamelt data" tot de eerste volledige ontlading.
+- **Optioneel: celbalans:** het verschil tussen de hoogste en laagste cel na een volle lading.
+- **Celtemperatuur als context (experimenteel)** en een **grafiek** op de batterijkaart (laatste 3 jaar of de hele garantie van 10 jaar): één druk op de knop Grafiek.
 - **Licht en lokaal:** alles in Home Assistant, geen InfluxDB of cloud.
 
 ## Installeren in 3 stappen
 
 1. In HACS: drie puntjes → *Custom repositories* → URL van deze repo, type *Integration*. Installeer **Marstek Capacity Monitor** en herstart Home Assistant.
 2. **Instellingen → Apparaten & diensten → Integratie toevoegen → Marstek Capacity Monitor**.
-3. Kies de gevonden batterij en controleer de fabrieksgegevens. Klaar.
+3. Kies de gevonden batterij, kies het model en vul de installatiedatum in. Klaar.
 
 Voeg daarna de kaarten uit [`dashboard/`](dashboard/) toe. Volledige uitleg: [docs/01-installation.nl.md](docs/01-installation.nl.md).
 
@@ -33,6 +37,7 @@ Voeg daarna de kaarten uit [`dashboard/`](dashboard/) toe. Volledige uitleg: [do
 | [03 – Hoe het werkt](docs/03-how-it-works.nl.md) | Drie capaciteiten, meten, omrekening naar 100 %, specificatie en kleuren |
 | [04 – Problemen oplossen](docs/04-troubleshooting.nl.md) | Veelvoorkomende meldingen en wat te doen |
 | [05 – Ondersteunde batterijen](docs/05-supported-batteries.nl.md) | Modellen, ontlaaddiepte per model, **bronnen voor de specificaties van de fabrikant** |
+| [06 – Dashboard en galerij](docs/06-dashboard-gallery.nl.md) | Indeling bij 1 tot 6 batterijen, de kaart genummerd uitgelegd, galerij met en zonder grafiek |
 
 Wijzigingen per versie: [CHANGELOG](CHANGELOG.md) (Engels).
 
@@ -62,7 +67,7 @@ Wijzigingen per versie: [CHANGELOG](CHANGELOG.md) (Engels).
 
 ![Apparaat](screenshots/06-device.png)
 
-**6. button-card: overzicht en detailkaarten (Nederlands en Engels)**
+**6. button-card: overzicht en batterijkaarten, één met de grafiek open (Nederlands en Engels). Meer voorbeelden, van 1 tot 6 batterijen: [galerij](docs/06-dashboard-gallery.nl.md)**
 
 ![Dashboard NL](screenshots/08-dashboard-nl.png)
 
