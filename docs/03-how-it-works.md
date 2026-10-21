@@ -92,4 +92,4 @@ Only **cell** temperatures belong here. Some connections report MOSFET (switchin
 
 ## Chart
 
-Press the small **Chart** button under the status to open or close a chart (old → new, left to right): the measured capacity per month, the manufacturer spec as a grey dashed line and 75 % as a red line. By default it shows the last 3 years; *full warranty* shows the whole warranty period. Hover over a dot for the value and the cell temperature that month. See [06 – Dashboard and gallery](06-dashboard-gallery.md) for the card explained with numbers.
+Press the small **Chart** button under the status to open or close a chart (old → new, left to right): the measured capacity per month, the manufacturer spec as a grey dashed line and 75 % as a red line. It shows the most recent 3 years. Hover over a dot for the value and the cell temperature that month. See [06 – Dashboard and gallery](06-dashboard-gallery.md) for the card explained with numbers.

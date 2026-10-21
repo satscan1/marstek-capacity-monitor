@@ -1,6 +1,6 @@
 # Marstek Capacity Monitor
 
-*[English](README.md)*
+*[English](README.md) · [Deutsch](README.de.md)*
 
 Volg in Home Assistant of je Marstek-thuisbatterij zijn capaciteit houdt, gemeten aan de **DC-kant** (de batterij zelf, niet het stopcontact). Tot **6 batterijen**.
 
@@ -17,16 +17,16 @@ Volg in Home Assistant of je Marstek-thuisbatterij zijn capaciteit houdt, gemete
 - **Plug & play:** kies je model en installatiedatum; de fabrieksgegevens worden voor je ingevuld.
 - **Laat zien of het werkt:** een status per batterij, en "verzamelt data" tot de eerste volledige ontlading.
 - **Optioneel: celbalans:** het verschil tussen de hoogste en laagste cel na een volle lading.
-- **Celtemperatuur als context (experimenteel)** en een **grafiek** op de batterijkaart (laatste 3 jaar of de hele garantie van 10 jaar): één druk op de knop Grafiek.
+- **Celtemperatuur als context (experimenteel)** en een **grafiek** op de batterijkaart (de recente 3 jaar): één druk op de knop Grafiek.
 - **Licht en lokaal:** alles in Home Assistant, geen InfluxDB of cloud.
 
 ## Installeren in 3 stappen
 
 1. In HACS: drie puntjes → *Custom repositories* → URL van deze repo, type *Integration*. Installeer **Marstek Capacity Monitor** en herstart Home Assistant.
-2. **Instellingen → Apparaten & diensten → Integratie toevoegen → Marstek Capacity Monitor**.
+2. **Instellingen → Apparaten en diensten → Voeg integratie toe → Marstek Capacity Monitor**.
 3. Kies de gevonden batterij, kies het model en vul de installatiedatum in. Klaar.
 
-Voeg daarna de kaarten toe: het snelst met een [kant-en-klaar dashboard](dashboard/ready-made/nl/) voor 1 tot 6 batterijen, dat je in één keer plakt. Volledige uitleg: [docs/01-installation.nl.md](docs/01-installation.nl.md).
+Herstart daarna Home Assistant en ga naar **Instellingen → Dashboards → Voeg dashboard toe → Marstek battery capacity** (Home Assistant 2026.5 en nieuwer; oudere versies: zie de handleiding). Het dashboard zet je batterijen (1 tot 6) vanzelf goed neer. De kaarten zitten in de integratie zelf; button-card is niet meer nodig. Volledige uitleg: [docs/01-installation.nl.md](docs/01-installation.nl.md).
 
 ## Documentatie
 
@@ -67,7 +67,7 @@ Wijzigingen per versie: [CHANGELOG](CHANGELOG.md) (Engels).
 
 ![Apparaat](screenshots/06-device.png)
 
-**6. button-card: overzicht en batterijkaarten, één met de grafiek open (Nederlands en Engels). Meer voorbeelden, van 1 tot 6 batterijen: [galerij](docs/06-dashboard-gallery.nl.md)**
+**6. De kaarten: overzicht en batterijkaarten, één met de grafiek open (Nederlands en Engels). Meer voorbeelden, van 1 tot 6 batterijen: [galerij](docs/06-dashboard-gallery.nl.md)**
 
 ![Dashboard NL](screenshots/08-dashboard-nl.png)
 

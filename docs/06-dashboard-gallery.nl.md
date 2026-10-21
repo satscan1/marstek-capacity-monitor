@@ -1,5 +1,7 @@
 # 06 – Dashboard: indeling, kaart en galerij
 
+*[English](06-dashboard-gallery.md) · [Deutsch](06-dashboard-gallery.de.md)*
+
 Op deze pagina zie je hoe de kaarten eruitzien bij 1 tot 6 batterijen, wat elk onderdeel van de batterijkaart betekent en hoe je de kaarten neerzet.
 
 > Alle afbeeldingen op deze pagina gebruiken **demogegevens**: zes verzonnen batterijen met verschillende leeftijden en toestanden. Ze laten zien hoe de kaarten eruitzien, niet hoe een echte batterij veroudert.
@@ -16,9 +18,9 @@ De batterijkaart is gemaakt voor **een derde van de breedte**: drie batterijen n
 | 5 | Overzicht twee derde breed, daaronder 3 + 2 |
 | 6 | Overzicht twee derde breed, daaronder 3 + 3 |
 
-Naast het overzicht is vanaf 3 batterijen een derde vrij voor een eigen kaart. Zet je daar niets neer, dan schuift Home Assistant de eerste batterij omhoog naast het overzicht; wil je de batterijen op een nieuwe rij, zet er dan een kaart neer (de galerij en de kant-en-klare dashboards gebruiken een tekstkaart "Vrije plek").
+Naast het overzicht is vanaf 3 batterijen een derde vrij voor een eigen kaart. Zet je daar niets neer, dan schuift Home Assistant de eerste batterij omhoog naast het overzicht; wil je de batterijen op een nieuwe rij, zet er dan een kaart neer (het dashboard met één klik, de kant-en-klare dashboards en de galerij gebruiken een tekstkaart "Vrije plek").
 
-Deze indeling staat al klaar in de [kant-en-klare dashboards](01-installation.nl.md#snelste-manier-kant-en-klaar-dashboard), één per aantal batterijen.
+Het [dashboard met één klik](01-installation.nl.md#snelste-manier-dashboard-met-één-klik) gebruikt deze indeling vanzelf. Voor button-card staan er [kant-en-klare dashboards](01-installation.nl.md#kant-en-klaar-dashboard-met-button-card) klaar, één per aantal batterijen.
 
 Zelf indelen? Gebruik hiervoor de standaardindeling van Home Assistant met **secties** ("Sections"). Een voorbeeld staat in [`dashboard/button-card/layout-sections.yaml`](../dashboard/button-card/layout-sections.yaml). Je geeft elke kaart een breedte met `grid_options`: in een sectie van drie kolommen is `columns: 12` een derde en `columns: 24` twee derde. Bij 4 batterijen gebruik je `columns: 18` per batterij.
 
@@ -28,7 +30,7 @@ Zelf indelen? Gebruik hiervoor de standaardindeling van Home Assistant met **sec
 
 1. **Status**: *Goed*, *Onder specificatie*, *Melden bij Marstek (app)* of *Verzamelt data*. De kleur volgt de laatste meting.
 2. **Grafiek**: druk op dit knopje om de grafiek te openen, druk nog eens om hem te sluiten. De rest van de kaart doet niets als je erop klikt.
-3. **Periode**: standaard zie je de laatste **3 jaar**. Met *hele garantie* zie je de hele garantietijd (tot 10 jaar). Het lichte vlak rechts is de garantietijd die nog komt.
+3. **Periode**: *recente 3 jaar van garantieperiode*: de grafiek toont de meest recente 3 jaar sinds de installatie.
 4. **Grafiek**: elke stip is een maand, met hoeveel procent van de bruikbare capaciteit er toen nog was. De grijze stippellijn is wat de fabrikant op die leeftijd verwacht, de rode lijn is 75 %. Ga met de muis over een stip voor het precieze getal en de celtemperatuur in die maand (als je temperatuursensoren hebt gekoppeld).
 5. **Hoe lees je dit?** Korte uitleg onder de grafiek: kijk of de stippen dicht bij of boven de grijze lijn blijven. Langzaam dalen is normaal; zakken ze richting de rode lijn, meld het dan bij Marstek.
 6. **Werkt de meting?** Groen: de meting werkt en zoveel volledige ontladingen zijn gemeten. Blauw: nog data aan het verzamelen. Oranje of rood: geen nieuwe gegevens of een sensor ontbreekt. De regel eronder zegt wat de volgende stap is (bijvoorbeeld *volledig laden tot 95 %*).
@@ -39,10 +41,6 @@ Zelf indelen? Gebruik hiervoor de standaardindeling van Home Assistant met **sec
 11. **Laatste volle ontlading en volle lading**, en het aantal metingen.
 
 Heb je sensoren voor de hoogste en laagste celspanning gekoppeld, dan staat onder de trend ook het **celverschil na volle lading** (zie Demo 2 in de galerij).
-
-Met *hele garantie* ziet de grafiek er zo uit:
-
-![Hele garantie](../screenshots/gallery/card-full-warranty-nl.png)
 
 ## Het overzicht
 
@@ -101,4 +99,4 @@ De zes demobatterijen laten elk een andere situatie zien:
 
 ## Zelf een demo bekijken
 
-De kaarten kennen een variabele `demo` met nepgegevens. De galerij hierboven is daarmee gemaakt. Die gegevens staan alleen in de dashboardinstellingen: er worden geen sensoren aangemaakt en er komt niets in je geschiedenis. Voor normaal gebruik heb je dit niet nodig.
+De kaarten kennen nepgegevens via de optie `demo` (bij button-card: de variabele `demo`). De galerij hierboven is daarmee gemaakt. Die gegevens staan alleen in de dashboardinstellingen: er worden geen sensoren aangemaakt en er komt niets in je geschiedenis. Voor normaal gebruik heb je dit niet nodig.
