@@ -26,8 +26,8 @@ OUT = ROOT / "custom_components" / "marstek_capacity_monitor" / "frontend" / "ma
 # (old, new): the only changes to the template code. Each must occur exactly once.
 BATTERY_EDITS = [
     (
-        "const open = !!(this && this._mcChart), whole = !!(this && this._mcAll);",
-        "const open = !!ctx.chart, whole = !!ctx.all;",
+        "const open = !!(this && this._mcChart);",
+        "const open = !!ctx.chart;",
     ),
     (
         'const act = js => `onclick="event.stopPropagation();const h=this.getRootNode().host;${js}h._config={...h._config};"`;',

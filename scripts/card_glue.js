@@ -141,8 +141,6 @@ class MarstekCapacityCard extends MarstekCapacityBase {
 
   _action(act) {
     if (act.includes("_mcChart")) this._chart = !this._chart;
-    else if (act.includes("_mcAll=true")) this._all = true;
-    else if (act.includes("_mcAll=false")) this._all = false;
   }
 
   _html() {
@@ -155,7 +153,7 @@ class MarstekCapacityCard extends MarstekCapacityBase {
       }[lang] || "No battery found yet. Add one via Settings → Devices & services → Add integration → Marstek Capacity Monitor.";
     }
     const variables = { battery: b.id, name: b.name, lang, months: this._config.months || 6, demo: this._config.demo };
-    return batteryBody(this._hass.states, variables, { chart: this._chart, all: this._all, width: this.offsetWidth });
+    return batteryBody(this._hass.states, variables, { chart: this._chart, width: this.offsetWidth });
   }
 
   getGridOptions() {
