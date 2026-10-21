@@ -9,12 +9,12 @@
         }
       },
       "specs": {
-        "title": "Factory data and warranty",
-        "description": "Defaults are the Marstek Venus E 5.12 kWh datasheet (DoD 90 %, > 6000 cycles, 80 % after 6000 cycles). Marstek gives no capacity guarantee in years.",
+        "title": "Factory data (other model)",
+        "description": "Enter the factory data of your battery. Defaults are those of the Marstek Venus E 5.12 kWh (90 % depth of discharge, > 6000 cycles, 80 % after 6000 cycles). Marstek gives no capacity guarantee in years.",
         "data": {
           "nominal_kwh": "Rated capacity (manufacturer)",
           "reserve_kwh": "Internal reserve (not usable)",
-          "purchase_date": "Purchase date",
+          "purchase_date": "Installation date",
           "warranty_years": "Warranty period",
           "cycle_life": "Rated cycle life",
           "cycle_eol_pct": "Capacity after rated cycle life",
@@ -29,22 +29,49 @@
           "cycle_eol_pct": "Manufacturer spec: e.g. 80 % after 6000 cycles (Marstek, Venus E Gen 3.0 product page). This is the spec line; not a warranty.",
           "initial_cycles": "Estimate: total discharged kWh so far divided by the usable capacity. Leave 0 for a new battery.",
           "red_pct": "At or below this % remaining the status turns red: the moment to report it to Marstek via the Marstek app. Default 75 %.",
-          "tolerance_pct": "Green while the measurement is at most this many points below the manufacturer spec line. Default 5."
+          "tolerance_pct": "Green while the measurement is at most this many points below the manufacturer spec line. Default 5.",
+          "purchase_date": "The date the battery went into use. Warranty and age are counted from here."
         }
       },
       "details": {
         "title": "Battery and sensors",
-        "description": "Check the proposal. The power sensor must measure the battery (DC) side, not the AC / grid side. Whether charging is positive or negative is detected automatically.",
+        "description": "Check the proposal. The power sensor must measure the battery (DC) side, not the AC / grid side. Whether charging is positive or negative is detected automatically.\n\nOptional: the highest and lowest cell voltage (cell balance check) and cell temperature (stored as context with every measurement). Filled in when found; leave empty if your battery does not provide them.",
         "data": {
           "battery_id": "Short id",
           "name": "Name",
           "soc_entity": "State of charge sensor (%)",
-          "power_entity": "DC battery power sensor (W)"
+          "power_entity": "DC battery power sensor (W)",
+          "cell_max_entity": "Highest cell voltage (optional)",
+          "cell_min_entity": "Lowest cell voltage (optional)",
+          "temp_max_entity": "Highest cell temperature (optional, experimental)",
+          "temp_min_entity": "Lowest cell temperature (optional, experimental)"
         },
         "data_description": {
           "battery_id": "Used in entity ids, e.g. mt1 gives sensor.marstek_mt1_capacity_pct. Lowercase letters, digits and _.",
           "soc_entity": "The battery's own SOC in %.",
-          "power_entity": "Power measured on the battery (DC) side. W or kW."
+          "power_entity": "Power measured on the battery (DC) side. W or kW.",
+          "cell_max_entity": "Voltage of the highest cell, in V or mV. Only cell voltages, not temperatures.",
+          "cell_min_entity": "Voltage of the lowest cell, in V or mV.",
+          "temp_max_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures.",
+          "temp_min_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures."
+        }
+      },
+      "model": {
+        "title": "Which Marstek is {name}?",
+        "description": "Pick your model and the date it was installed. The factory data (capacity, depth of discharge, cycles) are filled in for you. You can change them later under Configure.",
+        "data": {
+          "model": "Model",
+          "purchase_date": "Installation date"
+        },
+        "data_description": {
+          "purchase_date": "The date the battery went into use. Warranty and age are counted from here."
+        }
+      },
+      "packs": {
+        "title": "Venus D: number of battery packs",
+        "description": "A Venus D holds 2.56 kWh per pack. Rated capacity and reserve are calculated from the number of packs.",
+        "data": {
+          "packs": "Number of battery packs"
         }
       }
     },
@@ -52,7 +79,8 @@
       "invalid_id": "Use 1-20 lowercase letters, digits or _.",
       "same_entity": "SOC and power must be different sensors.",
       "reserve_too_large": "The reserve must be smaller than the nominal capacity.",
-      "looks_like_ac": "This sensor looks like the AC / grid side, not the battery (DC) side. AC values include conversion losses and give a wrong capacity. Choose the battery power sensor, or submit again to use this one anyway."
+      "looks_like_ac": "This sensor looks like the AC / grid side, not the battery (DC) side. AC values include conversion losses and give a wrong capacity. Choose the battery power sensor, or submit again to use this one anyway.",
+      "cells_both": "Fill in both the highest and the lowest cell voltage, or neither."
     },
     "abort": {
       "already_configured": "This battery id is already in use.",
@@ -66,14 +94,18 @@
         "data": {
           "nominal_kwh": "Rated capacity (manufacturer)",
           "reserve_kwh": "Internal reserve (not usable)",
-          "purchase_date": "Purchase date",
+          "purchase_date": "Installation date",
           "warranty_years": "Warranty period",
           "cycle_life": "Rated cycle life",
           "cycle_eol_pct": "Capacity after rated cycle life",
           "initial_cycles": "Cycles already done before monitoring",
           "red_pct": "Red threshold (report to Marstek)",
           "tolerance_pct": "Tolerance below spec",
-          "power_sign": "Sign of the power sensor"
+          "power_sign": "Sign of the power sensor",
+          "cell_max_entity": "Highest cell voltage (optional)",
+          "cell_min_entity": "Lowest cell voltage (optional)",
+          "temp_max_entity": "Highest cell temperature (optional, experimental)",
+          "temp_min_entity": "Lowest cell temperature (optional, experimental)"
         },
         "data_description": {
           "nominal_kwh": "Total capacity of the cells, e.g. 5.12 kWh.",
@@ -83,12 +115,19 @@
           "initial_cycles": "Estimate: total discharged kWh so far divided by the usable capacity. Leave 0 for a new battery.",
           "red_pct": "At or below this % remaining the status turns red: the moment to report it to Marstek via the Marstek app. Default 75 %.",
           "tolerance_pct": "Green while the measurement is at most this many points below the manufacturer spec line. Default 5.",
-          "power_sign": "Automatic: detected on the first charge or discharge. Change only if detection gets it wrong."
+          "power_sign": "Automatic: detected on the first charge or discharge. Change only if detection gets it wrong.",
+          "purchase_date": "The date the battery went into use. Warranty and age are counted from here.",
+          "cell_max_entity": "Voltage of the highest cell, in V or mV. Only cell voltages, not temperatures.",
+          "cell_min_entity": "Voltage of the lowest cell, in V or mV.",
+          "temp_max_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures.",
+          "temp_min_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures."
         }
       }
     },
     "error": {
-      "reserve_too_large": "The reserve must be smaller than the nominal capacity."
+      "reserve_too_large": "The reserve must be smaller than the nominal capacity.",
+      "cells_both": "Fill in both the highest and the lowest cell voltage, or neither.",
+      "same_entity": "SOC and power must be different sensors."
     }
   },
   "entity": {
@@ -137,6 +176,18 @@
       },
       "last_full_charge": {
         "name": "Last full charge"
+      },
+      "monitor_status": {
+        "name": "Monitor status",
+        "state": {
+          "measuring": "Measuring",
+          "collecting": "Collecting data",
+          "no_recent_data": "No recent data",
+          "sensor_missing": "Sensor unavailable"
+        }
+      },
+      "cell_spread": {
+        "name": "Cell spread after full charge"
       }
     }
   },
@@ -158,6 +209,14 @@
         "auto": "Automatic",
         "charge_positive": "Charging is positive",
         "charge_negative": "Charging is negative"
+      }
+    },
+    "model": {
+      "options": {
+        "venus_e_v12": "Venus E v1 / v2 (5.12 kWh)",
+        "venus_e_v3": "Venus E v3 (5.12 kWh)",
+        "venus_d": "Venus D (2.56 kWh per pack)",
+        "other": "Other model: enter factory data yourself"
       }
     }
   }

@@ -49,7 +49,8 @@ def _entry(battery_id="mt1", **extra):
     )
 
 
-async def test_config_flow_two_steps(hass: HomeAssistant) -> None:
+async def test_config_flow_other_model(hass: HomeAssistant) -> None:
+    """Other model: factory data entered by hand after the model step."""
     hass.states.async_set(SOC, 50, {"unit_of_measurement": "%"})
     hass.states.async_set(POWER, 0, {"unit_of_measurement": "W", "device_class": "power"})
     result = await hass.config_entries.flow.async_init(
@@ -65,6 +66,10 @@ async def test_config_flow_two_steps(hass: HomeAssistant) -> None:
             "soc_entity": SOC,
             "power_entity": POWER,
         },
+    )
+    assert result["step_id"] == "model"
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"model": "other", "purchase_date": "2024-02-01"}
     )
     assert result["step_id"] == "specs"
     result = await hass.config_entries.flow.async_configure(
@@ -109,6 +114,8 @@ async def test_full_discharge_end_to_end(hass: HomeAssistant, freezer) -> None:
 
     status = hass.states.get("sensor.marstek_mt1_warranty_status")
     assert status.state == "no_measurement"
+    mon = hass.states.get("sensor.marstek_mt1_monitor_status")
+    assert mon.state == "collecting" and mon.attributes["phase"] == "ready"
 
     sessions = []
     hass.bus.async_listen(f"{DOMAIN}_session", lambda e: sessions.append(e.data))
@@ -127,9 +134,14 @@ async def test_full_discharge_end_to_end(hass: HomeAssistant, freezer) -> None:
             hass.states.async_set(SOC, soc, {"unit_of_measurement": "%"})
             await hass.async_block_till_done()
 
-    await run(100, 11, 4.42, unit="kW")  # kW sensor is converted
+    await run(100, 50, 2.48, unit="kW")  # kW sensor is converted
+    mon = hass.states.get("sensor.marstek_mt1_monitor_status")
+    assert mon.attributes["phase"] == "full_discharge_running"
+    assert mon.attributes["from_soc"] == 100
+    await run(50, 11, 1.94, unit="kW")
     await run(11, 40, 1.5)
 
+    assert hass.states.get("sensor.marstek_mt1_monitor_status").state == "measuring"
     assert len(sessions) == 1
     assert sessions[0]["direction"] == "discharge"
     assert sessions[0]["e_dc_kwh"] == pytest.approx(4.42, abs=0.02)
@@ -217,9 +229,12 @@ async def test_scan_proposes_existing_sensors(hass: HomeAssistant) -> None:
             "power_entity": schema_defaults["power_entity"],
         },
     )
-    assert result["step_id"] == "specs"
-    result = await hass.config_entries.flow.async_configure(result["flow_id"], SPECS)
+    assert result["step_id"] == "model"
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"model": "venus_e_v12", "purchase_date": "2024-02-01"}
+    )
     assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"]["nominal_kwh"] == 5.12 and result["data"]["reserve_kwh"] == 0.51
 
     # Already configured -> not proposed again
     result = await hass.config_entries.flow.async_init(
@@ -239,7 +254,7 @@ async def test_ac_sensor_warning(hass: HomeAssistant) -> None:
     assert result["errors"] == {"power_entity": "looks_like_ac"}
     # second time with the same sensor: accepted
     result = await hass.config_entries.flow.async_configure(result["flow_id"], data)
-    assert result["step_id"] == "specs"
+    assert result["step_id"] == "model"
 
 
 async def test_auto_sign_notification(hass: HomeAssistant, freezer, monkeypatch) -> None:
@@ -288,10 +303,10 @@ async def test_abandoned_flow_does_not_block(hass: HomeAssistant) -> None:
     data = {"battery_id": "mt1", "name": "MT1", "soc_entity": SOC, "power_entity": POWER}
     first = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     first = await hass.config_entries.flow.async_configure(first["flow_id"], data)
-    assert first["step_id"] == "specs"  # left open
+    assert first["step_id"] == "model"  # left open
     second = await hass.config_entries.flow.async_init(DOMAIN, context={"source": config_entries.SOURCE_USER})
     second = await hass.config_entries.flow.async_configure(second["flow_id"], data)
-    assert second["step_id"] == "specs"
+    assert second["step_id"] == "model"
 
 
 async def test_scan_uses_friendly_name(hass: HomeAssistant) -> None:
@@ -317,3 +332,210 @@ async def test_scan_skips_cars_and_totals(hass: HomeAssistant) -> None:
     from custom_components.marstek_capacity_monitor.discovery import find_candidates
     names = [c.soc_entity for c in find_candidates(hass)]
     assert names == ["sensor.venus_5_12kwh_veranda_marstek_battery_state_of_charge"]
+
+
+async def test_model_preset_only_needs_install_date(hass: HomeAssistant) -> None:
+    """Known model: factory data are filled in; the model is guessed from the name."""
+    hass.states.async_set("sensor.venus_e_v3_battery_soc", 50,
+        {"unit_of_measurement": "%", "device_class": "battery"})
+    hass.states.async_set("sensor.venus_e_v3_battery_power", 0,
+        {"unit_of_measurement": "W", "device_class": "power"})
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"candidate": "0"})
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {"battery_id": "v3", "name": "Venus v3",
+         "soc_entity": "sensor.venus_e_v3_battery_soc",
+         "power_entity": "sensor.venus_e_v3_battery_power"},
+    )
+    assert result["step_id"] == "model"
+    model_key = next(k for k in result["data_schema"].schema if str(k) == "model")
+    assert model_key.default() == "venus_e_v3"
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"model": "venus_e_v3", "purchase_date": "2025-06-01"}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    data = result["data"]
+    assert data["nominal_kwh"] == 5.12 and data["reserve_kwh"] == 0.51
+    assert data["cycle_life"] == 6000 and data["cycle_eol_pct"] == 80
+    assert data["purchase_date"] == "2025-06-01" and data["model"] == "venus_e_v3"
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.marstek_v3_usable_capacity").state == "4.61"
+
+
+async def test_venus_d_packs(hass: HomeAssistant) -> None:
+    hass.states.async_set(SOC, 50, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W", "device_class": "power"})
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {"battery_id": "vd", "name": "Venus D", "soc_entity": SOC, "power_entity": POWER},
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"model": "venus_d", "purchase_date": "2025-06-01"}
+    )
+    assert result["step_id"] == "packs"
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"packs": 3})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"]["nominal_kwh"] == 7.68
+    assert result["data"]["reserve_kwh"] == 0.77
+    assert result["data"]["packs"] == 3
+
+
+async def test_status_sensor_missing(hass: HomeAssistant) -> None:
+    hass.states.async_set(SOC, "unavailable")
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    mon = hass.states.get("sensor.marstek_mt1_monitor_status")
+    assert mon.state == "sensor_missing"
+    assert mon.attributes["missing"] == [SOC]
+    hass.states.async_set(SOC, 40, {"unit_of_measurement": "%"})
+    await hass.async_block_till_done()
+    mon = hass.states.get("sensor.marstek_mt1_monitor_status")
+    assert mon.state == "collecting" and mon.attributes["phase"] == "waiting_full_charge"
+    assert mon.attributes["soc"] == 40
+
+
+async def test_scan_suggests_cell_sensors(hass: HomeAssistant) -> None:
+    W = {"unit_of_measurement": "W", "device_class": "power"}
+    P = {"unit_of_measurement": "%", "device_class": "battery"}
+    V = {"unit_of_measurement": "mV", "device_class": "voltage"}
+    hass.states.async_set("sensor.venus_veranda_battery_state_of_charge", 80, P)
+    hass.states.async_set("sensor.venus_veranda_battery_power", 0, W)
+    hass.states.async_set("sensor.venus_veranda_max_cell_voltage", 3330, V)
+    hass.states.async_set("sensor.venus_veranda_min_cell_voltage", 3310, V)
+    hass.states.async_set("sensor.venus_veranda_diff_cell_voltage", 20, V)
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"candidate": "0"})
+    sugg = {
+        str(k): k.description.get("suggested_value")
+        for k in result["data_schema"].schema
+        if k.description
+    }
+    assert sugg["cell_max_entity"] == "sensor.venus_veranda_max_cell_voltage"
+    assert sugg["cell_min_entity"] == "sensor.venus_veranda_min_cell_voltage"
+    # only one of the two -> error
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {"battery_id": "mt1", "name": "MT1",
+         "soc_entity": "sensor.venus_veranda_battery_state_of_charge",
+         "power_entity": "sensor.venus_veranda_battery_power",
+         "cell_max_entity": "sensor.venus_veranda_max_cell_voltage"},
+    )
+    assert result["errors"] == {"cell_min_entity": "cells_both"}
+
+
+async def test_cell_spread_after_full_charge(hass: HomeAssistant, freezer) -> None:
+    """Sample once per full charge, after 5 minutes at rest; V is converted to mV."""
+    freezer.move_to("2026-10-18 06:00:00+00:00")
+    MAXC, MINC = "sensor.test_cell_max", "sensor.test_cell_min"
+    V = {"unit_of_measurement": "V", "device_class": "voltage"}
+    hass.states.async_set(SOC, 80, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 1500, {"unit_of_measurement": "W"})
+    hass.states.async_set(MAXC, 3.40, V)
+    hass.states.async_set(MINC, 3.37, V)
+    entry = _entry(cell_max_entity=MAXC, cell_min_entity=MINC)
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    spread = hass.states.get("sensor.marstek_mt1_cell_spread")
+    assert spread is not None and spread.state == "unknown"
+
+    async def minutes(n):
+        for _ in range(n):
+            freezer.tick(timedelta(seconds=60))
+            async_fire_time_changed(hass, dt_util.utcnow())
+            await hass.async_block_till_done()
+
+    hass.states.async_set(SOC, 97, {"unit_of_measurement": "%"})
+    await minutes(10)  # still charging: no sample
+    assert hass.states.get("sensor.marstek_mt1_cell_spread").state == "unknown"
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    hass.states.async_set(MAXC, 3.452, V)
+    hass.states.async_set(MINC, 3.431, V)
+    await minutes(3)
+    assert hass.states.get("sensor.marstek_mt1_cell_spread").state == "unknown"
+    await minutes(4)
+    st = hass.states.get("sensor.marstek_mt1_cell_spread")
+    assert float(st.state) == pytest.approx(21, abs=0.1)
+    assert st.attributes["trend"][0]["month"] == "2026-10"
+    # still full: no second sample until the SOC dropped below 90 %
+    hass.states.async_set(MINC, 3.400, V)
+    await minutes(10)
+    assert hass.states.get("sensor.marstek_mt1_cell_spread").attributes["sample_count"] == 1
+
+
+async def test_no_cell_sensor_without_cells(hass: HomeAssistant) -> None:
+    hass.states.async_set(SOC, 50, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.marstek_mt1_cell_spread") is None
+
+
+async def test_temperature_stored_with_measurement(hass: HomeAssistant, freezer) -> None:
+    """Cell temperature during a full discharge ends up in history and trend."""
+    freezer.move_to("2026-10-18 06:00:00+00:00")
+    TMAX, TMIN = "sensor.test_max_cell_temperature", "sensor.test_min_cell_temperature"
+    T = {"unit_of_measurement": "°C", "device_class": "temperature"}
+    hass.states.async_set(SOC, 100, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    hass.states.async_set(TMAX, 12.0, T)
+    hass.states.async_set(TMIN, 10.0, T)
+    entry = _entry(reserve_kwh=0.61, temp_max_entity=TMAX, temp_min_entity=TMIN)
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    async def run(soc_from, soc_to, kwh):
+        steps = abs(soc_to - soc_from)
+        p = kwh * 3_600_000 / (steps * 60) * (1 if soc_to > soc_from else -1)
+        hass.states.async_set(POWER, round(p, 3), {"unit_of_measurement": "W"})
+        await hass.async_block_till_done()
+        for i in range(1, steps + 1):
+            freezer.tick(timedelta(seconds=60))
+            async_fire_time_changed(hass, dt_util.utcnow())
+            await hass.async_block_till_done()
+            hass.states.async_set(SOC, soc_from + (soc_to - soc_from) * i / steps)
+            await hass.async_block_till_done()
+
+    await run(100, 11, 4.42)
+    await run(11, 40, 1.5)
+    m = hass.states.get("sensor.marstek_mt1_measured_capacity")
+    assert m.attributes["history"][0]["temp_c"] == pytest.approx(11.0)
+    assert m.attributes["trend"][0]["temp_c"] == pytest.approx(11.0)
+    assert hass.states.get("sensor.marstek_mt1_monitor_status").attributes["temperature_check"]
+
+
+async def test_scan_suggests_cell_temperature_not_mos(hass: HomeAssistant) -> None:
+    P = {"unit_of_measurement": "%", "device_class": "battery"}
+    W = {"unit_of_measurement": "W", "device_class": "power"}
+    T = {"unit_of_measurement": "°C", "device_class": "temperature"}
+    hass.states.async_set("sensor.venus_v3_battery_soc", 80, P)
+    hass.states.async_set("sensor.venus_v3_battery_power", 0, W)
+    hass.states.async_set("sensor.venus_v3_internal_mos1_temperature", 30, T)
+    hass.states.async_set("sensor.venus_v3_max_mos_cell_temperature", 31, T)
+    hass.states.async_set("sensor.venus_v3_max_cell_temperature", 15, T)
+    hass.states.async_set("sensor.venus_v3_min_cell_temperature", 13, T)
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"candidate": "0"})
+    sugg = {
+        str(k): k.description.get("suggested_value")
+        for k in result["data_schema"].schema
+        if k.description
+    }
+    assert sugg["temp_max_entity"] == "sensor.venus_v3_max_cell_temperature"
+    assert sugg["temp_min_entity"] == "sensor.venus_v3_min_cell_temperature"

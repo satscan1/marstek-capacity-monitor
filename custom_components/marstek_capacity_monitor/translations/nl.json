@@ -9,12 +9,12 @@
         }
       },
       "specs": {
-        "title": "Fabrieksgegevens en garantie",
-        "description": "Standaardwaarden komen uit de datasheet van de Marstek Venus E 5,12 kWh (90% ontlaaddiepte, > 6000 cycli, 80% na 6000 cycli). Marstek geeft geen capaciteitsgarantie in jaren.",
+        "title": "Fabrieksgegevens (ander model)",
+        "description": "Vul de fabrieksgegevens van je batterij in. Standaardwaarden zijn die van de Marstek Venus E 5,12 kWh (90% ontlaaddiepte, > 6000 cycli, 80% na 6000 cycli). Marstek geeft geen capaciteitsgarantie in jaren.",
         "data": {
           "nominal_kwh": "Opgegeven capaciteit (fabrikant)",
           "reserve_kwh": "Interne reserve (niet bruikbaar)",
-          "purchase_date": "Aankoopdatum",
+          "purchase_date": "Installatiedatum",
           "warranty_years": "Garantietermijn",
           "cycle_life": "Opgegeven aantal cycli",
           "cycle_eol_pct": "Capaciteit na die cycli",
@@ -29,22 +29,49 @@
           "cycle_eol_pct": "Specificatie van de fabrikant: bv. 80% na 6000 cycli (Marstek, productpagina Venus E Gen 3.0). Dit is de specificatielijn; geen garantie.",
           "initial_cycles": "Schatting: totaal ontladen kWh tot nu toe gedeeld door de bruikbare capaciteit. Laat 0 bij een nieuwe batterij.",
           "red_pct": "Op of onder dit % van nieuw wordt de status rood: het moment om het via de Marstek-app te melden. Standaard 75%.",
-          "tolerance_pct": "Groen zolang de meting hooguit zoveel punten onder de specificatielijn van de fabrikant zit. Standaard 5."
+          "tolerance_pct": "Groen zolang de meting hooguit zoveel punten onder de specificatielijn van de fabrikant zit. Standaard 5.",
+          "purchase_date": "De datum waarop de batterij in gebruik ging. Garantie en leeftijd tellen vanaf hier."
         }
       },
       "details": {
         "title": "Batterij en sensoren",
-        "description": "Controleer het voorstel. De vermogensensor moet de batterijkant (DC) meten, niet de AC-/netkant. Of laden positief of negatief is, wordt automatisch herkend.",
+        "description": "Controleer het voorstel. De vermogensensor moet de batterijkant (DC) meten, niet de AC-/netkant. Of laden positief of negatief is, wordt automatisch herkend.\n\nOptioneel: de hoogste en laagste celspanning (celbalans) en celtemperatuur (bij elke meting bewaard als context). Ingevuld als ze gevonden zijn; laat leeg als je batterij ze niet levert.",
         "data": {
           "battery_id": "Korte code",
           "name": "Naam",
           "soc_entity": "Laadtoestand-sensor (%)",
-          "power_entity": "DC-vermogen batterij (W)"
+          "power_entity": "DC-vermogen batterij (W)",
+          "cell_max_entity": "Hoogste celspanning (optioneel)",
+          "cell_min_entity": "Laagste celspanning (optioneel)",
+          "temp_max_entity": "Hoogste celtemperatuur (optioneel, experimenteel)",
+          "temp_min_entity": "Laagste celtemperatuur (optioneel, experimenteel)"
         },
         "data_description": {
           "battery_id": "Wordt gebruikt in de entiteitnamen, bv. mt1 geeft sensor.marstek_mt1_capacity_pct. Kleine letters, cijfers en _.",
           "soc_entity": "De eigen SOC van de batterij in %.",
-          "power_entity": "Vermogen gemeten aan de batterijkant (DC). W of kW."
+          "power_entity": "Vermogen gemeten aan de batterijkant (DC). W of kW.",
+          "cell_max_entity": "Spanning van de hoogste cel, in V of mV. Alleen celspanningen, geen temperaturen.",
+          "cell_min_entity": "Spanning van de laagste cel, in V of mV.",
+          "temp_max_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen.",
+          "temp_min_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen."
+        }
+      },
+      "model": {
+        "title": "Welke Marstek is {name}?",
+        "description": "Kies je model en de datum waarop de batterij is geïnstalleerd. De fabrieksgegevens (capaciteit, ontlaaddiepte, cycli) worden voor je ingevuld. Je kunt ze later aanpassen via Configureren.",
+        "data": {
+          "model": "Model",
+          "purchase_date": "Installatiedatum"
+        },
+        "data_description": {
+          "purchase_date": "De datum waarop de batterij in gebruik ging. Garantie en leeftijd tellen vanaf hier."
+        }
+      },
+      "packs": {
+        "title": "Venus D: aantal batterijpakketten",
+        "description": "Een Venus D heeft 2,56 kWh per pakket. Opgegeven capaciteit en reserve worden berekend uit het aantal pakketten.",
+        "data": {
+          "packs": "Aantal batterijpakketten"
         }
       }
     },
@@ -52,7 +79,8 @@
       "invalid_id": "Gebruik 1-20 kleine letters, cijfers of _.",
       "same_entity": "SOC en vermogen moeten verschillende sensoren zijn.",
       "reserve_too_large": "De reserve moet kleiner zijn dan de fabriekscapaciteit.",
-      "looks_like_ac": "Deze sensor lijkt de AC-/netkant te meten, niet de batterijkant (DC). AC-waarden bevatten omzetverlies en geven een verkeerde capaciteit. Kies de sensor voor het batterijvermogen, of verstuur nogmaals om deze toch te gebruiken."
+      "looks_like_ac": "Deze sensor lijkt de AC-/netkant te meten, niet de batterijkant (DC). AC-waarden bevatten omzetverlies en geven een verkeerde capaciteit. Kies de sensor voor het batterijvermogen, of verstuur nogmaals om deze toch te gebruiken.",
+      "cells_both": "Vul zowel de hoogste als de laagste celspanning in, of geen van beide."
     },
     "abort": {
       "already_configured": "Deze code is al in gebruik.",
@@ -66,14 +94,18 @@
         "data": {
           "nominal_kwh": "Opgegeven capaciteit (fabrikant)",
           "reserve_kwh": "Interne reserve (niet bruikbaar)",
-          "purchase_date": "Aankoopdatum",
+          "purchase_date": "Installatiedatum",
           "warranty_years": "Garantietermijn",
           "cycle_life": "Opgegeven aantal cycli",
           "cycle_eol_pct": "Capaciteit na die cycli",
           "initial_cycles": "Cycli al gedaan vóór de monitoring",
           "red_pct": "Rode grens (melden bij Marstek)",
           "tolerance_pct": "Marge onder specificatie",
-          "power_sign": "Teken van de vermogensensor"
+          "power_sign": "Teken van de vermogensensor",
+          "cell_max_entity": "Hoogste celspanning (optioneel)",
+          "cell_min_entity": "Laagste celspanning (optioneel)",
+          "temp_max_entity": "Hoogste celtemperatuur (optioneel, experimenteel)",
+          "temp_min_entity": "Laagste celtemperatuur (optioneel, experimenteel)"
         },
         "data_description": {
           "nominal_kwh": "Totale capaciteit van de cellen, bv. 5,12 kWh.",
@@ -83,12 +115,19 @@
           "initial_cycles": "Schatting: totaal ontladen kWh tot nu toe gedeeld door de bruikbare capaciteit. Laat 0 bij een nieuwe batterij.",
           "red_pct": "Op of onder dit % van nieuw wordt de status rood: het moment om het via de Marstek-app te melden. Standaard 75%.",
           "tolerance_pct": "Groen zolang de meting hooguit zoveel punten onder de specificatielijn van de fabrikant zit. Standaard 5.",
-          "power_sign": "Automatisch: wordt herkend bij de eerste laad- of ontlaadbeurt. Alleen aanpassen als de herkenning het mis heeft."
+          "power_sign": "Automatisch: wordt herkend bij de eerste laad- of ontlaadbeurt. Alleen aanpassen als de herkenning het mis heeft.",
+          "purchase_date": "De datum waarop de batterij in gebruik ging. Garantie en leeftijd tellen vanaf hier.",
+          "cell_max_entity": "Spanning van de hoogste cel, in V of mV. Alleen celspanningen, geen temperaturen.",
+          "cell_min_entity": "Spanning van de laagste cel, in V of mV.",
+          "temp_max_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen.",
+          "temp_min_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen."
         }
       }
     },
     "error": {
-      "reserve_too_large": "De reserve moet kleiner zijn dan de fabriekscapaciteit."
+      "reserve_too_large": "De reserve moet kleiner zijn dan de fabriekscapaciteit.",
+      "cells_both": "Vul zowel de hoogste als de laagste celspanning in, of geen van beide.",
+      "same_entity": "SOC en vermogen moeten verschillende sensoren zijn."
     }
   },
   "entity": {
@@ -137,6 +176,18 @@
       },
       "last_full_charge": {
         "name": "Laatste volledige lading"
+      },
+      "monitor_status": {
+        "name": "Status meting",
+        "state": {
+          "measuring": "Meet",
+          "collecting": "Verzamelt data",
+          "no_recent_data": "Geen recente data",
+          "sensor_missing": "Sensor niet beschikbaar"
+        }
+      },
+      "cell_spread": {
+        "name": "Celverschil na volle lading"
       }
     }
   },
@@ -158,6 +209,14 @@
         "auto": "Automatisch",
         "charge_positive": "Laden is positief",
         "charge_negative": "Laden is negatief"
+      }
+    },
+    "model": {
+      "options": {
+        "venus_e_v12": "Venus E v1 / v2 (5,12 kWh)",
+        "venus_e_v3": "Venus E v3 (5,12 kWh)",
+        "venus_d": "Venus D (2,56 kWh per pakket)",
+        "other": "Ander model: fabrieksgegevens zelf invullen"
       }
     }
   }

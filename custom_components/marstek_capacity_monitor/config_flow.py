@@ -18,6 +18,18 @@ from homeassistant.helpers import selector
 
 from .const import (
     CONF_BATTERY_ID,
+    CONF_CELL_MAX_ENTITY,
+    CONF_CELL_MIN_ENTITY,
+    CONF_MODEL,
+    CONF_TEMP_MAX_ENTITY,
+    CONF_TEMP_MIN_ENTITY,
+    CONF_PACKS,
+    MAX_PACKS,
+    MODEL_D,
+    MODEL_OTHER,
+    MODELS,
+    MODEL_E_V12,
+    preset_for,
     CONF_CYCLE_EOL,
     CONF_CYCLE_LIFE,
     CONF_INITIAL_CYCLES,
@@ -36,7 +48,13 @@ from .const import (
     MAX_BATTERIES,
     SIGN_MODES,
 )
-from .discovery import Candidate, find_candidates, looks_like_ac
+from .discovery import (
+    Candidate,
+    find_candidates,
+    find_cell_sensors,
+    guess_model,
+    looks_like_ac,
+)
 
 CONF_CANDIDATE = "candidate"
 MANUAL = "manual"
@@ -90,6 +108,50 @@ def _spec_schema(values: dict[str, Any]) -> vol.Schema:
             ),
         }
     )
+
+
+def _volt_selector() -> selector.EntitySelector:
+    return selector.EntitySelector(
+        selector.EntitySelectorConfig(domain="sensor", device_class="voltage")
+    )
+
+
+def _temp_selector() -> selector.EntitySelector:
+    return selector.EntitySelector(
+        selector.EntitySelectorConfig(domain="sensor", device_class="temperature")
+    )
+
+
+OPTIONAL_SENSORS = (
+    (CONF_CELL_MAX_ENTITY, _volt_selector),
+    (CONF_CELL_MIN_ENTITY, _volt_selector),
+    (CONF_TEMP_MAX_ENTITY, _temp_selector),
+    (CONF_TEMP_MIN_ENTITY, _temp_selector),
+)
+
+
+def _cell_fields(values: dict[str, Any]) -> dict[Any, Any]:
+    """Optional cell voltage (cell balance) and cell temperature sensors."""
+    fields: dict[Any, Any] = {}
+    for key, make in OPTIONAL_SENSORS:
+        current = values.get(key)
+        marker = (
+            vol.Optional(key, description={"suggested_value": current})
+            if current
+            else vol.Optional(key)
+        )
+        fields[marker] = make()
+    return fields
+
+
+def _validate_cells(data: dict[str, Any]) -> dict[str, str]:
+    has_max = bool(data.get(CONF_CELL_MAX_ENTITY))
+    has_min = bool(data.get(CONF_CELL_MIN_ENTITY))
+    if has_max != has_min:
+        return {CONF_CELL_MAX_ENTITY if not has_max else CONF_CELL_MIN_ENTITY: "cells_both"}
+    if has_max and data[CONF_CELL_MAX_ENTITY] == data[CONF_CELL_MIN_ENTITY]:
+        return {CONF_CELL_MIN_ENTITY: "same_entity"}
+    return {}
 
 
 def _validate_spec(data: dict[str, Any]) -> dict[str, str]:
@@ -183,6 +245,8 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
                 errors[CONF_BATTERY_ID] = "invalid_id"
             elif user_input[CONF_SOC_ENTITY] == power:
                 errors[CONF_POWER_ENTITY] = "same_entity"
+            elif cell_errors := _validate_cells(user_input):
+                errors.update(cell_errors)
             elif looks_like_ac(self.hass, power) and self._ac_confirmed != power:
                 # Warn once; submitting again with the same sensor accepts it.
                 self._ac_confirmed = power
@@ -193,13 +257,26 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(battery_id, raise_on_progress=False)
                 self._abort_if_unique_id_configured()
                 self._data = {**user_input, CONF_BATTERY_ID: battery_id}
-                return await self.async_step_specs()
+                return await self.async_step_model()
 
         default_id = self._default_id()
+        cells: dict[str, Any] = {}
+        if soc := self._proposal.get(CONF_SOC_ENTITY):
+            found = find_cell_sensors(self.hass, soc)
+            if "max" in found and "min" in found:
+                cells = {
+                    CONF_CELL_MAX_ENTITY: found["max"],
+                    CONF_CELL_MIN_ENTITY: found["min"],
+                }
+            if "temp_max" in found:
+                cells[CONF_TEMP_MAX_ENTITY] = found["temp_max"]
+            if "temp_min" in found:
+                cells[CONF_TEMP_MIN_ENTITY] = found["temp_min"]
         suggested = {
             CONF_BATTERY_ID: default_id,
             CONF_NAME: default_id.upper(),
             **self._proposal,
+            **cells,
             **(user_input or {}),
         }
         schema = vol.Schema(
@@ -212,6 +289,7 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_POWER_ENTITY): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor", device_class="power")
                 ),
+                **{vol.Optional(key): make() for key, make in OPTIONAL_SENSORS},
             }
         )
         return self.async_show_form(
@@ -220,9 +298,65 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
+    async def async_step_model(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Step 3: which Marstek, installed when. Factory data follow from
+        the model, so for a known model this is the last step."""
+        if user_input is not None:
+            model = user_input[CONF_MODEL]
+            self._data[CONF_MODEL] = model
+            self._data[CONF_PURCHASE_DATE] = user_input[CONF_PURCHASE_DATE]
+            if model == MODEL_D:
+                return await self.async_step_packs()
+            if model == MODEL_OTHER:
+                return await self.async_step_specs()
+            return self._create(preset_for(model))
+
+        guess = guess_model(self.hass, self._data[CONF_SOC_ENTITY]) or MODEL_E_V12
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_MODEL, default=guess): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=MODELS,
+                        translation_key="model",
+                        mode=selector.SelectSelectorMode.LIST,
+                    )
+                ),
+                vol.Required(CONF_PURCHASE_DATE): selector.DateSelector(),
+            }
+        )
+        return self.async_show_form(
+            step_id="model",
+            data_schema=schema,
+            description_placeholders={"name": self._data[CONF_NAME]},
+        )
+
+    async def async_step_packs(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Venus D: capacity depends on the number of battery packs."""
+        if user_input is not None:
+            packs = int(user_input[CONF_PACKS])
+            self._data[CONF_PACKS] = packs
+            return self._create(preset_for(MODEL_D, packs))
+        schema = vol.Schema(
+            {vol.Required(CONF_PACKS, default=1): _num(1, MAX_PACKS, 1)}
+        )
+        return self.async_show_form(step_id="packs", data_schema=schema)
+
+    def _create(self, preset: dict[str, Any]) -> ConfigFlowResult:
+        data = {
+            **{k: v for k, v in DEFAULTS.items() if k != CONF_POWER_SIGN},
+            **preset,
+            **self._data,
+        }
+        return self.async_create_entry(title=self._data[CONF_NAME], data=data)
+
     async def async_step_specs(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
+        """Other model: enter the factory data yourself."""
         errors: dict[str, str] = {}
         if user_input is not None:
             errors = _validate_spec(user_input)
@@ -230,9 +364,10 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(
                     title=self._data[CONF_NAME], data={**self._data, **user_input}
                 )
+        values = {CONF_PURCHASE_DATE: self._data.get(CONF_PURCHASE_DATE), **(user_input or {})}
         return self.async_show_form(
             step_id="specs",
-            data_schema=_spec_schema(user_input or {}),
+            data_schema=_spec_schema(values),
             errors=errors,
         )
 
@@ -251,11 +386,14 @@ class MarstekCapacityOptionsFlow(OptionsFlow):
         current = {**self.config_entry.data, **self.config_entry.options}
         errors: dict[str, str] = {}
         if user_input is not None:
-            errors = _validate_spec(user_input)
+            errors = _validate_spec(user_input) or _validate_cells(user_input)
             if not errors:
+                # Clearing an optional field must clear it, not keep the old one
+                for key, _make in OPTIONAL_SENSORS:
+                    user_input.setdefault(key, "")
                 return self.async_create_entry(data=user_input)
             current.update(user_input)
-        schema = _spec_schema(current).extend(
+        schema = _spec_schema(current).extend(_cell_fields(current)).extend(
             {
                 vol.Required(
                     CONF_POWER_SIGN,

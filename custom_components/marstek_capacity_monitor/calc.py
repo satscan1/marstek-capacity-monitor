@@ -33,8 +33,9 @@ FULL_LOW_PCT = 15.0  # ... and ends at or below 15 %
 MEDIAN_OF_LAST = 3  # measured capacity = median of the last 3 full discharges
 MEASURE_WINDOW_DAYS = 365
 MAX_GAP_S = 300.0  # no power value for longer than this -> swing unreliable
-MAX_RECORDS = 500
-TREND_MONTHS = 12
+MAX_RECORDS = 500  # other swings kept (recent context only)
+MAX_FULL_RECORDS = 3000  # full discharges are kept for the whole warranty period
+TREND_MONTHS = 120  # monthly trend over 10 years (warranty period)
 HISTORY_ITEMS = 10
 
 
@@ -130,6 +131,25 @@ def is_full_discharge(rec: dict[str, Any]) -> bool:
         and rec.get("soc_start", 0) >= FULL_HIGH_PCT
         and rec.get("soc_end", 100) <= FULL_LOW_PCT
     )
+
+
+def prune_records(
+    records: list[dict[str, Any]],
+    max_other: int = MAX_RECORDS,
+    max_full: int = MAX_FULL_RECORDS,
+) -> list[dict[str, Any]]:
+    """Drop the oldest records, but keep full discharges for years.
+
+    Full discharges are the measurements; other swings are only recent context.
+    The order of the remaining records is unchanged.
+    """
+    full = [i for i, r in enumerate(records) if is_full_discharge(r)]
+    other = [i for i, r in enumerate(records) if not is_full_discharge(r)]
+    drop = set(full[:-max_full] if len(full) > max_full else [])
+    drop |= set(other[:-max_other] if len(other) > max_other else [])
+    if not drop:
+        return records
+    return [r for i, r in enumerate(records) if i not in drop]
 
 
 def is_full_charge(rec: dict[str, Any]) -> bool:
@@ -401,6 +421,7 @@ def evaluate(
             cycles_at(mid.get("cumulative_discharge_kwh", cumulative_discharge_kwh)),
         )
         m_pct = pct(median(mc))
+        temps = [r["temp_c"] for r in recs if r.get("temp_c") is not None]
         trend.append(
             {
                 "month": key,
@@ -410,6 +431,7 @@ def evaluate(
                 "diff_pct": round(m_pct - m_exp, 1),
                 "status": classify(spec, m_pct, m_exp),
                 "n": len(mc),
+                "temp_c": round(median(temps), 1) if temps else None,
             }
         )
 
@@ -423,6 +445,7 @@ def evaluate(
                 "pct": round(pct(cap), 1),
                 "soc": f"{r['soc_start']:.0f}->{r['soc_end']:.0f}",
                 "e_dc_kwh": r["e_dc_kwh"],
+                "temp_c": r.get("temp_c"),
             }
         )
 
@@ -449,6 +472,152 @@ def evaluate(
         "warranty_end": w_end,
         "in_warranty": w_end is None or today <= w_end,
         "status": status,
+        "trend": trend,
+        "history": history,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Progress towards a measurement (for the "collecting data" message)
+# ---------------------------------------------------------------------------
+
+
+def measurement_phase(tracker_state: dict[str, Any]) -> dict[str, Any]:
+    """Where the battery is on the way to the next full-discharge measurement.
+
+    waiting_full_charge     - charge to >= 95 % first
+    ready                   - full; a discharge to <= 15 % gives a measurement
+    full_discharge_running  - discharging from >= 95 %; ends at <= 15 %
+    """
+    soc = tracker_state.get("soc")
+    sw = tracker_state.get("swing") or {}
+    out: dict[str, Any] = {"soc": soc}
+    start = (sw.get("start") or {}).get("soc")
+    if (
+        sw.get("direction") == "discharge"
+        and start is not None
+        and start >= FULL_HIGH_PCT
+        and sw.get("valid", True)
+    ):
+        out["phase"] = "full_discharge_running"
+        out["from_soc"] = start
+    elif soc is not None and soc >= FULL_HIGH_PCT:
+        out["phase"] = "ready"
+    else:
+        out["phase"] = "waiting_full_charge"
+    # Only worth mentioning when a full discharge was actually under way
+    if (
+        sw
+        and not sw.get("valid", True)
+        and sw.get("direction") == "discharge"
+        and start is not None
+        and start >= FULL_HIGH_PCT
+    ):
+        out["interrupted"] = sw.get("reason")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Cell balance: spread between highest and lowest cell after a full charge
+# ---------------------------------------------------------------------------
+#
+# Event   : end of a full charge (SOC >= 95 %)
+# Context : battery at rest (|power| <= 50 W) for 5 minutes, so the spread is
+#           not distorted by load. LFP voltage is flat mid-band; differences
+#           only show near full.
+# Result  : spread = highest - lowest cell in mV, one sample per full charge.
+#
+# No colours / limits yet: Marstek publishes no normal spread.
+
+CELL_FULL_PCT = FULL_HIGH_PCT
+CELL_REARM_PCT = 90.0  # a new sample needs the SOC to drop below this first
+CELL_REST_W = 50.0
+CELL_REST_S = 300.0
+MAX_CELL_RECORDS = 4000  # about one per day at most: covers the warranty period
+
+
+def new_cell_state() -> dict[str, Any]:
+    return {"armed": True, "rest_since": None}
+
+
+def to_mv(value: float, unit: str | None) -> float:
+    """Cell voltage in mV, whatever the sensor reports (V or mV)."""
+    if unit == "mV":
+        return value
+    if unit in ("V",):
+        return value * 1000.0
+    return value * 1000.0 if value < 10 else value
+
+
+class CellBalanceTracker:
+    """Takes one spread sample per full charge, at rest."""
+
+    def __init__(self, state: dict[str, Any] | None = None) -> None:
+        self.s = {**new_cell_state(), **(state or {})}
+
+    def update(
+        self,
+        soc: float | None,
+        power_w: float | None,
+        max_mv: float | None,
+        min_mv: float | None,
+        ts: float,
+    ) -> dict[str, Any] | None:
+        if soc is None:
+            return None
+        if soc < CELL_REARM_PCT:
+            self.s["armed"] = True
+            self.s["rest_since"] = None
+            return None
+        if not self.s["armed"] or soc < CELL_FULL_PCT:
+            self.s["rest_since"] = None
+            return None
+        if power_w is None or abs(power_w) > CELL_REST_W:
+            self.s["rest_since"] = None
+            return None
+        if self.s["rest_since"] is None:
+            self.s["rest_since"] = ts
+            return None
+        if ts - self.s["rest_since"] < CELL_REST_S:
+            return None
+        if max_mv is None or min_mv is None or max_mv < min_mv:
+            return None
+        self.s["armed"] = False
+        self.s["rest_since"] = None
+        return {
+            "ts": ts,
+            "soc": round(soc, 1),
+            "max_mv": round(max_mv, 1),
+            "min_mv": round(min_mv, 1),
+            "spread_mv": round(max_mv - min_mv, 1),
+        }
+
+
+def evaluate_cells(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """Last spread, monthly median (newest first) and recent samples."""
+    recs = sorted(records, key=lambda r: r["ts"])
+    by_month: dict[str, list[float]] = {}
+    for r in recs:
+        by_month.setdefault(datetime.fromtimestamp(r["ts"]).strftime("%Y-%m"), []).append(
+            r["spread_mv"]
+        )
+    trend = [
+        {"month": k, "spread_mv": round(median(by_month[k]), 1), "n": len(by_month[k])}
+        for k in sorted(by_month, reverse=True)[:TREND_MONTHS]
+    ]
+    history = [
+        {
+            "date": datetime.fromtimestamp(r["ts"]).strftime("%Y-%m-%d"),
+            "spread_mv": r["spread_mv"],
+            "max_mv": r["max_mv"],
+            "min_mv": r["min_mv"],
+        }
+        for r in reversed(recs[-HISTORY_ITEMS:])
+    ]
+    return {
+        "spread_mv": recs[-1]["spread_mv"] if recs else None,
+        "last_sample": _utc(recs[-1]["ts"]) if recs else None,
+        "sample_count": len(recs),
         "trend": trend,
         "history": history,
     }

@@ -175,3 +175,79 @@ def find_candidates(
     for cand in found:
         unique.setdefault(cand.power_entity, cand)
     return sorted(unique.values(), key=lambda c: c.name.lower())
+
+
+# ---------------------------------------------------------------------------
+# Optional extras: cell voltage sensors and the battery model
+# ---------------------------------------------------------------------------
+
+CELL_MAX_RE = re.compile(
+    r"(max|maximum|highest|high)_?cell_?(volt|voltage)|cell_?(volt|voltage)_?(max|maximum|highest|high)"
+)
+CELL_MIN_RE = re.compile(
+    r"(min|minimum|lowest|low)_?cell_?(volt|voltage)|cell_?(volt|voltage)_?(min|minimum|lowest|low)"
+)
+VOLT_UNITS = {"V", "mV"}
+TEMP_UNITS = {"°C", "°F"}
+TEMP_MAX_RE = re.compile(r"(max|maximum|highest)_?cell_?temp|cell_?temp(erature)?_?(max|maximum|highest)")
+TEMP_MIN_RE = re.compile(r"(min|minimum|lowest)_?cell_?temp|cell_?temp(erature)?_?(min|minimum|lowest)")
+# Never offer transistor / board temperatures as cell temperatures
+NOT_CELL_TEMP_RE = re.compile(r"mos|mosfet|internal|board|inverter|ambient|pcb")
+
+
+def find_cell_sensors(hass: HomeAssistant, soc_entity: str) -> dict[str, str]:
+    """Highest / lowest cell voltage and cell temperature on the same device
+    as the SOC sensor. Keys: max, min, temp_max, temp_min."""
+    ent_reg = er.async_get(hass)
+    soc_entry = ent_reg.async_get(soc_entity)
+    dev_id = soc_entry.device_id if soc_entry else None
+    prefix = _prefix(soc_entity, SOC_RE)
+    found: dict[str, str] = {}
+    for state in hass.states.async_all("sensor"):
+        unit = state.attributes.get("unit_of_measurement")
+        if unit not in VOLT_UNITS and unit not in TEMP_UNITS:
+            continue
+        entry = ent_reg.async_get(state.entity_id)
+        same_device = dev_id is not None and entry is not None and entry.device_id == dev_id
+        same_name = bool(prefix) and state.entity_id.split(".", 1)[1].startswith(prefix)
+        if not (same_device or same_name):
+            continue
+        text = _text(state, entry)
+        if "diff" in text or "delta" in text or "avg" in text or "average" in text:
+            continue
+        if unit in TEMP_UNITS:
+            if NOT_CELL_TEMP_RE.search(text):
+                continue
+            if TEMP_MAX_RE.search(text):
+                found.setdefault("temp_max", state.entity_id)
+            elif TEMP_MIN_RE.search(text):
+                found.setdefault("temp_min", state.entity_id)
+            continue
+        if CELL_MAX_RE.search(text):
+            found.setdefault("max", state.entity_id)
+        elif CELL_MIN_RE.search(text):
+            found.setdefault("min", state.entity_id)
+    return found
+
+
+def guess_model(hass: HomeAssistant, soc_entity: str) -> str | None:
+    """Best guess of the Marstek model from the device registry; None if unsure."""
+    from .const import MODEL_D, MODEL_E_V12, MODEL_E_V3
+
+    entry = er.async_get(hass).async_get(soc_entity)
+    device = (
+        dr.async_get(hass).async_get(entry.device_id)
+        if entry and entry.device_id
+        else None
+    )
+    parts = [soc_entity]
+    if device is not None:
+        parts += [device.model or "", device.name or "", device.name_by_user or ""]
+    text = re.sub(r"[^a-z0-9]+", "_", " ".join(parts).lower())
+    if re.search(r"vnse3|venus_?e_?(v_?3|3_0|gen_?3)", text):
+        return MODEL_E_V3
+    if re.search(r"vnsd|venus_?d($|_)", text):
+        return MODEL_D
+    if re.search(r"(^|_)hmg($|_)|venus_?e_?(v_?[12]|2_0)", text):
+        return MODEL_E_V12
+    return None

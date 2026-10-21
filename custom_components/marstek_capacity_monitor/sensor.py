@@ -12,14 +12,19 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, EntityCategory, UnitOfEnergy
+from homeassistant.const import (
+    PERCENTAGE,
+    EntityCategory,
+    UnitOfElectricPotential,
+    UnitOfEnergy,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import MonitorConfigEntry
-from .const import CONF_BATTERY_ID, DOMAIN
+from .const import CONF_BATTERY_ID, DOMAIN, MONITOR_STATUSES
 from .monitor import BatteryMonitor
 
 STATUS_OPTIONS = ["good", "attention", "critical", "no_measurement"]
@@ -29,6 +34,7 @@ STATUS_OPTIONS = ["good", "attention", "critical", "no_measurement"]
 class CapacitySensorDescription(SensorEntityDescription):
     value_fn: Callable[[BatteryMonitor], Any]
     attrs_fn: Callable[[BatteryMonitor], dict[str, Any]] | None = None
+    status_only: bool = False  # refreshed on status changes, not on recalcs
 
 
 def _r(m: BatteryMonitor, key: str) -> Any:
@@ -189,13 +195,47 @@ SENSORS: tuple[CapacitySensorDescription, ...] = (
 )
 
 
+STATUS_SENSOR = CapacitySensorDescription(
+    key="monitor_status",
+    translation_key="monitor_status",
+    device_class=SensorDeviceClass.ENUM,
+    options=MONITOR_STATUSES,
+    icon="mdi:heart-pulse",
+    status_only=True,
+    value_fn=lambda m: m.status.get("state"),
+    attrs_fn=lambda m: {k: v for k, v in m.status.items() if k != "state"},
+)
+
+CELL_SENSOR = CapacitySensorDescription(
+    key="cell_spread",
+    translation_key="cell_spread",
+    native_unit_of_measurement=UnitOfElectricPotential.MILLIVOLT,
+    device_class=SensorDeviceClass.VOLTAGE,
+    state_class=SensorStateClass.MEASUREMENT,
+    suggested_display_precision=0,
+    icon="mdi:battery-sync-outline",
+    value_fn=lambda m: m.cell_result.get("spread_mv"),
+    attrs_fn=lambda m: {
+        "last_sample": m.cell_result.get("last_sample"),
+        "sample_count": m.cell_result.get("sample_count"),
+        "trend": m.cell_result.get("trend"),
+        "history": m.cell_result.get("history"),
+        "cell_max_entity": m.cell_max_entity,
+        "cell_min_entity": m.cell_min_entity,
+    },
+)
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: MonitorConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     monitor = entry.runtime_data
-    async_add_entities(CapacitySensor(monitor, d) for d in SENSORS)
+    descriptions = [*SENSORS, STATUS_SENSOR]
+    if monitor.has_cells:
+        descriptions.append(CELL_SENSOR)
+    async_add_entities(CapacitySensor(monitor, d) for d in descriptions)
 
 
 class CapacitySensor(SensorEntity):
@@ -206,7 +246,7 @@ class CapacitySensor(SensorEntity):
     _attr_should_poll = False
     # Lists are only needed live by the cards; keep them out of the recorder
     # database (lower write load).
-    _unrecorded_attributes = frozenset({"trend", "history"})
+    _unrecorded_attributes = frozenset({"trend", "history", "last_data_minutes"})
 
     def __init__(
         self, monitor: BatteryMonitor, description: CapacitySensorDescription
@@ -225,9 +265,12 @@ class CapacitySensor(SensorEntity):
         )
 
     async def async_added_to_hass(self) -> None:
-        self.async_on_remove(
-            async_dispatcher_connect(self.hass, self._monitor.signal, self._refresh)
+        signal = (
+            self._monitor.status_signal
+            if self.entity_description.status_only
+            else self._monitor.signal
         )
+        self.async_on_remove(async_dispatcher_connect(self.hass, signal, self._refresh))
 
     @callback
     def _refresh(self) -> None:

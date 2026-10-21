@@ -1,0 +1,66 @@
+# Layout example: a "Sections" view (Home Assistant's standard dashboard layout).
+# The battery card is made for one third of the width: three batteries side by side.
+#
+#   1 or 2 batteries : batteries, then the overview to the right (one row of three)
+#   3 batteries      : overview 2/3 wide (free place next to it), then 3 in a row
+#   4 batteries      : overview, then 2 x 2
+#   5 batteries      : overview, then 3 + 2
+#   6 batteries      : overview, then 3 + 3
+#
+# In the raw configuration editor of a sections dashboard, add this as a view
+# (under `views:`). The section is three columns wide; the grid inside it has
+# 36 columns, so `columns: 12` is one third and `columns: 24` is two thirds.
+# The templates (marstek_capacity_templates.yaml) must be in the same dashboard.
+
+# --- Example A: two batteries -------------------------------------------------
+title: Batteries
+path: batteries
+type: sections
+max_columns: 3
+sections:
+  - type: grid
+    column_span: 3
+    cards:
+      - type: custom:button-card
+        template: marstek_capacity_battery
+        grid_options: {columns: 12, rows: auto}
+        triggers_update:
+          - sensor.marstek_mt1_capacity_pct
+          - sensor.marstek_mt1_monitor_status
+          - sensor.marstek_mt1_measured_capacity
+        variables: {battery: mt1, name: MT1, lang: en}
+      - type: custom:button-card
+        template: marstek_capacity_battery
+        grid_options: {columns: 12, rows: auto}
+        triggers_update:
+          - sensor.marstek_mt2_capacity_pct
+          - sensor.marstek_mt2_monitor_status
+          - sensor.marstek_mt2_measured_capacity
+        variables: {battery: mt2, name: MT2, lang: en}
+      - type: custom:button-card
+        template: marstek_capacity_overview
+        grid_options: {columns: 12, rows: auto}
+        triggers_update:
+          - sensor.marstek_mt1_capacity_pct
+          - sensor.marstek_mt1_monitor_status
+          - sensor.marstek_mt2_capacity_pct
+          - sensor.marstek_mt2_monitor_status
+        variables:
+          lang: en
+          months: 3          # narrow card: 3 months fit
+          batteries:
+            - {id: mt1, name: MT1}
+            - {id: mt2, name: MT2}
+
+# --- Example B: five batteries (overview 2/3 wide, then 3 + 2) -----------------
+# cards:
+#   - <overview>   grid_options: {columns: 24, rows: auto}   months: 6
+#   - <your own card here, or nothing>   grid_options: {columns: 12, rows: auto}
+#   - <battery 1>  grid_options: {columns: 12, rows: auto}
+#   - <battery 2>  grid_options: {columns: 12, rows: auto}
+#   - <battery 3>  grid_options: {columns: 12, rows: auto}
+#   - <battery 4>  grid_options: {columns: 12, rows: auto}
+#   - <battery 5>  grid_options: {columns: 12, rows: auto}
+# With four batteries use columns: 18 for each battery (2 x 2).
+# Without a card in the free place, Home Assistant moves the first battery up next
+# to the overview; if you want the batteries to start on a new row, put a card there.
