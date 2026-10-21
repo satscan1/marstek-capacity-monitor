@@ -244,9 +244,9 @@ class SwingTracker:
         if not br:
             return None
         gap = ts - br["ts"]
-        if gap > MAX_BRIDGE_S:
+        if gap > br.get("limit", MAX_BRIDGE_S):
             self.s["bridge"] = None
-            self._invalidate_swing("restart")
+            self._invalidate_swing(br.get("reason", "restart"))
         elif p_new is None:
             return None  # still waiting for the first value after the restart
         else:
@@ -272,6 +272,15 @@ class SwingTracker:
             self.s["power_ts"] = ts if new is not None else None
             return self._close_bridge(new, ts)
         self._integrate(ts)
+        if power_w is None and self.s["power_w"] is not None and self.s["power_ts"] is not None:
+            # Power sensor unavailable (e.g. a Modbus hiccup): bridge it like a
+            # restart, but only up to MAX_GAP_S; longer -> the swing does not count.
+            self.s["bridge"] = {
+                "ts": self.s["power_ts"],
+                "p": self.s["power_w"],
+                "limit": MAX_GAP_S,
+                "reason": "data_gap",
+            }
         self.s["power_w"] = None if power_w is None else power_w * self.s["sign"]
         if power_w is None:
             self.s["power_ts"] = None
