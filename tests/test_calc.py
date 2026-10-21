@@ -375,3 +375,33 @@ def test_soc_before_power_after_restart_keeps_gap_energy():
     assert r["valid"] and r["bridged_s"] == 240
     # gap: (1000 + 0) / 2 W for 240 s = 0.0333 kWh, included in the record
     assert r["e_dc_kwh"] == pytest.approx(4.4 + 0.0333, abs=0.002)
+
+
+def test_short_unavailable_power_is_bridged():
+    """Issue #1: power unavailable for 2 minutes mid-discharge, then back."""
+    tr = calc.SwingTracker()
+    tr.update_soc(100, T0)
+    _, t = simulate(tr, 100, 50, 2.5, T0)
+    tr.update_power(-3000.0, t)
+    tr.update_power(None, t + 30)  # unavailable
+    tr.tick(t + 90)
+    _, t2 = simulate(tr, 50, 11, 1.95, t + 150)  # back after 2 minutes
+    recs, _ = simulate(tr, 11, 30, 1.0, t2)
+    r = recs[0]
+    assert r["valid"] and r["bridged_s"] == 120
+    # 30 s before the outage + 120 s bridged at 3000 W = 0.125 kWh
+    assert r["e_dc_kwh"] == pytest.approx(2.5 + 0.125 + 1.95, abs=0.01)
+
+
+def test_long_unavailable_power_invalidates_swing():
+    """Issue #1: power unavailable for 10 minutes: the energy is unknown, do not count."""
+    tr = calc.SwingTracker()
+    tr.update_soc(100, T0)
+    _, t = simulate(tr, 100, 50, 2.5, T0)
+    tr.update_power(-3000.0, t)
+    tr.update_power(None, t + 30)
+    for k in range(1, 11):
+        tr.tick(t + 30 + 60 * k)
+    _, t2 = simulate(tr, 50, 11, 1.95, t + 660)
+    recs, _ = simulate(tr, 11, 30, 1.0, t2)
+    assert recs[0]["valid"] is False and recs[0]["reason"] == "data_gap"

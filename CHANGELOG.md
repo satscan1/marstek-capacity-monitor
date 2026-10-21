@@ -6,6 +6,7 @@
 
 - Fix: a battery standing still (empty or full, around 0 W) no longer shows *no recent data · check the connection*. Its state of charge and power simply do not change for hours. The status now only appears when the battery was charging or discharging (more than 50 W) and no new value came in for an hour. The minutes shown are now updated every hour.
 - Fix: a Home Assistant restart in the middle of a full discharge no longer throws the measurement away. A restart of up to 10 minutes is bridged: the energy in that gap is estimated from the power just before and just after. Such a measurement is marked `bridged_s` (seconds bridged).
+- Fix ([#1](https://github.com/satscan1/marstek-capacity-monitor/issues/1)): when the power sensor was briefly *unavailable* during a discharge, the energy of those minutes was silently missing and the measurement still counted, so the capacity came out too low. An outage of up to 5 minutes is now bridged the same way; a longer one makes the discharge not count. Thanks to @brauwers1981.
 - New: ready-made dashboards for 1 to 6 batteries, in English and Dutch, in `dashboard/ready-made/`. Paste one into a new dashboard and you are done.
 - Fix: *Reset measurements* (service `reset_measurements`) gave an error and did nothing.
 - Installation guide: step by step how to add the cards, in a new or an existing dashboard.
