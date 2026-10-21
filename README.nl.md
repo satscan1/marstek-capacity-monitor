@@ -17,7 +17,7 @@ Volg in Home Assistant of je Marstek-thuisbatterij zijn capaciteit houdt, gemete
 - **Plug & play:** kies je model en installatiedatum; de fabrieksgegevens worden voor je ingevuld.
 - **Laat zien of het werkt:** een status per batterij, en "verzamelt data" tot de eerste volledige ontlading.
 - **Optioneel: celbalans:** het verschil tussen de hoogste en laagste cel na een volle lading.
-- **Celtemperatuur als context (experimenteel)** en een **grafiek** op de batterijkaart (laatste 3 jaar of de hele garantie van 10 jaar): één druk op de knop Grafiek.
+- **Celtemperatuur als context (experimenteel)** en een **grafiek** op de batterijkaart (de recente 3 jaar): één druk op de knop Grafiek.
 - **Licht en lokaal:** alles in Home Assistant, geen InfluxDB of cloud.
 
 ## Installeren in 3 stappen
