@@ -10,7 +10,7 @@ triggers_update:
   - sensor.marstek_mt2_capacity_pct
   - sensor.marstek_mt2_monitor_status
 variables:
-  lang: nl          # en | nl
+  lang: nl          # en | nl | de
   months: 6
   batteries:
     - id: mt1

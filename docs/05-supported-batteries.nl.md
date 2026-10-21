@@ -19,7 +19,7 @@ Integraties zoals [marstek_venus_modbus](https://github.com/ViperRNMC/marstek_ve
 
 ## Fabrieksgegevens per model
 
-Bij het toevoegen kies je het model; deze waarden worden dan ingevuld. Je kunt ze later aanpassen via **Configureren**.
+Bij het toevoegen kies je het model; deze waarden worden dan ingevuld. Je kunt ze later aanpassen via **Configureer**.
 
 | Model | Opgegeven capaciteit | Reserve (ontlaaddiepte) | Cycli · capaciteit daarna | Garantietermijn |
 |---|---|---|---|---|
@@ -59,4 +59,4 @@ Geraadpleegd op 20-10-2026. Waar bronnen elkaar tegenspreken, gebruikt de tool d
 | Venus D | 2,56 kWh per unit · meer dan 10.000 cycli · rekenvoorbeelden met 90 % ontlaaddiepte | [Marstek – Venus D](https://marstekenergy.com/en-us/products/marstek-venus-d-ac-version) |
 | Garantie | Materiaal- en fabricagefouten; geen capaciteitspercentage; normale slijtage en aansluiting op hardware/software van derden uitgesloten | [Marstek – Garantiebeleid](https://marstekenergy.com/nl-nl/pages/warranty) |
 
-Controleer je eigen voorwaarden. Je past de waarden aan via **Instellingen → Apparaten & diensten → Marstek Capacity Monitor → Configureren**.
+Controleer je eigen voorwaarden. Je past de waarden aan via **Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren**.

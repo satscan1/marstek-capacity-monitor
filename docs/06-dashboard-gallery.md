@@ -1,5 +1,7 @@
 # 06 – Dashboard: layout, card and gallery
 
+*[Nederlands](06-dashboard-gallery.nl.md) · [Deutsch](06-dashboard-gallery.de.md)*
+
 This page shows how the cards look with 1 to 6 batteries, what each part of the battery card means and how to arrange the cards.
 
 > All images on this page use **demo data**: six made-up batteries of different ages and conditions. They show how the cards look, not how a real battery ages. The gallery screenshots are in Dutch; the numbered card below is shown in English.
@@ -16,9 +18,9 @@ The battery card is made for **one third of the width**: three batteries side by
 | 5 | Overview two thirds wide, then 3 + 2 |
 | 6 | Overview two thirds wide, then 3 + 3 |
 
-From 3 batteries on, one third next to the overview is free for a card of your own. If you leave it empty, Home Assistant moves the first battery up next to the overview; to start the batteries on a new row, put a card there (the ready-made dashboards use a text card "Free spot").
+From 3 batteries on, one third next to the overview is free for a card of your own. If you leave it empty, Home Assistant moves the first battery up next to the overview; to start the batteries on a new row, put a card there (the one-click dashboard and the ready-made dashboards use a text card "Free spot"; the gallery shows the Dutch "Vrije plek").
 
-This layout is ready in the [ready-made dashboards](01-installation.md#quickest-way-ready-made-dashboard), one per number of batteries.
+The [one-click dashboard](01-installation.md#quickest-way-dashboard-in-one-click) uses this layout by itself. For button-card there are [ready-made dashboards](01-installation.md#ready-made-dashboard-with-button-card), one per number of batteries.
 
 Arranging it yourself? Use Home Assistant's standard **Sections** layout. An example is in [`dashboard/button-card/layout-sections.yaml`](../dashboard/button-card/layout-sections.yaml). Give each card a width with `grid_options`: in a section three columns wide, `columns: 12` is one third and `columns: 24` is two thirds. With 4 batteries use `columns: 18` per battery.
 
@@ -101,4 +103,4 @@ Each of the six demo batteries shows a different situation:
 
 ## Trying a demo yourself
 
-The cards accept a `demo` variable with fake data; the gallery above was made with it. That data lives only in the dashboard configuration: no sensors are created and nothing goes into your history. You do not need this for normal use.
+The cards accept fake data with the `demo` option (for button-card: the `demo` variable); the gallery above was made with it. That data lives only in the dashboard configuration: no sensors are created and nothing goes into your history. You do not need this for normal use.

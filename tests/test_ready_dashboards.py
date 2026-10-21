@@ -22,7 +22,7 @@ def test_files_are_up_to_date():
         )
 
 
-@pytest.mark.parametrize("lang", ["en", "nl"])
+@pytest.mark.parametrize("lang", ["en", "nl", "de"])
 @pytest.mark.parametrize("n", range(1, 7))
 def test_layout(n, lang):
     cfg = yaml.safe_load(build.build(n, lang))
