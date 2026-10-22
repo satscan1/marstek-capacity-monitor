@@ -92,3 +92,51 @@ def test_dashboard_layout_for_1_to_6_batteries(tmp_path):
                              "de": "Batteriekapazität", "fr": "Battery capacity"}
     assert out["cards"] == ["marstek-capacity-card", "marstek-capacity-overview-card"]
     assert out["strategies"] == [["marstek-capacity", "dashboard"]]
+
+
+ACTION_TEST = r"""
+const fs = require("fs");
+global.HTMLElement = class {};
+const defined = {};
+global.customElements = { get: (n) => defined[n], define: (n, c) => { defined[n] = c; } };
+global.window = {};
+global.console = { info() {}, log: console.log };
+eval(fs.readFileSync(process.argv[2], "utf8"));
+const S = {
+  "sensor.marstek_mt1_measured_capacity": { state: "4.4", attributes: { trend: [] } },
+  "sensor.marstek_mt1_capacity_pct": { state: "97", attributes: {} },
+  "sensor.marstek_mt1_expected_capacity": { state: "96", attributes: {} },
+  "sensor.marstek_mt1_soc_health": { state: "advies", attributes: { count: 3, last_size: 12, trend: [] } },
+  "sensor.marstek_mt1_cell_health": { state: "ok", attributes: { trend: [] } },
+};
+const card = new defined["marstek-capacity-card"]();
+const calls = [];
+card._config = { battery: "mt1" };
+card._hass = { states: S, entities: {}, devices: {}, callService: (...a) => calls.push(a) };
+const out = {};
+const acts = (html) => [...html.matchAll(/data-mc="([^"]*)"/g)].map((m) => m[1]);
+out.closed = acts(card._html()).length;
+card._action(acts(card._html())[1]);
+out.panel = card._panel;
+const html = card._html();
+out.advice = html.includes("twee keer") || html.includes("twice");
+card._action(acts(html).pop());
+out.calls = calls;
+card._action(acts(card._html())[1]);
+out.closedAgain = card._panel;
+process.stdout.write(JSON.stringify(out));
+"""
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
+def test_card_buttons_open_panels_and_dismiss(tmp_path):
+    script = tmp_path / "t.js"
+    script.write_text(ACTION_TEST)
+    out = json.loads(subprocess.run(
+        ["node", str(script), str(build_card.OUT)], capture_output=True, text=True, check=True
+    ).stdout)
+    assert out["closed"] == 3  # Chart · SOC · Cells
+    assert out["panel"] == "soc"
+    assert out["advice"]
+    assert out["calls"] == [["marstek_capacity_monitor", "dismiss_advice", {"battery": "mt1", "kind": "soc"}]]
+    assert out["closedAgain"] == ""
