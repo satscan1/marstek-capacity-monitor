@@ -34,8 +34,8 @@ Zelf indelen? Gebruik hiervoor de standaardindeling van Home Assistant met **sec
 4. **Instellingen** (tandwiel): brengt je naar deze batterij onder Instellingen → Apparaten en diensten; het tandwiel daar opent *Configureren*.
 5. **Drie capaciteiten**: *Opgegeven* (op het typeplaatje), *Bruikbaar* (opgegeven min de reserve die de batterij zelf vasthoudt) en *Gemeten* (wat er nu echt uitkomt, en hoeveel procent van bruikbaar dat is).
 6. **Balk**: de gemeten capaciteit, met een wit streepje voor de specificatie van de fabrikant en een rood streepje bij 75 %.
-7. **Marge**: hoeveel je boven (+) of onder (−) de specificatie zit, met het aantal cycli en de leeftijd. Wijs aan voor de specificatie in kWh.
-8. **Laatste volle ontlading en volle lading**, het aantal metingen en de versie van de kaart.
+7. **Marge**: hoeveel je boven (+) of onder (−) de specificatie zit, met het aantal cycli en de leeftijd. Wijs aan voor de specificatie in kWh en waar de cycli van vóór de monitoring vandaan komen.
+8. **Laatste volle ontlading en volle lading** en de versie van de kaart.
 
 **De grafiek** toont de meest recente 3 jaar. Elke stip is een maand: hoeveel van de bruikbare capaciteit er toen nog was. ● gemeten, geijkt · ○ minder betrouwbaar (in de 14 dagen ervoor niet helemaal vol, of cellen kouder dan 5 °C) · grijze stippellijn: verwacht volgens specificatie · rode stippellijn: melden bij Marstek (75 %). Wijs een stip aan voor het getal, de specificatie en de celtemperatuur in die maand.
 
