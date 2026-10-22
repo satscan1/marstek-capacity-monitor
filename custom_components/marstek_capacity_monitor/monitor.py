@@ -16,6 +16,7 @@ from homeassistant.const import (
     UnitOfPower,
 )
 from homeassistant.core import Event, EventStateChangedData, HomeAssistant, State, callback
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import (
     async_track_state_change_event,
@@ -24,6 +25,14 @@ from homeassistant.helpers.event import (
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
+from . import advice
+from .health import (
+    SocHealthTracker,
+    add_events,
+    evaluate_cell_health,
+    evaluate_soc,
+    note_day,
+)
 from .calc import (
     HISTORY_DAYS,
     MAX_CELL_RECORDS,
@@ -43,6 +52,11 @@ from .const import (
     CONF_CELL_MAX_ENTITY,
     CONF_CELL_MIN_ENTITY,
     CONF_MODEL,
+    CONF_NOTIFY,
+    EVENT_ADVICE,
+    KIND_CELLS,
+    KIND_SOC,
+    NOTIFY_ACTION_PREFIX,
     CONF_TEMP_MAX_ENTITY,
     CONF_TEMP_MIN_ENTITY,
     CONF_CYCLE_EOL,
@@ -142,6 +156,18 @@ class BatteryMonitor:
         self.result: dict[str, Any] = {}
         self.last_session: dict[str, Any] | None = None
         self._unsubs: list = []
+        # SOC drift and cell calibration (0.5)
+        self.notify: bool = bool(entry_setting(entry, CONF_NOTIFY))
+        self.health = self._new_health()
+        self.soc_events: list[dict[str, Any]] = []
+        self.full_days: list[str] = []
+        self.alive_days: list[str] = []
+        self.soc_since: float | None = None
+        self.dismissed: dict[str, float | None] = {}
+        self.notified: dict[str, list | None] = {}
+        self.soc_result: dict[str, Any] = {"level": "ok", "trend": []}
+        self.cell_health: dict[str, Any] = {"level": "ok"}
+        self._issues: dict[str, str] = {}
 
     @property
     def signal(self) -> str:
@@ -204,6 +230,14 @@ class BatteryMonitor:
             self.cells = CellBalanceTracker(data.get("cells"))
             self.cell_records = data.get("cell_records", [])
             self.cell_result = evaluate_cells(self.cell_records)
+            self.health = self._new_health(data.get("health"))
+            self.soc_events = data.get("soc_events", [])
+            self.full_days = data.get("full_days", [])
+            self.alive_days = data.get("alive_days", [])
+            self.soc_since = data.get("soc_since")
+            self.dismissed = data.get("dismissed", {})
+            self.notified = data.get("notified", {})
+            self.health.after_restart()
             # HA was down: a short gap (<= 10 min) is bridged with the average
             # of the power before and after; a longer one invalidates the swing.
             self.tracker.start_after_restart(self._now_ts())
@@ -245,6 +279,11 @@ class BatteryMonitor:
         self._unsubs.append(
             self.hass.bus.async_listen(EVENT_HOMEASSISTANT_STOP, self._on_ha_stop)
         )
+        self._unsubs.append(
+            self.hass.bus.async_listen(
+                ir.EVENT_REPAIRS_ISSUE_REGISTRY_UPDATED, self._on_issue_update
+            )
+        )
         if self.has_cells:
             self._unsubs.append(
                 async_track_state_change_event(
@@ -267,6 +306,8 @@ class BatteryMonitor:
         """
         found: list[dict[str, Any]] = []
         replay = self._new_tracker()
+        replay_health = self._new_health()
+        h_out: dict[str, list] = {"events": [], "full_days": [], "alive_days": []}
         if "recorder" in self.hass.config.components:
             from homeassistant.components.recorder import get_instance, history  # noqa: PLC0415
 
@@ -296,12 +337,22 @@ class BatteryMonitor:
                         (st.last_updated.timestamp(), "s", self._soc(st))
                         for st in soc_states
                     ]
-                    found += replay_history(replay, events)
+                    found += replay_history(replay, events, replay_health, h_out)
                     first = False
                     day = stop
             except Exception:  # noqa: BLE001 - history is a bonus, never fatal
                 _LOGGER.debug("%s: no history available", self.entry.title, exc_info=True)
                 found = []
+                h_out = {"events": [], "full_days": [], "alive_days": []}
+        # SOC drift events from the history (only before the battery was added)
+        old_ev = [e for e in h_out["events"] if e["ts"] < until]
+        if old_ev or h_out["alive_days"]:
+            self.soc_events = sorted(old_ev + self.soc_events, key=lambda e: e["ts"])
+            self.full_days = sorted(set(h_out["full_days"]) | set(self.full_days))
+            self.alive_days = sorted(set(h_out["alive_days"]) | set(self.alive_days))
+            since = replay_health.s.get("since")
+            if since is not None and (self.soc_since is None or since < self.soc_since):
+                self.soc_since = since
         found = [
             r
             for r in found
@@ -315,6 +366,7 @@ class BatteryMonitor:
                 sum(1 for r in found if is_full_discharge(r)),
             )
         if self.tracker.adopt_sign(replay):
+            self._swap_health_energy()
             _LOGGER.info("%s: power sign taken over from the history", self.entry.title)
         self._history_until = None
         await self._store.async_save(self._data())
@@ -338,6 +390,10 @@ class BatteryMonitor:
         self._temps.clear()
         self.cells = CellBalanceTracker()
         self.cell_result = evaluate_cells([])
+        self.health = self._new_health()
+        self.soc_events, self.full_days, self.alive_days = [], [], []
+        self.soc_since = None
+        self.dismissed, self.notified = {}, {}
         await self._store.async_save(self._data())
         self._recalculate()
         self._update_status(force=True)
@@ -352,6 +408,14 @@ class BatteryMonitor:
             tracker.s["sign"] = 1
             tracker.s["sign_flipped"] = False
         return tracker
+
+    def _new_health(self, state: dict[str, Any] | None = None) -> SocHealthTracker:
+        return SocHealthTracker(state, unit_kwh=self.spec.nominal_kwh / 100)
+
+    def _swap_health_energy(self) -> None:
+        """The power sign was reversed: the counted energy changed buckets."""
+        h = self.health.s
+        h["e_c"], h["e_d"] = h.get("e_d"), h.get("e_c")
 
     @property
     def power_sign_state(self) -> str:
@@ -370,6 +434,13 @@ class BatteryMonitor:
             "cell_records": self.cell_records,
             # set while the one-time history check has not finished yet
             "history_until": self._history_until,
+            "health": self.health.s,
+            "soc_events": self.soc_events,
+            "full_days": self.full_days,
+            "alive_days": self.alive_days,
+            "soc_since": self.soc_since,
+            "dismissed": self.dismissed,
+            "notified": self.notified,
         }
 
     @staticmethod
@@ -400,14 +471,184 @@ class BatteryMonitor:
             return None
         return value if 0 <= value <= 100 else None
 
+    def _tops(self) -> list[float]:
+        return [e["ts"] for e in self.soc_events if e["type"] == "top"]
+
+    def _other_jumps(self) -> list[float]:
+        """Jumps of the other batteries: at the same time = data, not battery."""
+        out: list[float] = []
+        for entry in self.hass.config_entries.async_entries(DOMAIN):
+            other = getattr(entry, "runtime_data", None)
+            if entry.entry_id == self.entry.entry_id or not isinstance(other, BatteryMonitor):
+                continue
+            out += [e["ts"] for e in other.soc_events if e["type"] == "jump"]
+        return out
+
+    def _evaluate_health(self) -> None:
+        now = self._now_ts()
+        self.soc_result = evaluate_soc(
+            self.soc_events, self.full_days, self.alive_days, now, self._other_jumps()
+        )
+        if self.has_cells:
+            self.cell_health = evaluate_cell_health(
+                self.cell_records,
+                [e for e in self.soc_events if e["type"] == "rest"],
+                now,
+                self.health.rest_hours_now(now),
+            )
+        else:
+            self.cell_health = {"level": "ok"}
+        self._update_advice()
+
     def _recalculate(self) -> None:
         self.result = evaluate(
             self.spec,
             self.records,
             self.tracker.cumulative_discharge_kwh,
             dt_util.now().replace(tzinfo=None),
+            self._tops(),
+            self.soc_since,
         )
+        self._evaluate_health()
         async_dispatcher_send(self.hass, self.signal)
+
+    # -- advice: "let op" and advice messages -------------------------------
+
+    def health_of(self, kind: str) -> dict[str, Any]:
+        return self.cell_health if kind == KIND_CELLS else self.soc_result
+
+    def is_dismissed(self, kind: str) -> bool:
+        res = self.health_of(kind)
+        return res.get("level", "ok") != "ok" and self.dismissed.get(kind) == res.get("since")
+
+    def _issue_id(self, kind: str, since: float) -> str:
+        return f"{kind}_{self.entry.entry_id}_{int(since)}"
+
+    def _clear_issue(self, kind: str) -> None:
+        issue = self._issues.pop(kind, None)
+        if issue:
+            ir.async_delete_issue(self.hass, DOMAIN, issue)
+
+    def _phones(self) -> list[str]:
+        return sorted(
+            name
+            for name in self.hass.services.async_services().get("notify", {})
+            if name.startswith("mobile_app_")
+        )
+
+    def _tag(self, kind: str) -> str:
+        return f"{DOMAIN}_{self.entry.entry_id}_{kind}"
+
+    def _phone(self, kind: str, text: str | None, since: float | None = None) -> None:
+        """Send (text) or remove (None) the message on every phone with the app."""
+        lang = advice.lang_of(self.hass.config.language)
+        for name in self._phones():
+            if text is None:
+                data = {"message": "clear_notification", "data": {"tag": self._tag(kind)}}
+            else:
+                data = {
+                    "title": advice.TITLE,
+                    "message": text,
+                    "data": {
+                        "tag": self._tag(kind),
+                        "actions": [
+                            {
+                                "action": f"{NOTIFY_ACTION_PREFIX}|{self.entry.entry_id}|{kind}|{int(since or 0)}",
+                                "title": advice.DISMISS[lang],
+                            }
+                        ],
+                    },
+                }
+            self.hass.async_create_task(
+                self.hass.services.async_call("notify", name, data, blocking=False)
+            )
+
+    def _update_advice(self) -> None:
+        """Fire an event and send a message when the level of a subject changes."""
+        for kind in (KIND_SOC, KIND_CELLS):
+            res = self.health_of(kind)
+            level, since = res.get("level", "ok"), res.get("since")
+            key = [level, since] if level != "ok" else None
+            old = self.notified.get(kind)
+            if key == old:
+                # Repairs are not kept over a restart: put it back when needed
+                if key and self.notify and not self.is_dismissed(kind):
+                    self._ensure_issue(kind, level, since, res)
+                elif key:
+                    self._clear_issue(kind)
+                continue
+            self.notified[kind] = key
+            self.hass.bus.async_fire(
+                EVENT_ADVICE,
+                {
+                    "entry_id": self.entry.entry_id,
+                    "name": self.entry.title,
+                    "battery": self.entry.data.get("battery_id"),
+                    "kind": kind,
+                    "level": level,
+                    "count": res.get("count"),
+                    "size": res.get("last_size"),
+                },
+            )
+            self._store.async_delay_save(self._data, 5)
+            self._clear_issue(kind)
+            if level == "ok":
+                if old:
+                    self._phone(kind, None)
+                continue
+            if not self.notify or self.is_dismissed(kind):
+                continue
+            text = self._ensure_issue(kind, level, since, res)
+            self._phone(kind, text, since)
+
+    def _ensure_issue(self, kind: str, level: str, since: float, res: dict[str, Any]) -> str:
+        """Create (or keep) the message under Settings -> Repairs; returns its text."""
+        text = advice.message(
+            kind, level, self.entry.title, res, self.model, self.hass.config.language
+        )
+        issue = self._issue_id(kind, since)
+        if self._issues.get(kind) not in (None, issue):
+            self._clear_issue(kind)
+        ir.async_create_issue(
+            self.hass,
+            DOMAIN,
+            issue,
+            is_fixable=False,
+            is_persistent=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key=f"{kind}_{level}",
+            translation_placeholders={"name": self.entry.title, "message": text},
+        )
+        self._issues[kind] = issue
+        return text
+
+    async def async_dismiss(self, kind: str, since: float | None = None) -> bool:
+        """Dismiss the current "let op" or advice once (card, phone or Repairs).
+        It comes back only with a new series of occurrences."""
+        res = self.health_of(kind)
+        if res.get("level", "ok") == "ok":
+            return False
+        if since is not None and int(since) != int(res.get("since") or 0):
+            return False  # an old message: a newer series is running
+        self.dismissed[kind] = res.get("since")
+        self._clear_issue(kind)
+        self._phone(kind, None)
+        await self._store.async_save(self._data())
+        async_dispatcher_send(self.hass, self.signal)
+        return True
+
+    @callback
+    def _on_issue_update(self, event: Event) -> None:
+        """Ignored under Settings -> Repairs: same as dismissing on the card."""
+        data = event.data
+        if data.get("domain") != DOMAIN or data.get("action") != "update":
+            return
+        for kind, issue_id in list(self._issues.items()):
+            if issue_id != data.get("issue_id"):
+                continue
+            issue = ir.async_get(self.hass).async_get_issue(DOMAIN, issue_id)
+            if issue is not None and issue.dismissed_version is not None:
+                self.hass.async_create_task(self.async_dismiss(kind))
 
     def _cell_mv(self, entity_id: str | None) -> float | None:
         state = self.hass.states.get(entity_id) if entity_id else None
@@ -434,6 +675,7 @@ class BatteryMonitor:
         self.cell_records.append(record)
         del self.cell_records[:-MAX_CELL_RECORDS]
         self.cell_result = evaluate_cells(self.cell_records)
+        self._evaluate_health()
         self.hass.async_create_task(self._store.async_save(self._data()))
         _LOGGER.debug("%s: cell spread recorded %s", self.entry.title, record)
         async_dispatcher_send(self.hass, self.signal)
@@ -524,8 +766,23 @@ class BatteryMonitor:
 
     # -- event handlers -----------------------------------------------------
 
+    def _health_events(self, new: list[dict[str, Any]]) -> None:
+        if not new:
+            return
+        add_events(self.soc_events, new)
+        self._evaluate_health()
+        async_dispatcher_send(self.hass, self.signal)
+
+    @property
+    def _bridging(self) -> bool:
+        return bool(self.tracker.s.get("bridge"))
+
     def _handle_power(self, state: State | None) -> None:
-        record = self.tracker.update_power(self._power_w(state), self._now_ts())
+        ts = self._now_ts()
+        record = self.tracker.update_power(self._power_w(state), ts)
+        self._health_events(
+            self.health.on_power(self.tracker.s.get("power_w"), ts, gap=self._bridging)
+        )
         self._check_cells()
         if record is not None:
             self._process_record(record)
@@ -535,7 +792,20 @@ class BatteryMonitor:
         soc = self._soc(state)
         if soc is None:
             return
-        record = self.tracker.update_soc(soc, self._now_ts())
+        ts = self._now_ts()
+        record = self.tracker.update_soc(soc, ts)
+        if self.soc_since is None:
+            self.soc_since = ts
+        note_day(self.full_days, self.alive_days, soc, ts)
+        self._health_events(
+            self.health.on_soc(
+                soc,
+                self.tracker.s["e_charge_kwh"],
+                self.tracker.s["e_discharge_kwh"],
+                ts,
+                gap=self._bridging,
+            )
+        )
         self._check_cells()
         self._update_status()
         if record is None:
@@ -558,6 +828,7 @@ class BatteryMonitor:
         )
         _LOGGER.debug("%s: session recorded %s", self.entry.title, record)
         if record.get("sign_corrected"):
+            self._swap_health_energy()
             _LOGGER.warning(
                 "%s: %s reports charging as negative; the sign was reversed "
                 "automatically",
@@ -592,7 +863,10 @@ class BatteryMonitor:
 
     @callback
     def _on_tick(self, _now: datetime) -> None:
-        record = self.tracker.tick(self._now_ts())
+        ts = self._now_ts()
+        record = self.tracker.tick(ts)
+        self._health_events(self.health.tick(ts, gap=self._bridging))
+        note_day(self.full_days, self.alive_days, self.tracker.s.get("soc"), ts)
         self._sample_temps()
         self._check_cells()
         if record is not None:
