@@ -837,3 +837,19 @@ async def test_live_jump_and_calibration_point(hass: HomeAssistant, freezer) -> 
     state = hass.states.get("sensor.marstek_mt1_soc_health")
     assert state.attributes["last_calibration"] is not None
     assert state.attributes["trend"][0]["dev"] >= 34
+
+
+async def test_sensitivity_options(hass: HomeAssistant, freezer) -> None:
+    freezer.move_to("2026-10-22 12:00:00+00:00")
+    entry, calls = await _setup_with_phone(hass)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert "soc_sensitivity" in result["data_schema"].schema
+    hass.config_entries.async_update_entry(entry, options={**entry.options, "soc_sensitivity": "off"})
+    await hass.async_block_till_done()
+    monitor = entry.runtime_data
+    _drift(monitor)
+    await hass.async_block_till_done()
+    state = hass.states.get("sensor.marstek_mt1_soc_health")
+    assert state.state == "ok" and state.attributes["sensitivity"] == "off"
+    assert state.attributes["trend"]
+    assert not [c for c in calls if c.get("message") != "clear_notification"]
