@@ -5,3 +5,24 @@ reset_measurements:
       selector:
         config_entry:
           integration: marstek_capacity_monitor
+
+dismiss_advice:
+  fields:
+    battery:
+      required: false
+      example: mt1
+      selector:
+        text:
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: marstek_capacity_monitor
+    kind:
+      required: true
+      selector:
+        select:
+          options:
+            - soc
+            - cells
+          translation_key: kind

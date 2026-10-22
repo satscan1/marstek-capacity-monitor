@@ -42,13 +42,28 @@ CONF_MODEL = "model"
 CONF_PACKS = "packs"
 MODEL_E_V12 = "venus_e_v12"
 MODEL_E_V3 = "venus_e_v3"
+MODEL_E_V4 = "venus_e_v4"
+MODEL_E_MAX = "venus_e_max"
+MODEL_E_PRO = "venus_e_pro"
 MODEL_D = "venus_d"
 MODEL_OTHER = "other"
-MODELS = [MODEL_E_V12, MODEL_E_V3, MODEL_D, MODEL_OTHER]
+MODELS = [
+    MODEL_E_V12,
+    MODEL_E_V3,
+    MODEL_E_V4,
+    MODEL_E_MAX,
+    MODEL_E_PRO,
+    MODEL_D,
+    MODEL_OTHER,
+]
 
 # Sources: docs/05-supported-batteries.md (checked 20-10-2026).
 # Where sources disagree the most cautious value is used.
 _SPEC_LINE = {CONF_CYCLE_LIFE: 6000.0, CONF_CYCLE_EOL: 80.0, CONF_WARRANTY_YEARS: 10.0}
+# New generation (2026, 314 Ah LFP cells): > 10,000 cycles at 25 °C. Marstek does
+# not state the capacity after those cycles for these models; 80 % is assumed,
+# as stated for the Venus E Mini (same cells). Change it under Configure.
+_SPEC_LINE_10K = {CONF_CYCLE_LIFE: 10000.0, CONF_CYCLE_EOL: 80.0, CONF_WARRANTY_YEARS: 10.0}
 MODEL_PRESETS: dict[str, dict[str, float]] = {
     # Venus E datasheet: 5.12 kWh, 90 % DoD, > 6000 cycles
     MODEL_E_V12: {CONF_NOMINAL_KWH: 5.12, CONF_RESERVE_KWH: 0.51, **_SPEC_LINE},
@@ -57,19 +72,44 @@ MODEL_PRESETS: dict[str, dict[str, float]] = {
     # Venus D product page: 2.56 kWh per unit, calculated with 90 % DoD.
     # Values are per pack and multiplied by the number of packs.
     MODEL_D: {CONF_NOMINAL_KWH: 2.56, CONF_RESERVE_KWH: 0.256, **_SPEC_LINE},
+    # Venus E 4.0 brochure: 5024 Wh (314 Ah x 5S, 16 V), DoD 88 %
+    MODEL_E_V4: {CONF_NOMINAL_KWH: 5.024, CONF_RESERVE_KWH: 0.603, **_SPEC_LINE_10K},
+    # Venus E Max brochure: 10.048 kWh (314 Ah x 10S, 32 V), DoD 90 %
+    MODEL_E_MAX: {CONF_NOMINAL_KWH: 10.048, CONF_RESERVE_KWH: 1.005, **_SPEC_LINE_10K},
+    # Venus E Pro brochure (EU): 2.08 kWh per pack (41.6 V, 13S), DoD 90 %,
+    # base unit + 0-5 extra packs. Per pack, multiplied by the number of packs.
+    MODEL_E_PRO: {CONF_NOMINAL_KWH: 2.08, CONF_RESERVE_KWH: 0.208, **_SPEC_LINE_10K},
 }
 MAX_PACKS = 6
+PACK_MODELS = (MODEL_D, MODEL_E_PRO)
+
+# UPS mode (keeps the battery full while there is grid), used in the advice
+# text for cell calibration. True: Marstek describes it; None: unknown or
+# depends on the firmware (the text then also gives the alternative).
+MODEL_UPS: dict[str, bool | None] = {
+    MODEL_E_V3: True,
+    MODEL_E_V12: None,  # a Homey app tested with a v2.0 has a card for it
+}
 
 
 def preset_for(model: str, packs: int = 1) -> dict[str, float]:
     """Factory data for a model; empty for 'other'."""
     preset = dict(MODEL_PRESETS.get(model, {}))
-    if model == MODEL_D and preset:
+    if model in PACK_MODELS and preset:
         packs = max(1, min(int(packs or 1), MAX_PACKS))
         preset[CONF_NOMINAL_KWH] = round(preset[CONF_NOMINAL_KWH] * packs, 2)
         preset[CONF_RESERVE_KWH] = round(preset[CONF_RESERVE_KWH] * packs, 2)
     return preset
 
+
+# Notifications (0.5): "let op" and advice for SOC drift and cell calibration,
+# as a message on the phone and under Settings -> Repairs. On by default.
+CONF_NOTIFY = "notify"
+DEFAULTS[CONF_NOTIFY] = True
+EVENT_ADVICE = "marstek_capacity_monitor_advice"
+NOTIFY_ACTION_PREFIX = "MCM_DISMISS"
+KIND_SOC = "soc"
+KIND_CELLS = "cells"
 
 # Optional: highest / lowest cell voltage for the cell balance check
 CONF_CELL_MAX_ENTITY = "cell_max_entity"

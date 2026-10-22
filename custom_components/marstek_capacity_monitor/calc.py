@@ -22,6 +22,17 @@ from datetime import date, datetime, timezone
 from statistics import median
 from typing import Any
 
+try:
+    from . import health as _health
+except ImportError:  # loaded on its own, without Home Assistant (tests)
+    import importlib.util as _ilu
+    from pathlib import Path as _Path
+
+    _hs = _ilu.spec_from_file_location("mcm_health", _Path(__file__).with_name("health.py"))
+    _health = _ilu.module_from_spec(_hs)
+    _hs.loader.exec_module(_health)
+reliability = _health.reliability
+
 # ---------------------------------------------------------------------------
 # Tuning (defaults match the Marstek Venus E 5.12 kWh)
 # ---------------------------------------------------------------------------
@@ -461,7 +472,10 @@ SOC_JUMP_PCT = 2.0  # SOC step after a quiet time that cannot be "standing still
 
 
 def replay_history(
-    tracker: SwingTracker, events: list[tuple[float, str, float | None]]
+    tracker: SwingTracker,
+    events: list[tuple[float, str, float | None]],
+    health: Any = None,
+    health_out: dict[str, list] | None = None,
 ) -> list[dict[str, Any]]:
     """Feed recorded SOC ("s") and power ("p") values through a tracker.
 
@@ -470,7 +484,11 @@ def replay_history(
     A (dis)charging battery whose power did not change for more than MAX_GAP_S
     is treated as a data gap (e.g. Home Assistant was off): that swing does not
     count. Returns the completed swing records, marked as coming from history.
+
+    With `health` (a SocHealthTracker) and `health_out` ({"events", "full_days",
+    "alive_days"}) the SOC drift events are collected as well (0.5).
     """
+    add_events, note_day = _health.add_events, _health.note_day
     out: list[dict[str, Any]] = []
     soc_before_gap: float | None = None
     for ts, kind, value in sorted(events, key=lambda e: e[0]):
@@ -484,15 +502,34 @@ def replay_history(
             while t < ts:
                 tracker.tick(t)
                 t += TICK_S
+        gap_in_quiet = False
         if kind == "p":
             rec = tracker.update_power(value, ts)
+            if health is not None:
+                add_events(
+                    health_out["events"],
+                    health.on_power(tracker.s["power_w"], ts, gap=bool(tracker.s.get("bridge"))),
+                )
         elif value is not None:
             if soc_before_gap is not None and abs(value - soc_before_gap) >= SOC_JUMP_PCT:
                 # The SOC moved during the quiet time: the battery was not
                 # idle, Home Assistant was off. The energy is unknown.
                 tracker._invalidate_swing("data_gap")  # noqa: SLF001
+                gap_in_quiet = True
             soc_before_gap = None
             rec = tracker.update_soc(value, ts)
+            if health is not None:
+                add_events(
+                    health_out["events"],
+                    health.on_soc(
+                        value,
+                        tracker.s["e_charge_kwh"],
+                        tracker.s["e_discharge_kwh"],
+                        ts,
+                        gap=gap_in_quiet or bool(tracker.s.get("bridge")),
+                    ),
+                )
+                note_day(health_out["full_days"], health_out["alive_days"], value, ts)
         else:
             rec = None
         if rec:
@@ -518,8 +555,13 @@ def evaluate(
     records: list[dict[str, Any]],
     cumulative_discharge_kwh: float,
     now: datetime,
+    tops: list[float] | None = None,
+    soc_since: float | None = None,
 ) -> dict[str, Any]:
-    """Every number the sensors and the cards show."""
+    """Every number the sensors and the cards show.
+
+    tops / soc_since (0.5): calibration points of the SOC meter, to mark each
+    month as calibrated (filled dot) or less reliable (open dot)."""
     today = now.date()
     usable = spec.usable_kwh
 
@@ -567,6 +609,10 @@ def evaluate(
         )
         m_pct = pct(median(mc))
         temps = [r["temp_c"] for r in recs if r.get("temp_c") is not None]
+        rel = [reliability(r, tops or [], soc_since) for r in recs]
+        good = sum(1 for x in rel if x["reliable"])
+        whys = [x["why"] for x in rel if not x["reliable"]]
+        ages = [x["ref_age_d"] for x in rel if x.get("ref_age_d") is not None]
         trend.append(
             {
                 "month": key,
@@ -577,6 +623,9 @@ def evaluate(
                 "status": classify(spec, m_pct, m_exp),
                 "n": len(mc),
                 "temp_c": round(median(temps), 1) if temps else None,
+                "reliable": good * 2 >= len(rel),
+                "why": max(set(whys), key=whys.count) if whys and good * 2 < len(rel) else None,
+                "ref_age_d": round(median(ages), 1) if ages else None,
             }
         )
 

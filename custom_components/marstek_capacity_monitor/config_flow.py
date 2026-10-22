@@ -23,10 +23,12 @@ from .const import (
     CONF_MODEL,
     CONF_TEMP_MAX_ENTITY,
     CONF_TEMP_MIN_ENTITY,
+    CONF_NOTIFY,
     CONF_PACKS,
     MAX_PACKS,
-    MODEL_D,
+    MODEL_PRESETS,
     MODEL_OTHER,
+    PACK_MODELS,
     MODELS,
     MODEL_E_V12,
     preset_for,
@@ -310,7 +312,7 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
             model = user_input[CONF_MODEL]
             self._data[CONF_MODEL] = model
             self._data[CONF_PURCHASE_DATE] = user_input[CONF_PURCHASE_DATE]
-            if model == MODEL_D:
+            if model in PACK_MODELS:
                 return await self.async_step_packs()
             if model == MODEL_OTHER:
                 return await self.async_step_specs()
@@ -338,15 +340,26 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_packs(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Venus D: capacity depends on the number of battery packs."""
+        """Venus D / Venus E Pro: capacity depends on the number of packs."""
+        model = self._data[CONF_MODEL]
         if user_input is not None:
             packs = int(user_input[CONF_PACKS])
             self._data[CONF_PACKS] = packs
-            return self._create(preset_for(MODEL_D, packs))
+            return self._create(preset_for(model, packs))
         schema = vol.Schema(
             {vol.Required(CONF_PACKS, default=1): _num(1, MAX_PACKS, 1)}
         )
-        return self.async_show_form(step_id="packs", data_schema=schema)
+        per_pack = MODEL_PRESETS[model][CONF_NOMINAL_KWH]
+        lang = (self.hass.config.language or "en")[:2]
+        kwh = f"{per_pack:.2f}".replace(".", "," if lang in ("nl", "de") else ".")
+        return self.async_show_form(
+            step_id="packs",
+            data_schema=schema,
+            description_placeholders={
+                "model": "Venus D" if model == "venus_d" else "Venus E Pro",
+                "kwh": kwh,
+            },
+        )
 
     def _create(self, preset: dict[str, Any]) -> ConfigFlowResult:
         data = {
@@ -406,6 +419,10 @@ class MarstekCapacityOptionsFlow(OptionsFlow):
                         options=SIGN_MODES, translation_key="power_sign"
                     )
                 ),
+                vol.Required(
+                    CONF_NOTIFY,
+                    default=bool(current.get(CONF_NOTIFY, DEFAULTS[CONF_NOTIFY])),
+                ): selector.BooleanSelector(),
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema, errors=errors)

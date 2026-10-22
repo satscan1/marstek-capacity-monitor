@@ -22,9 +22,11 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.util import dt as dt_util
 
 from . import MonitorConfigEntry
-from .const import CONF_BATTERY_ID, DOMAIN, MONITOR_STATUSES
+from .const import CONF_BATTERY_ID, DOMAIN, KIND_CELLS, KIND_SOC, MONITOR_STATUSES
+from .health import LEVELS
 from .monitor import BatteryMonitor
 
 STATUS_OPTIONS = ["good", "attention", "critical", "no_measurement"]
@@ -226,15 +228,75 @@ CELL_SENSOR = CapacitySensorDescription(
 )
 
 
+def _dt(ts: float | None) -> Any:
+    return dt_util.utc_from_timestamp(ts) if ts else None
+
+
+def _soc_attrs(m: BatteryMonitor) -> dict[str, Any]:
+    r = m.soc_result
+    return {
+        "since": _dt(r.get("since")),
+        "count": r.get("count"),
+        "last_size": r.get("last_size"),
+        "last_calibration": _dt(r.get("last_top")),
+        "last_deviation": r.get("last_deviation"),
+        "dismissed": m.is_dismissed(KIND_SOC),
+        "notify": m.notify,
+        "trend": r.get("trend", []),
+    }
+
+
+def _cell_attrs(m: BatteryMonitor) -> dict[str, Any]:
+    r = m.cell_health
+    rest = {t["month"]: t["rest_h"] for t in r.get("rest_trend", [])}
+    temp = {t["month"]: t.get("temp_c") for t in m.result.get("trend", [])}
+    trend = [
+        {**t, "rest_h": rest.get(t["month"]), "temp_c": temp.get(t["month"])}
+        for t in m.cell_result.get("trend", [])
+    ]
+    return {
+        "since": _dt(r.get("since")),
+        "count": r.get("count"),
+        "last_size": r.get("last_size"),
+        "base_mv": r.get("base_mv"),
+        "limit_mv": r.get("limit_mv"),
+        "last_mv": m.cell_result.get("spread_mv"),
+        "dismissed": m.is_dismissed(KIND_CELLS),
+        "notify": m.notify,
+        "trend": trend,
+    }
+
+
+SOC_HEALTH_SENSOR = CapacitySensorDescription(
+    key="soc_health",
+    translation_key="soc_health",
+    device_class=SensorDeviceClass.ENUM,
+    options=list(LEVELS),
+    icon="mdi:battery-check",
+    value_fn=lambda m: m.soc_result.get("level", "ok"),
+    attrs_fn=_soc_attrs,
+)
+
+CELL_HEALTH_SENSOR = CapacitySensorDescription(
+    key="cell_health",
+    translation_key="cell_health",
+    device_class=SensorDeviceClass.ENUM,
+    options=list(LEVELS),
+    icon="mdi:scale-balance",
+    value_fn=lambda m: m.cell_health.get("level", "ok"),
+    attrs_fn=_cell_attrs,
+)
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: MonitorConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     monitor = entry.runtime_data
-    descriptions = [*SENSORS, STATUS_SENSOR]
+    descriptions = [*SENSORS, STATUS_SENSOR, SOC_HEALTH_SENSOR]
     if monitor.has_cells:
-        descriptions.append(CELL_SENSOR)
+        descriptions += [CELL_SENSOR, CELL_HEALTH_SENSOR]
     async_add_entities(CapacitySensor(monitor, d) for d in descriptions)
 
 
