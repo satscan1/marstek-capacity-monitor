@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import re
 
 import yaml
 
@@ -26,8 +27,12 @@ OUT = ROOT / "custom_components" / "marstek_capacity_monitor" / "frontend" / "ma
 # (old, new): the only changes to the template code. Each must occur exactly once.
 BATTERY_EDITS = [
     (
-        "const open = !!(this && this._mcChart);",
-        "const open = !!ctx.chart;",
+        "const panel = (this && this._mcPanel) || '';",
+        "const panel = ctx.panel || '';",
+    ),
+    (
+        "const gone = (this && this._mcGone) || '';",
+        "const gone = ctx.gone || '';",
     ),
     (
         'const act = js => `onclick="event.stopPropagation();const h=this.getRootNode().host;${js}h._config={...h._config};"`;',
@@ -53,15 +58,13 @@ def battery_body() -> str:
     for old, new in BATTERY_EDITS:
         assert code.count(old) == 1, old
         code = code.replace(old, new)
-    assert "this" not in code.replace("this period", "").replace("read this", "").replace(
-        "lees je dit", ""
-    ), "template code still uses `this`"
+    assert not re.search(r"\bthis\b\s*(\.|&&|\))", code), "template code still uses `this`"
     return code
 
 
 def overview_body() -> str:
     code = _body("marstek_capacity_overview")
-    assert "this." not in code
+    assert not re.search(r"\bthis\b\s*(\.|&&|\))", code)
     return code
 
 
