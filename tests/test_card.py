@@ -115,14 +115,16 @@ card._config = { battery: "mt1" };
 card._hass = { states: S, entities: {}, devices: {}, callService: (...a) => calls.push(a) };
 const out = {};
 const acts = (html) => [...html.matchAll(/data-mc="([^"]*)"/g)].map((m) => m[1]);
-out.closed = acts(card._html()).length;
-card._action(acts(card._html())[1]);
+const pills = (html) => acts(html).filter((a) => a.includes("_mcPanel"));
+out.closed = pills(card._html()).length;
+out.closedHasAdvice = /twice/.test(card._html());
+card._action(pills(card._html())[1]);
 out.panel = card._panel;
 const html = card._html();
-out.advice = html.includes("twee keer") || html.includes("twice");
-card._action(acts(html).pop());
+out.advice = html.includes("twice") && html.includes("position:fixed");
+card._action(acts(html).find((a) => a.includes("dismiss_advice")));
 out.calls = calls;
-card._action(acts(card._html())[1]);
+card._action(pills(card._html())[1]);
 out.closedAgain = card._panel;
 process.stdout.write(JSON.stringify(out));
 """
@@ -136,6 +138,7 @@ def test_card_buttons_open_panels_and_dismiss(tmp_path):
         ["node", str(script), str(build_card.OUT)], capture_output=True, text=True, check=True
     ).stdout)
     assert out["closed"] == 3  # Chart · SOC · Cells
+    assert not out["closedHasAdvice"]  # SOC and Cells only open as a popup
     assert out["panel"] == "soc"
     assert out["advice"]
     assert out["calls"] == [["marstek_capacity_monitor", "dismiss_advice", {"battery": "mt1", "kind": "soc"}]]

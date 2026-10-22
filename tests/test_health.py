@@ -253,3 +253,25 @@ def test_reliability_calibration_and_cold():
     assert health.reliability({**rec, "temp_c": 3.0}, [T0 + 29 * 86400], since)["why"] == "cold"
     # measurements from before SOC monitoring (older versions): unknown, shown as calibrated
     assert health.reliability({"ts": T0 - 86400}, [], since)["reliable"]
+
+
+def test_sensitivity_soc():
+    alive, full = _alive(range(-20, 60)), _some_full(range(-20, 60))
+    ev = _occ([0, 10, 20], size=4.0)  # 4 % off: only counts when strict
+    now = T0 + 21 * 86400
+    assert health.evaluate_soc(ev, full, alive, now)["level"] == "ok"
+    assert health.evaluate_soc(ev, full, alive, now, event_pct=3.0)["level"] == "advies"
+    big = _occ([0, 10, 20], size=6.0)
+    assert health.evaluate_soc(big, full, alive, now, event_pct=8.0)["level"] == "ok"
+    off = health.evaluate_soc(big, full, alive, now, enabled=False)
+    assert off["level"] == "ok" and off["trend"]  # table still there
+
+
+def test_sensitivity_cells():
+    base = _cells([60, 62, 58, 61] * 4)
+    late = _cells([100, 105, 110], start_day=120, step=5)  # about 1.7x normal
+    now = T0 + 131 * 86400
+    assert health.evaluate_cell_health(base + late, [], now)["level"] == "ok"
+    strict = health.evaluate_cell_health(base + late, [], now, factor=1.5)
+    assert strict["level"] == "advies" and strict["limit_mv"] == 90
+    assert health.evaluate_cell_health(base + late, [], now, factor=1.5, enabled=False)["level"] == "ok"
