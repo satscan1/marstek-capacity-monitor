@@ -27,7 +27,7 @@
           "reserve_kwh": "Deel van de fabriekscapaciteit dat de batterij nooit afgeeft. Datasheet: 90% ontlaaddiepte, dus 5,12 − 0,51 = 4,61 kWh = 100% van nieuw.",
           "cycle_life": "Bv. 6000 volle cycli.",
           "cycle_eol_pct": "Specificatie van de fabrikant: bv. 80% na 6000 cycli (Marstek, productpagina Venus E Gen 3.0). Dit is de specificatielijn; geen garantie.",
-          "initial_cycles": "Schatting: totaal ontladen kWh tot nu toe gedeeld door de bruikbare capaciteit. Laat 0 bij een nieuwe batterij.",
+          "initial_cycles": "Cycli vóór deze monitor. Wordt ingevuld met de teller totaal ontladen van de batterij als die er is (gedeeld door de bruikbare capaciteit). Die teller meet aan de AC-kant: een schatting, minder precies dan de cycli die de monitor zelf aan de DC-kant telt. Zonder teller: totaal ontladen kWh tot nu toe ÷ bruikbare capaciteit; laat 0 bij een nieuwe batterij.",
           "red_pct": "Op of onder dit % van nieuw wordt de status rood: het moment om het via de Marstek-app te melden. Standaard 75%.",
           "tolerance_pct": "Groen zolang de meting hooguit zoveel punten onder de specificatielijn van de fabrikant zit. Standaard 5.",
           "purchase_date": "De datum waarop de batterij in gebruik ging. Garantie en leeftijd tellen vanaf hier."
@@ -58,7 +58,7 @@
       },
       "model": {
         "title": "Welke Marstek is {name}?",
-        "description": "Kies je model en de datum waarop de batterij is geïnstalleerd. De fabrieksgegevens (capaciteit, ontlaaddiepte, cycli) worden voor je ingevuld. Je kunt ze later aanpassen via Configureren.",
+        "description": "Kies je model en de datum waarop de batterij is geïnstalleerd. De fabrieksgegevens (capaciteit, ontlaaddiepte, cycli) worden voor je ingevuld. Je kunt ze later aanpassen via Configureren.{counter}",
         "data": {
           "model": "Model",
           "purchase_date": "Installatiedatum"
@@ -115,7 +115,7 @@
           "reserve_kwh": "Deel van de fabriekscapaciteit dat de batterij nooit afgeeft. Datasheet: 90% ontlaaddiepte, dus 5,12 − 0,51 = 4,61 kWh = 100% van nieuw.",
           "cycle_life": "Bv. 6000 volle cycli.",
           "cycle_eol_pct": "Specificatie van de fabrikant: bv. 80% na 6000 cycli (Marstek, productpagina Venus E Gen 3.0). Dit is de specificatielijn; geen garantie.",
-          "initial_cycles": "Schatting: totaal ontladen kWh tot nu toe gedeeld door de bruikbare capaciteit. Laat 0 bij een nieuwe batterij.",
+          "initial_cycles": "Cycli vóór deze monitor. Wordt ingevuld met de teller totaal ontladen van de batterij als die er is (gedeeld door de bruikbare capaciteit). Die teller meet aan de AC-kant: een schatting, minder precies dan de cycli die de monitor zelf aan de DC-kant telt. Zonder teller: totaal ontladen kWh tot nu toe ÷ bruikbare capaciteit; laat 0 bij een nieuwe batterij.",
           "red_pct": "Op of onder dit % van nieuw wordt de status rood: het moment om het via de Marstek-app te melden. Standaard 75%.",
           "tolerance_pct": "Groen zolang de meting hooguit zoveel punten onder de specificatielijn van de fabrikant zit. Standaard 5.",
           "power_sign": "Automatisch: wordt herkend bij de eerste laad- of ontlaadbeurt. Alleen aanpassen als de herkenning het mis heeft.",
@@ -293,6 +293,24 @@
     "cells_advies": {
       "title": "{name}: celkalibratie aanbevolen",
       "description": "{message}\n\nDeze melding verdwijnt vanzelf zodra de monitor dat heeft gezien. Negeren = wegklikken tot er een nieuwe reeks is."
+    },
+    "extras_found": {
+      "title": "{name}: extra sensoren gevonden",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{name}: extra sensoren gevonden",
+            "description": "{found}",
+            "data": {
+              "add_cells": "Celspanningen toevoegen (celbalans)",
+              "add_cycles": "Cycli vóór de monitoring invullen (schatting, AC-kant)"
+            }
+          }
+        },
+        "abort": {
+          "battery_gone": "Deze batterij bestaat niet meer."
+        }
+      }
     }
   }
 }

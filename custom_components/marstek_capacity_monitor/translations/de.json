@@ -27,7 +27,7 @@
           "reserve_kwh": "Teil der Nennkapazität, den die Batterie nie abgibt. Datenblatt: 90 % Entladetiefe, also 5,12 − 0,51 = 4,61 kWh = 100 % im Neuzustand.",
           "cycle_life": "Z. B. 6000 Vollzyklen.",
           "cycle_eol_pct": "Herstellerangabe: z. B. 80 % nach 6000 Zyklen (Marstek, Produktseite Venus E Gen 3.0). Das ist die Linie der Herstellerangabe, keine Garantie.",
-          "initial_cycles": "Schätzung: bisher insgesamt entladene kWh geteilt durch die nutzbare Kapazität. Bei einer neuen Batterie 0 lassen.",
+          "initial_cycles": "Zyklen vor diesem Monitor. Wird aus dem Zähler Gesamtentladung der Batterie gefüllt, wenn es einen gibt (geteilt durch die nutzbare Kapazität). Dieser Zähler misst auf der AC-Seite: eine Schätzung, ungenauer als die Zyklen, die der Monitor selbst auf der DC-Seite zählt. Ohne Zähler: bisher entladene kWh ÷ nutzbare Kapazität; bei einer neuen Batterie 0 lassen.",
           "red_pct": "Liegt „Noch verfügbar“ bei diesem Wert oder darunter, wird der Status rot: Zeit, es über die Marstek-App an Marstek zu melden. Standard 75 %.",
           "tolerance_pct": "Grün, solange die Messung höchstens so viele Punkte unter der Linie der Herstellerangabe liegt. Standard 5.",
           "purchase_date": "Das Datum, an dem die Batterie in Betrieb ging. Garantie und Alter werden ab diesem Datum gerechnet."
@@ -58,7 +58,7 @@
       },
       "model": {
         "title": "Welches Marstek-Modell ist {name}?",
-        "description": "Wähle dein Modell und das Datum der Inbetriebnahme. Die Herstellerdaten (Kapazität, Entladetiefe, Zyklen) werden für dich ausgefüllt. Du kannst sie später unter Konfigurieren ändern.",
+        "description": "Wähle dein Modell und das Datum der Inbetriebnahme. Die Herstellerdaten (Kapazität, Entladetiefe, Zyklen) werden für dich ausgefüllt. Du kannst sie später unter Konfigurieren ändern.{counter}",
         "data": {
           "model": "Modell",
           "purchase_date": "Datum der Inbetriebnahme"
@@ -115,7 +115,7 @@
           "reserve_kwh": "Teil der Nennkapazität, den die Batterie nie abgibt. Datenblatt: 90 % Entladetiefe, also 5,12 − 0,51 = 4,61 kWh = 100 % im Neuzustand.",
           "cycle_life": "Z. B. 6000 Vollzyklen.",
           "cycle_eol_pct": "Herstellerangabe: z. B. 80 % nach 6000 Zyklen (Marstek, Produktseite Venus E Gen 3.0). Das ist die Linie der Herstellerangabe, keine Garantie.",
-          "initial_cycles": "Schätzung: bisher insgesamt entladene kWh geteilt durch die nutzbare Kapazität. Bei einer neuen Batterie 0 lassen.",
+          "initial_cycles": "Zyklen vor diesem Monitor. Wird aus dem Zähler Gesamtentladung der Batterie gefüllt, wenn es einen gibt (geteilt durch die nutzbare Kapazität). Dieser Zähler misst auf der AC-Seite: eine Schätzung, ungenauer als die Zyklen, die der Monitor selbst auf der DC-Seite zählt. Ohne Zähler: bisher entladene kWh ÷ nutzbare Kapazität; bei einer neuen Batterie 0 lassen.",
           "red_pct": "Liegt „Noch verfügbar“ bei diesem Wert oder darunter, wird der Status rot: Zeit, es über die Marstek-App an Marstek zu melden. Standard 75 %.",
           "tolerance_pct": "Grün, solange die Messung höchstens so viele Punkte unter der Linie der Herstellerangabe liegt. Standard 5.",
           "power_sign": "Automatisch: wird beim ersten Laden oder Entladen erkannt. Nur ändern, wenn die Erkennung falsch liegt.",
@@ -293,6 +293,24 @@
     "cells_advies": {
       "title": "{name}: Zellkalibrierung empfohlen",
       "description": "{message}\n\nDiese Meldung verschwindet von selbst, sobald der Monitor es gesehen hat. Ignorieren = ausblenden bis zu einer neuen Reihe."
+    },
+    "extras_found": {
+      "title": "{name}: weitere Sensoren gefunden",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{name}: weitere Sensoren gefunden",
+            "description": "{found}",
+            "data": {
+              "add_cells": "Zellspannungen hinzufügen (Zellbalance)",
+              "add_cycles": "Zyklen vor der Überwachung eintragen (Schätzung, AC-Seite)"
+            }
+          }
+        },
+        "abort": {
+          "battery_gone": "Diese Batterie gibt es nicht mehr."
+        }
+      }
     }
   }
 }
