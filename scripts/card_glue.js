@@ -140,8 +140,22 @@ class MarstekCapacityCard extends MarstekCapacityBase {
     return b.id ? [b.id] : [];
   }
 
+  // The config entry of a battery, for the settings button
+  _entryId(id) {
+    const ent = this._hass.entities && this._hass.entities[`sensor.marstek_${id}_monitor_status`];
+    const dev = ent && ent.device_id && this._hass.devices ? this._hass.devices[ent.device_id] : null;
+    return (dev && (dev.config_entries || [])[0]) || "";
+  }
+
   // The template's buttons, translated: open/close a panel, click advice away.
   _action(act) {
+    const nav = /pushState\(null,'','([^']+)'\)/.exec(act);
+    if (nav) {
+      history.pushState(null, "", nav[1]);
+      window.dispatchEvent(new CustomEvent("location-changed"));
+      return;
+    }
+    if (act.includes("_mcPanel=''")) this._panel = "";
     const panel = /_mcPanel==='(\w+)'/.exec(act);
     if (panel) this._panel = this._panel === panel[1] ? "" : panel[1];
     const kind = /kind:'(\w+)'/.exec(act) || /_mcGone\|\|''\)\+'(\w+)'/.exec(act);
@@ -161,7 +175,7 @@ class MarstekCapacityCard extends MarstekCapacityBase {
         de: "Noch keine Batterie gefunden. Füge eine hinzu: Einstellungen → Geräte & Dienste → Integration hinzufügen → Marstek Capacity Monitor.",
       }[lang] || "No battery found yet. Add one via Settings → Devices & services → Add integration → Marstek Capacity Monitor.";
     }
-    const variables = { battery: b.id, name: b.name, lang, months: this._config.months || 6, demo: this._config.demo };
+    const variables = { battery: b.id, name: b.name, lang, months: this._config.months || 6, demo: this._config.demo, version: MC_VERSION, entry_id: this._entryId(b.id) };
     return batteryBody(this._hass.states, variables, { panel: this._panel, gone: this._gone, width: this.offsetWidth });
   }
 
