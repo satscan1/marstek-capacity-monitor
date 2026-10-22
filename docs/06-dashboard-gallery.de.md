@@ -29,24 +29,25 @@ Selbst anordnen? Verwende den Ansichtstyp **Abschnitte** (Sections) von Home Ass
 ![Batteriekarte mit Nummern](../screenshots/gallery/de/card-numbered-de.png)
 
 1. **Status**: *Gut*, *Unter Herstellerangabe*, *An Marstek melden (App)* oder *Sammelt Daten*. Die Farbe folgt der letzten Messung.
-2. **Diagramm**: Drücke auf diese kleine Schaltfläche, um das Diagramm zu öffnen, und noch einmal, um es zu schließen. Der Rest der Karte reagiert nicht auf Klicks.
-3. **Zeitraum**: *jüngste 3 Jahre der Garantiezeit*: Das Diagramm zeigt die jüngsten 3 Jahre seit der Inbetriebnahme.
-4. **Diagramm**: Jeder Punkt ist ein Monat, mit dem Prozentsatz der nutzbaren Kapazität, der damals noch vorhanden war. Die graue gestrichelte Linie zeigt, was der Hersteller in diesem Alter erwartet, die rote Linie liegt bei 75 %. Fährst du mit der Maus über einen Punkt, siehst du den genauen Wert und die Zelltemperatur in diesem Monat (wenn du Temperatursensoren verknüpft hast).
-5. **Wie liest man das?** Eine kurze Erklärung unter dem Diagramm: Achte darauf, dass die Punkte nahe an oder über der grauen Linie bleiben. Ein langsamer Rückgang ist normal; sinken sie in Richtung der roten Linie, melde es an Marstek.
-6. **Läuft die Messung?** Grün: Die Messung läuft, mit der Zahl der gemessenen vollständigen Entladungen. Blau: sammelt noch Daten. Orange oder rot: keine neuen Daten oder ein Sensor fehlt. Die Zeile darunter nennt den nächsten Schritt (zum Beispiel *auf 95 % voll laden*).
-7. **Drei Kapazitäten**: *Nennwert* (auf dem Typenschild), *Nutzbar* (Nennwert abzüglich der Reserve, die die Batterie selbst behält) und *Gemessen* (was jetzt wirklich herauskommt, und wie viel Prozent der nutzbaren Kapazität das sind).
-8. **Balken**: die gemessene Kapazität, mit einem weißen Strich für die Herstellerangabe und einem roten Strich bei 75 %.
-9. **Herstellerangabe** bei der aktuellen Zyklenzahl und dem Alter, und der Abstand: wie weit du darüber (+) oder darunter (−) liegst.
-10. **Trend pro Monat**: zuerst die Richtung (▲ ▬ ▼), dann die Monate von neu nach alt. Große Zahl = gemessen, kleine Zahl = Herstellerangabe für diesen Monat, dazu die Zelltemperatur, falls vorhanden.
-11. **Letzte vollständige Entladung und Ladung**, und die Anzahl der Messungen.
+2. **Läuft die Messung?** Grün: Die Messung läuft, mit der Zahl der gemessenen vollständigen Entladungen. Blau: sammelt noch Daten. Orange oder rot: keine neuen Daten oder ein Sensor fehlt. Beim Sammeln oder während einer vollständigen Entladung steht der nächste Schritt darunter; sonst siehst du ihn beim Zeigen auf die Zeile.
+3. **Diagramm · SOC · Zellen**: *Diagramm* zeigt das Diagramm an der Stelle der Kapazitäten (noch einmal drücken = zurück); die Karte bleibt gleich hoch. *SOC* und *Zellen* öffnen ein Fenster in der Mitte des Bildschirms; ✕ oder ein Klick daneben schließt es. Ein ⚠ (Achtung) oder 🔧 (Empfehlung) auf *SOC* oder *Zellen* heißt: kurz hineinschauen. *Zellen* erscheint nur, wenn die Zellspannungen eingetragen sind.
+4. **Einstellungen** (Zahnrad): führt zu dieser Batterie unter Einstellungen → Geräte & Dienste; das Zahnrad dort öffnet *Konfigurieren*.
+5. **Drei Kapazitäten**: *Nennwert* (auf dem Typenschild), *Nutzbar* (Nennwert abzüglich der Reserve, die die Batterie selbst behält) und *Gemessen* (was jetzt wirklich herauskommt, und wie viel Prozent der nutzbaren Kapazität das sind).
+6. **Balken**: die gemessene Kapazität, mit einem weißen Strich für die Herstellerangabe und einem roten Strich bei 75 %.
+7. **Abstand**: wie weit du über (+) oder unter (−) der Herstellerangabe liegst, mit Zyklen und Alter. Zeige darauf für die Herstellerangabe in kWh und woher die Zyklen vor der Überwachung kommen.
+8. **Letzte vollständige Entladung und Ladung** und die Version der Karte.
 
-Hast du Sensoren für die höchste und niedrigste Zellspannung verknüpft, erscheint unter dem Trend die **Zellspannungsdifferenz nach Vollladung** (siehe Demo 2 in der Galerie).
+**Das Diagramm** zeigt die jüngsten 3 Jahre. Jeder Punkt ist ein Monat: wie viel der nutzbaren Kapazität damals noch vorhanden war. ● gemessen, kalibriert · ○ weniger zuverlässig (in den 14 Tagen davor nicht ganz voll, oder Zellen kälter als 5 °C) · graue gestrichelte Linie: erwartet laut Herstellerangabe · rote gestrichelte Linie: an Marstek melden (75 %). Zeige auf einen Punkt für Wert, Herstellerangabe und Zelltemperatur in diesem Monat.
+
+**SOC und Zellen** beantworten *Stimmt meine SOC-Anzeige noch?* (pro Monat *Tage ganz voll* und *SOC-Anzeige stimmte*) und *Sind meine Zellen noch im Gleichgewicht?* (Zellspannungsdifferenz pro Monat). Bei Achtung oder Empfehlung steht im Fenster, was zu tun ist, und eine Schaltfläche **Ausblenden**.
+
+Hast du Sensoren für die höchste und niedrigste Zellspannung verknüpft, steht die **Zellspannungsdifferenz nach Vollladung** im Feld **Zellen** (bis 0.4 unter dem Trend).
 
 ## Die Übersicht
 
 Die Übersicht zeigt alle Batterien (bis 6) untereinander:
 
-- **Batterie**: mit ✓ (Messung läuft), ⏳ (sammelt Daten) oder ⚠ (Verbindung prüfen).
+- **Batterie**: mit ✓ (Messung läuft), ⏳ (sammelt Daten) oder ⚠ (Verbindung prüfen). Ab 0.5 auch ⚠ (Achtung) oder 🔧 (Empfehlung) für SOC-Drift oder Zellkalibrierung; zeige darauf, um zu sehen, welche, und öffne die Karte dieser Batterie.
 - **Trend**: ▲ steigend, ▬ stabil, ▼ fallend über die gezeigten Monate.
 - **Jetzt**: die letzte Messung.
 - **Monate**, von neu nach alt: große Zahl = gemessen, kleine Zahl = Herstellerangabe für diesen Monat.
@@ -60,11 +61,11 @@ Jede der sechs Demobatterien zeigt eine andere Situation:
 
 | Batterie | Situation |
 |---|---|
-| Demo 1 | 4 Jahre alt, gut |
-| Demo 2 | 1,6 Jahre alt, gut, mit Zellspannungsdifferenz |
+| Demo 1 | 4 Jahre alt, gut; steht draußen, daher offene Punkte im Winter; SOC-Anzeige 2× deutlich daneben: ⚠ Achtung bei SOC |
+| Demo 2 | 1,6 Jahre alt, gut, mit Zellspannungsdifferenz: 🔧 Zellkalibrierung empfohlen |
 | Demo 3 | Gerade in Betrieb genommen: sammelt Daten für die erste Messung |
 | Demo 4 | 6,5 Jahre alt, unter Herstellerangabe (orange) |
-| Demo 5 | 9 Jahre alt, knapp unter 75 %: an Marstek melden (rot) |
+| Demo 5 | 9 Jahre alt, knapp unter 75 %: an Marstek melden (rot), Zellen im Gleichgewicht |
 | Demo 6 | 2,8 Jahre alt, gut, aber seit einer Weile keine neuen Daten (⚠) |
 
 ### 1 Batterie

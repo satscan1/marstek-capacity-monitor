@@ -43,7 +43,7 @@ Gedeeltelijke ontladingen tellen bewust niet mee: een procent onderin levert mee
 
 ## Specificatie fabrikant en kleuren
 
-De lijn waarmee de meting wordt vergeleken is de **specificatie van de fabrikant per cyclus**: 80 % capaciteit na 6.000 volle cycli, dus 0,0033 punt per cyclus. Het aantal volle cycli is de DC-ontladen kWh gedeeld door de bruikbare capaciteit, plus eventueel de cycli van vóór de monitoring. Het getal "specificatie" op de kaart is die lijn, doorgerekend naar het aantal cycli van nu (bijvoorbeeld 98,8 % bij 369 cycli).
+De lijn waarmee de meting wordt vergeleken is de **specificatie van de fabrikant per cyclus**: 80 % capaciteit na 6.000 volle cycli, dus 0,0033 punt per cyclus. Het aantal volle cycli is de DC-ontladen kWh gedeeld door de bruikbare capaciteit, plus eventueel de cycli van vóór de monitoring. Die laatste komen, als de batterij een teller *totaal ontladen* heeft, uit die teller: die meet aan de AC-kant en is dus een schatting, minder precies dan wat de monitor zelf aan de DC-kant meet. Wijs op de kaart de regel met de cycli aan om te zien waar het getal vandaan komt. Het getal "specificatie" op de kaart is die lijn, doorgerekend naar het aantal cycli van nu (bijvoorbeeld 98,8 % bij 369 cycli).
 
 Dit is een **specificatie, geen garantie**. Marstek geeft geen capaciteitsgarantie in jaren; daarom is er geen tijdlijn.
 
@@ -80,7 +80,50 @@ Optioneel, als je koppeling de hoogste en laagste celspanning levert.
 * **Context:** de batterij staat 5 minuten in rust (vermogen binnen ±50 W), zodat belasting de spanningen niet vertekent. LFP-cellen verschillen midden in de band nauwelijks; verschillen worden pas zichtbaar bij bijna vol.
 * **Resultaat:** het verschil tussen de hoogste en laagste cel, in mV. Eén meting per volle lading; voor de volgende meting moet de batterij eerst onder de 90 % komen. De kaart toont het midden (mediaan) per maand, trendkolom eerst, nieuw → oud.
 
-Het celverschil heeft **nog geen kleuren**: Marstek publiceert geen normaalwaarde. Grenzen komen er pas als genoeg gegevens van echte batterijen ze onderbouwen.
+Marstek publiceert geen normaalwaarde voor het celverschil. Vanaf 0.5 vergelijkt de monitor daarom met wat normaal is voor **jouw** batterij (de eerste 3 maanden): een ⚠ bij 2× zo veel. Zie Celkalibratie hieronder.
+
+## SOC-drift (vanaf 0.5)
+
+**Wat is het?** De batterij weet niet precies hoe vol hij is; de laadtoestand (SOC) is een schatting die hij bijhoudt door stroom op te tellen. Kleine fouten stapelen zich op. Alleen als de batterij helemaal vol is (het laden stopt vanzelf) zet hij de teller weer recht. Gebeurt dat lang niet, dan gaat de SOC-meter steeds verder ernaast zitten: **SOC-drift**. Je merkt het aan sprongen (bijv. van 57 % naar 91 % in een minuut), aan "99 %" waarbij nog veel bijgeladen wordt, of aan een batterij die lang op 100 % blijft hangen terwijl hij ontlaadt.
+
+**Waarom is het belangrijk?** Met een scheve SOC-meter stopt de batterij te vroeg of te laat, en een capaciteitsmeting wordt minder zeker. Daarom krijgt een meting in de grafiek een **open stip** als de batterij in de 14 dagen ervoor niet helemaal vol is geweest (of als de cellen kouder waren dan 5 °C).
+
+**Hoe meet de monitor het?**
+* **Gebeurtenis:** de laadtoestand verandert.
+* **Context:** het opgetelde DC-vermogen. Loopt de SOC meer dan 3 % harder dan de energie verklaart, dan is dat een correctie. Gaten in de gegevens, een herstart, kortstondig 0 % en sprongen die tegelijk bij een andere batterij gebeuren (dan ligt het aan de koppeling) tellen niet mee.
+* **Resultaat:** een **voorval** is een afwijking van 5 % of meer, of 14 dagen niet helemaal vol (terwijl Home Assistant draaide). Een voorval telt alleen als de batterij in de 14 dagen ervoor op minder dan 7 dagen helemaal vol was; een batterij die bijna elke dag vol is, corrigeert zichzelf al.
+
+**De meldladder** (termijn 45 dagen):
+
+| Aantal voorvallen in 45 dagen | Wat je ziet | Wat te doen |
+|---|---|---|
+| 1 | niets, alleen vastgelegd | – |
+| 2 | ⚠ **Let op** | ontlaad de batterij **één keer** tot de ontlaadgrens en laad hem daarna in één keer vol, tot het laden echt stopt |
+| 3 | 🔧 **SOC-drift geconstateerd** | doe dat **twee keer** |
+
+De monitor ziet zelf wanneer je dat gedaan hebt (een ontlading tot 20 % of lager, daarna helemaal vol); de melding verdwijnt dan. Na 45 dagen zonder nieuw voorval verdwijnt hij ook vanzelf.
+
+## Celkalibratie (vanaf 0.5)
+
+**Wat is het?** De cellen in een batterij lopen langzaam uit elkaar: de ene cel is eerder vol dan de andere. De batterij brengt ze weer gelijk (balanceren), maar alleen als hij een tijd **vol en in rust** staat. Staat hij nooit lang vol, dan wordt het celverschil groter en kan de batterij minder kwijt.
+
+**Hoe meet de monitor het?** Met de hoogste en laagste celspanning (optioneel, zie Celbalans hierboven). Wat normaal is, verschilt per batterij; de monitor neemt daarom het midden van de **eerste 3 maanden** als normaal. Een **voorval** is een celverschil van **2× normaal** of meer.
+
+| Wanneer | Wat je ziet | Wat te doen |
+|---|---|---|
+| 2 voorvallen achter elkaar | ⚠ **Let op** | laad de batterij vol en laat hem ongeveer **4 uur** vol staan (heeft je model een UPS-modus: zet die in de Marstek-app 4 uur aan en daarna terug naar je eigen modus) |
+| 3 voorvallen in 45 dagen | 🔧 **Celkalibratie aanbevolen** | laad vol en zet **UPS-modus 8 uur** aan (geen UPS-modus: laat hem 8 uur in de laadmodus staan), daarna terug naar je eigen modus. Kalibreren duurt lang. Blijft het celverschil daarna hoog, meld het dan via de Marstek-app |
+
+De monitor ziet zelf hoe lang de batterij vol en in rust stond (4 uur bij let op, 8 uur bij advies); de melding verdwijnt dan.
+
+## Seintjes en wegklikken (vanaf 0.5)
+
+* **Waar:** op de kaart (knoppen **SOC** en **Cellen** met ⚠ of 🔧), als bericht op je telefoon (Home Assistant-app) en onder **Instellingen → Reparaties**.
+* **Wegklikken:** één klik is genoeg: **Wegklikken** op de kaart, in het bericht op je telefoon, of **Negeren** onder Reparaties. Dat geldt overal. De melding komt pas terug bij een nieuwe reeks voorvallen.
+* **Helemaal uit:** per batterij via **Configureren → Seintjes** (staat standaard aan). De kaart blijft de stand tonen; je krijgt alleen geen berichten meer.
+* **Gevoeligheid:** per batterij onder **Configureren**, apart voor SOC-drift en celkalibratie: *Uit* (alleen op de kaart, nooit let op of advies), *Ruim* (SOC 8 %, cellen 3× normaal), *Normaal* (5 %, 2×, standaard) of *Extra* (3 %, 1,5×).
+* **Extra sensoren gevonden:** celspanningen of een teller *totaal ontladen* die nog niet gebruikt worden, staan ook onder Reparaties; daar voeg je ze met één klik toe. Zie [Instellingen](02-configuration.nl.md#extra-sensoren-gevonden).
+* Voor automatiseringen: de sensoren `sensor.marstek_<id>_soc_health` en `sensor.marstek_<id>_cell_health` (ok / letop / advies), het event `marstek_capacity_monitor_advice` en de dienst `marstek_capacity_monitor.dismiss_advice`.
 
 ## Celtemperatuur (experimenteel)
 
@@ -92,4 +135,11 @@ Alleen **cel**temperaturen horen hier. Sommige koppelingen geven MOSFET-temperat
 
 ## Grafiek
 
-Druk op het knopje **Grafiek** onder de status om een grafiek te openen of te sluiten (oud → nieuw, van links naar rechts): de gemeten capaciteit per maand, de specificatie van de fabrikant als grijze stippellijn en 75 % als rode lijn. De grafiek toont de meest recente 3 jaar. Ga met de muis over een stip voor het getal en de celtemperatuur in die maand. Zie [06 – Dashboard en galerij](06-dashboard-gallery.nl.md) voor de kaart genummerd uitgelegd.
+Onder de status staan drie knopjes: **Grafiek · SOC · Cellen**, en rechts een tandwiel voor de instellingen. *Grafiek* komt op de plek van de capaciteiten (nog eens drukken = terug), zodat de kaart even hoog blijft; *SOC* en *Cellen* openen als venster midden op het scherm. De grafiek (oud → nieuw, van links naar rechts) toont de meest recente 3 jaar en verder alleen:
+
+* **●** gemeten, geijkt
+* **○** minder betrouwbaar: in de 14 dagen vóór de meting niet helemaal vol, of cellen kouder dan 5 °C
+* **grijze stippellijn**: verwacht volgens specificatie
+* **rode stippellijn**: melden bij Marstek (75 %)
+
+Ga met de muis over een stip voor het getal, de celtemperatuur en waarom hij minder betrouwbaar is. Het venster **SOC** toont per maand *Dagen helemaal vol* en *SOC-meter klopte* (✓ of ⚠ met hoeveel hij ernaast zat); **Cellen** toont *Cellen in balans* (celverschil in mV, ⚠ vanaf de grens die bij de gevoeligheid hoort). Ook daar staan de details bij aanwijzen van een vakje. Zie [06 – Dashboard en galerij](06-dashboard-gallery.nl.md) voor de kaart genummerd uitgelegd.
