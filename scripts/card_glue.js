@@ -14,7 +14,8 @@ function mcEsc(text) {
 
 // The sensors a card reads (fixed list, so no scanning of all states).
 const MC_KEYS = ["measured_capacity", "capacity_pct", "expected_capacity", "warranty_status",
-  "warranty_end", "margin", "last_full_discharge", "last_full_charge", "monitor_status", "cell_spread"];
+  "warranty_end", "margin", "last_full_discharge", "last_full_charge", "monitor_status", "cell_spread",
+  "soc_health", "cell_health"];
 
 // Batteries of this integration, found through the entity registry.
 // Cached per registry object: HA replaces it only when the registry changes.
@@ -139,8 +140,16 @@ class MarstekCapacityCard extends MarstekCapacityBase {
     return b.id ? [b.id] : [];
   }
 
+  // The template's buttons, translated: open/close a panel, click advice away.
   _action(act) {
-    if (act.includes("_mcChart")) this._chart = !this._chart;
+    const panel = /_mcPanel==='(\w+)'/.exec(act);
+    if (panel) this._panel = this._panel === panel[1] ? "" : panel[1];
+    const kind = /kind:'(\w+)'/.exec(act) || /_mcGone\|\|''\)\+'(\w+)'/.exec(act);
+    if (kind && act.includes("dismiss_advice")) {
+      this._hass.callService(MC_DOMAIN, "dismiss_advice", { battery: this._battery().id, kind: kind[1] });
+    } else if (kind) {
+      this._gone = (this._gone || "") + kind[1];
+    }
   }
 
   _html() {
@@ -153,7 +162,7 @@ class MarstekCapacityCard extends MarstekCapacityBase {
       }[lang] || "No battery found yet. Add one via Settings → Devices & services → Add integration → Marstek Capacity Monitor.";
     }
     const variables = { battery: b.id, name: b.name, lang, months: this._config.months || 6, demo: this._config.demo };
-    return batteryBody(this._hass.states, variables, { chart: this._chart, width: this.offsetWidth });
+    return batteryBody(this._hass.states, variables, { panel: this._panel, gone: this._gone, width: this.offsetWidth });
   }
 
   getGridOptions() {
