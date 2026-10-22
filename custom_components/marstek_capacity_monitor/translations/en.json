@@ -68,8 +68,8 @@
         }
       },
       "packs": {
-        "title": "Venus D: number of battery packs",
-        "description": "A Venus D holds 2.56 kWh per pack. Rated capacity and reserve are calculated from the number of packs.",
+        "title": "{model}: number of battery packs",
+        "description": "A {model} holds {kwh} kWh per pack. Rated capacity and reserve are calculated from the number of packs.",
         "data": {
           "packs": "Number of battery packs"
         }
@@ -105,7 +105,8 @@
           "cell_max_entity": "Highest cell voltage (optional)",
           "cell_min_entity": "Lowest cell voltage (optional)",
           "temp_max_entity": "Highest cell temperature (optional, experimental)",
-          "temp_min_entity": "Lowest cell temperature (optional, experimental)"
+          "temp_min_entity": "Lowest cell temperature (optional, experimental)",
+          "notify": "Notifications"
         },
         "data_description": {
           "nominal_kwh": "Total capacity of the cells, e.g. 5.12 kWh.",
@@ -120,7 +121,8 @@
           "cell_max_entity": "Voltage of the highest cell, in V or mV. Only cell voltages, not temperatures.",
           "cell_min_entity": "Voltage of the lowest cell, in V or mV.",
           "temp_max_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures.",
-          "temp_min_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures."
+          "temp_min_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures.",
+          "notify": "A message on your phone (Home Assistant app) and under Settings → Repairs when the SOC meter drifts or the cells get out of balance, with advice. Only for a pattern: once is only recorded, 2× in 45 days is \"attention\", 3× is advice. Off = no messages; the card still shows it."
         }
       }
     },
@@ -188,6 +190,22 @@
       },
       "cell_spread": {
         "name": "Cell spread after full charge"
+      },
+      "soc_health": {
+        "name": "SOC meter",
+        "state": {
+          "ok": "OK",
+          "letop": "Attention",
+          "advies": "Advice"
+        }
+      },
+      "cell_health": {
+        "name": "Cell balance",
+        "state": {
+          "ok": "OK",
+          "letop": "Attention",
+          "advies": "Advice"
+        }
       }
     }
   },
@@ -199,6 +217,24 @@
         "config_entry_id": {
           "name": "Battery",
           "description": "The battery whose measurements are removed."
+        }
+      }
+    },
+    "dismiss_advice": {
+      "name": "Dismiss advice",
+      "description": "Dismiss the current \"attention\" or advice of one battery once. It comes back only with a new series.",
+      "fields": {
+        "battery": {
+          "name": "Battery",
+          "description": "Short id of the battery, e.g. mt1."
+        },
+        "config_entry_id": {
+          "name": "Battery (entry)",
+          "description": "Or pick the battery."
+        },
+        "kind": {
+          "name": "Subject",
+          "description": "soc = SOC drift, cells = cell calibration."
         }
       }
     }
@@ -215,9 +251,36 @@
       "options": {
         "venus_e_v12": "Venus E v1 / v2 (5.12 kWh)",
         "venus_e_v3": "Venus E v3 (5.12 kWh)",
+        "venus_e_v4": "Venus E 4.0 (5.02 kWh)",
+        "venus_e_max": "Venus E Max (10.05 kWh)",
+        "venus_e_pro": "Venus E Pro (2.08 kWh per pack)",
         "venus_d": "Venus D (2.56 kWh per pack)",
         "other": "Other model: enter factory data yourself"
       }
+    },
+    "kind": {
+      "options": {
+        "soc": "SOC drift",
+        "cells": "Cell calibration"
+      }
+    }
+  },
+  "issues": {
+    "soc_letop": {
+      "title": "{name}: attention, SOC meter",
+      "description": "{message}\n\nThis message disappears by itself once the monitor has seen it. Ignore = dismiss it until a new series."
+    },
+    "soc_advies": {
+      "title": "{name}: SOC drift detected",
+      "description": "{message}\n\nThis message disappears by itself once the monitor has seen it. Ignore = dismiss it until a new series."
+    },
+    "cells_letop": {
+      "title": "{name}: attention, cell balance",
+      "description": "{message}\n\nThis message disappears by itself once the monitor has seen it. Ignore = dismiss it until a new series."
+    },
+    "cells_advies": {
+      "title": "{name}: cell calibration advised",
+      "description": "{message}\n\nThis message disappears by itself once the monitor has seen it. Ignore = dismiss it until a new series."
     }
   }
 }
