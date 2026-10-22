@@ -24,7 +24,15 @@ Card
 - Chart, simpler: ● measured, calibrated · ○ less reliable (not completely full in the 14 days before, or cells below 5 °C) · grey dashed line expected per spec · red dashed line report to Marstek. The *How to read this?* text is gone; details when you point at a dot.
 - The cell spread moved from the card into the Cells panel.
 - Overview: ⚠ or 🔧 after the battery name.
+- The cards follow the light or dark theme of Home Assistant.
+- The foot line no longer shows *n=*; the status line already says how many full discharges were measured.
+- The button-card templates follow the language of Home Assistant too when `lang` is left out (as the integration's own cards already did).
+- After an update the browser loads the new card by itself, also for a test version with the same number.
 - Button-card templates and ready-made dashboards updated: paste the new `marstek_capacity_templates.yaml` again if you use them.
+
+Cycles before monitoring and extra sensors
+- New: **cycles before monitoring filled in by itself.** If the battery has its own *total discharged* counter (Modbus, ESPHome), the monitor uses it when you add a battery: counter ÷ usable capacity. That counter measures on the AC side, so this is an estimate, less exact than the cycles the monitor counts itself on the DC side; the settings screen and the card (point at the cycles line) say so. A value you entered yourself is never overwritten.
+- New: **extra sensors found** under Settings → Repairs, after start-up (so also after this update): cell voltage sensors that are not filled in yet, and the *total discharged* counter while *cycles before monitoring* is still 0. Tick what you want to add and press Submit; what you leave unticked is not asked again.
 
 Models
 - New: **Venus E 4.0** (5.024 kWh, 88 %), **Venus E Max** (10.048 kWh, 90 %) and **Venus E Pro** (2.08 kWh per pack, 1–6 packs, 90 %). Marstek lists more than 10,000 cycles without a capacity percentage; the monitor assumes 80 % after 10,000. See [Supported batteries](docs/05-supported-batteries.md).
