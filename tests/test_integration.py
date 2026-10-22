@@ -853,3 +853,125 @@ async def test_sensitivity_options(hass: HomeAssistant, freezer) -> None:
     assert state.state == "ok" and state.attributes["sensitivity"] == "off"
     assert state.attributes["trend"]
     assert not [c for c in calls if c.get("message") != "clear_notification"]
+
+
+KWH = {"unit_of_measurement": "kWh", "device_class": "energy", "state_class": "total_increasing"}
+MV = {"unit_of_measurement": "mV", "device_class": "voltage"}
+
+
+async def test_new_battery_takes_start_cycles_from_counter(hass: HomeAssistant) -> None:
+    """The battery's own discharge counter fills in the cycles before monitoring
+    (AC side, an estimate); daily counters are not used."""
+    W = {"unit_of_measurement": "W", "device_class": "power"}
+    P = {"unit_of_measurement": "%", "device_class": "battery"}
+    pre = "sensor.venus_veranda_marstek_"
+    hass.states.async_set(pre + "battery_state_of_charge", 80, P)
+    hass.states.async_set(pre + "battery_power", 0, W)
+    hass.states.async_set(pre + "daily_discharging_energy", 3.2, KWH)
+    hass.states.async_set(pre + "total_discharging_energy", 1589.5, KWH)
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"candidate": "0"})
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {"battery_id": "mt1", "name": "MT1", "soc_entity": pre + "battery_state_of_charge",
+         "power_entity": pre + "battery_power"},
+    )
+    assert result["step_id"] == "model"
+    note = result["description_placeholders"]["counter"]
+    assert pre + "total_discharging_energy" in note and "AC" in note
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"model": "venus_e_v12", "purchase_date": "2024-02-01"}
+    )
+    data = result["data"]
+    assert data["initial_cycles"] == round(1589.5 / 4.61, 1)
+    assert data["cycle_counter"] == pre + "total_discharging_energy"
+    await hass.async_block_till_done()
+    attrs = hass.states.get("sensor.marstek_mt1_expected_capacity").attributes
+    assert attrs["initial_cycles"] == data["initial_cycles"]
+    assert attrs["cycle_counter"] == pre + "total_discharging_energy"
+
+
+async def _repairs_flow(hass, issue_id):
+    from homeassistant.components.repairs import repairs_flow_manager
+
+    manager = repairs_flow_manager(hass)
+    return manager, await manager.async_init(DOMAIN, data={"issue_id": issue_id})
+
+
+async def test_found_sensors_offered_under_repairs(hass: HomeAssistant) -> None:
+    """After an update: cell sensors and the discharge counter found on the
+    device are offered under Repairs; ticking adds them."""
+    from homeassistant.helpers import issue_registry as ir
+
+    hass.states.async_set(SOC, 60, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    hass.states.async_set("sensor.test_max_cell_voltage", 3330, MV)
+    hass.states.async_set("sensor.test_min_cell_voltage", 3310, MV)
+    hass.states.async_set("sensor.test_total_discharging_energy", 461.0, KWH)
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    issue_id = f"extras_{entry.entry_id}"
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, issue_id)
+    assert issue is not None and issue.is_fixable
+
+    manager, result = await _repairs_flow(hass, issue_id)
+    assert result["step_id"] == "confirm"
+    found = result["description_placeholders"]["found"]
+    assert "sensor.test_max_cell_voltage" in found and "AC" in found
+    result = await manager.async_configure(
+        result["flow_id"], {"add_cells": True, "add_cycles": True}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+    assert entry.options["cell_max_entity"] == "sensor.test_max_cell_voltage"
+    assert entry.options["initial_cycles"] == 100.0  # 461 kWh / 4.61 kWh
+    assert ir.async_get(hass).async_get_issue(DOMAIN, issue_id) is None
+    assert hass.states.get("sensor.marstek_mt1_cell_health") is not None
+
+    # The options form keeps the counter; a hand-changed value drops it
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    form = {
+        str(k): (k.default() if callable(getattr(k, "default", None)) else None)
+        for k in result["data_schema"].schema
+    }
+    form = {k: v for k, v in form.items() if v is not None}
+    result = await hass.config_entries.options.async_configure(result["flow_id"], form)
+    assert entry.options["cycle_counter"] == "sensor.test_total_discharging_energy"
+
+
+async def test_declined_sensors_are_not_offered_again(hass: HomeAssistant) -> None:
+    from homeassistant.helpers import issue_registry as ir
+
+    hass.states.async_set(SOC, 60, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    hass.states.async_set("sensor.test_total_discharging_energy", 461.0, KWH)
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    issue_id = f"extras_{entry.entry_id}"
+    manager, result = await _repairs_flow(hass, issue_id)
+    assert "add_cells" not in {str(k) for k in result["data_schema"].schema}
+    await manager.async_configure(result["flow_id"], {"add_cycles": False})
+    await hass.async_block_till_done()
+    assert entry.options["extras_declined"] == ["cycles"]
+    assert entry.options.get("initial_cycles") is None
+    assert ir.async_get(hass).async_get_issue(DOMAIN, issue_id) is None
+
+
+async def test_no_offer_when_start_value_entered(hass: HomeAssistant) -> None:
+    """A start value the user entered is never overwritten or questioned."""
+    from homeassistant.helpers import issue_registry as ir
+
+    hass.states.async_set(SOC, 60, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    hass.states.async_set("sensor.test_total_discharging_energy", 461.0, KWH)
+    entry = _entry(initial_cycles=352)
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert ir.async_get(hass).async_get_issue(DOMAIN, f"extras_{entry.entry_id}") is None
