@@ -19,6 +19,7 @@ Alle waarden stel je in bij het toevoegen van een batterij. Later wijzigen kan v
 | Teken van de vermogensensor | Automatisch | Alleen aanpassen als de automatische herkenning het mis heeft |
 | Hoogste / laagste celtemperatuur | leeg | Optioneel, experimenteel. Wordt bij elke meting bewaard als context (een koude batterij geeft minder af). Alleen celtemperaturen, nooit MOS- of printplaattemperaturen |
 | Hoogste / laagste celspanning | leeg | Optioneel, voor de celbalans. Vul beide in of geen van beide. Alleen cel**spanningen**: sommige koppelingen geven MOSFET-temperaturen door als "celtemperatuur" |
+| Gevoeligheid SOC-drift / celkalibratie | Normaal | Uit (alleen op de kaart), Ruim (SOC 8 %, cellen 3× normaal), Normaal (5 %, 2×) of Extra (3 %, 1,5×). Zie [Hoe het werkt](03-how-it-works.nl.md#seintjes-en-wegklikken-vanaf-05) |
 | Seintjes | aan | Bericht op je telefoon en onder Reparaties bij SOC-drift of celkalibratie, alleen bij een patroon. Uit = geen berichten; de kaart laat het wel zien. Zie [Hoe het werkt](03-how-it-works.nl.md#seintjes-en-wegklikken-vanaf-05) |
 
 ## Sensoren
