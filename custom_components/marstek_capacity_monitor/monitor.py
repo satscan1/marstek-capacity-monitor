@@ -19,13 +19,16 @@ from homeassistant.core import Event, EventStateChangedData, HomeAssistant, Stat
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import (
+    async_call_later,
     async_track_state_change_event,
     async_track_time_interval,
 )
+from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from . import advice
+from .extras import find_extras
 from .health import (
     SocHealthTracker,
     add_events,
@@ -49,6 +52,9 @@ from .calc import (
     to_mv,
 )
 from .const import (
+    CONF_CYCLE_COUNTER,
+    CONF_EXTRAS_DECLINED,
+    EXTRAS_RECHECK_S,
     CONF_CELL_MAX_ENTITY,
     CONF_CELL_MIN_ENTITY,
     CONF_MODEL,
@@ -140,6 +146,7 @@ class BatteryMonitor:
         self.power_entity: str = entry.data[CONF_POWER_ENTITY]
         self.sign_mode: str = entry_setting(entry, CONF_POWER_SIGN) or SIGN_AUTO
         self.model: str | None = entry_setting(entry, CONF_MODEL)
+        self.cycle_counter: str | None = entry_setting(entry, CONF_CYCLE_COUNTER) or None
         self.cell_max_entity: str | None = entry_setting(entry, CONF_CELL_MAX_ENTITY) or None
         self.cell_min_entity: str | None = entry_setting(entry, CONF_CELL_MIN_ENTITY) or None
         self.temp_max_entity: str | None = entry_setting(entry, CONF_TEMP_MAX_ENTITY) or None
@@ -287,6 +294,13 @@ class BatteryMonitor:
             self.hass.bus.async_listen(
                 ir.EVENT_REPAIRS_ISSUE_REGISTRY_UPDATED, self._on_issue_update
             )
+        )
+        # Sensors on the device that are not used yet (cells, discharge
+        # counter): offered under Repairs once HA has started, and again a
+        # bit later for integrations that come up slowly.
+        self._unsubs.append(async_at_started(self.hass, self._check_extras))
+        self._unsubs.append(
+            async_call_later(self.hass, EXTRAS_RECHECK_S, self._check_extras)
         )
         if self.has_cells:
             self._unsubs.append(
@@ -652,6 +666,38 @@ class BatteryMonitor:
         await self._store.async_save(self._data())
         async_dispatcher_send(self.hass, self.signal)
         return True
+
+    @property
+    def extras_issue_id(self) -> str:
+        return f"extras_{self.entry.entry_id}"
+
+    @callback
+    def _check_extras(self, _now: Any = None) -> None:
+        """Offer sensors found on the device under Settings -> Repairs."""
+        found = find_extras(
+            self.hass,
+            self.entry,
+            self.tracker.cumulative_discharge_kwh,
+            declined=self.extras_declined,
+        )
+        if not found:
+            ir.async_delete_issue(self.hass, DOMAIN, self.extras_issue_id)
+            return
+        ir.async_create_issue(
+            self.hass,
+            DOMAIN,
+            self.extras_issue_id,
+            is_fixable=True,
+            is_persistent=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key="extras_found",
+            translation_placeholders={"name": self.entry.title},
+            data={"entry_id": self.entry.entry_id},
+        )
+
+    @property
+    def extras_declined(self) -> list[str]:
+        return list(self.entry.options.get(CONF_EXTRAS_DECLINED, []))
 
     @callback
     def _on_issue_update(self, event: Event) -> None:

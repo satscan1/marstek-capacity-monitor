@@ -93,6 +93,10 @@ SENSORS: tuple[CapacitySensorDescription, ...] = (
         attrs_fn=lambda m: {
             "cycle_life": m.spec.cycle_life,
             "cycle_eol_pct": m.spec.cycle_eol_pct,
+            # Cycles before the monitor; from the battery's own counter (AC
+            # side, an estimate) when cycle_counter is set, else entered by hand
+            "initial_cycles": m.spec.initial_cycles,
+            "cycle_counter": m.cycle_counter,
         } | {
             k: m.result.get(k)
             for k in (
