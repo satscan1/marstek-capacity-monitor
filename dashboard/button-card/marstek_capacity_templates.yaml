@@ -45,8 +45,10 @@ button_card_templates:
   # -------------------------------------------------------------------------
   marstek_capacity_battery:
     template: marstek_capacity_base
-    # The chart opens with the small "Chart" button under the status (top right);
-    # press again to close. The rest of the card does nothing when clicked.
+    # Three small buttons under the status line: Chart · SOC · Cells. One panel
+    # is open at a time; press the same button again to close it. A ⚠ (let op)
+    # or 🔧 (advice) on a button means: look inside. The rest of the card does
+    # nothing when clicked.
     variables:
       battery: mt1
       name: ""
@@ -75,9 +77,35 @@ button_card_templates:
               interrupted: 'letzte Entladung zählte nicht (unterbrochen)'
             },
             chart: 'Diagramm', win3: 'jüngste 3 Jahre der Garantiezeit', chartTitle: 'Noch verfügbar pro Monat (%)', noData: 'Noch keine Messungen in diesem Zeitraum. Das Diagramm füllt sich nach der ersten vollständigen Entladung.',
-            legCap: 'gemessen', legSpec: 'erwartet laut Hersteller', legRed: 'an Marstek melden',
-            how: '<b>Wie liest man das?</b> Jeder Punkt ist ein Monat: wie viel Prozent der nutzbaren Kapazität damals noch vorhanden war. Die graue gestrichelte Linie zeigt, was der Hersteller in diesem Alter erwartet. Achte vor allem darauf, dass die Punkte nahe an oder über dieser Linie bleiben; ein langsamer Rückgang ist normal. Sinken sie in Richtung der roten Linie, melde es an Marstek.',
-            cell: {title: 'Zellspannungsdifferenz nach Vollladung', none: 'Noch keine Messung: folgt nach der nächsten Vollladung, sobald die Batterie 5 Minuten geruht hat.', note: 'Differenz zwischen höchster und niedrigster Zelle, gemessen in Ruhe bei voller Batterie. Ohne Farbe: Marstek nennt keinen Normalwert.', last: 'zuletzt'},
+            legCap: 'gemessen, kalibriert', legOpen: 'weniger zuverlässig', legSpec: 'erwartet laut Herstellerangabe', legRed: 'an Marstek melden',
+            less: 'weniger zuverlässig', why: {no_calibration: 'in den 14 Tagen vor der Messung nicht ganz voll', cold: 'Zellen kälter als 5 °C'}, refAge: d => `zuletzt ganz voll ${d} Tage vor der Messung`,
+            dismiss: 'Ausblenden', gone: 'Ausgeblendet · kommt bei einer neuen Reihe zurück.',
+            soc: {pill: 'SOC', q: 'Stimmt meine SOC-Anzeige noch?',
+              days: n => n === null ? 'noch nicht gesehen' : n === 0 ? 'heute' : n === 1 ? 'gestern' : `vor ${n} Tagen`,
+              okH: d => `<b>In Ordnung</b> · zuletzt ganz voll: ${d} · die SOC-Anzeige stimmt`,
+              letH: l => `<b>Achtung</b> · die SOC-Anzeige lag zuletzt 2× deutlich daneben${l}`,
+              advH: (n, l) => `<b>SOC-Drift festgestellt</b> · die SOC-Anzeige lag ${n}× in 45 Tagen deutlich daneben${l}`,
+              last: v => ` (zuletzt ${v} %)`, lastNoFull: ' (lange nicht ganz voll)',
+              letBox: 'Um SOC-Drift vorzubeugen: entlade die Batterie <b>einmal</b> bis zur Entladegrenze und lade sie danach in einem Zug voll, bis das Laden wirklich stoppt.',
+              advBox: 'Empfehlung: entlade die Batterie <b>zweimal</b> bis zur Entladegrenze und lade sie jedes Mal in einem Zug voll, bis das Laden wirklich stoppt. Der Monitor erkennt das selbst; danach verschwindet diese Empfehlung.',
+              full: 'Tage ganz voll', ok: 'SOC-Anzeige stimmte', off: v => `⚠ ${v} %`,
+              dev: v => `größte Abweichung ${v} %`, b99: v => `beim Vollladen noch ${v} % nachgeladen, während sie 99 % zeigte`, jump: v => `größter Sprung ${v} %`,
+              hang: v => `blieb beim Entladen ${v} % lang auf 100 %`, nofull: v => `am längsten nicht ganz voll: ${v} Tage`,
+              words: {up: 'höher', down: 'niedriger', flat: 'stabil', good: 'gut', bad: 'weicht ab'},
+              sub: '✓ = die SOC-Anzeige lag weniger als 5 % daneben · ⚠ = so viel lag sie daneben. Zeige auf ein Feld für Details. Eine Abweichung wird nur festgehalten; erst bei 2× in 45 Tagen kommt „Achtung“.',
+              none: 'Noch keine Daten: der Monitor zeichnet das ab jetzt auf.'},
+            cell: {pill: 'Zellen', q: 'Sind meine Zellen noch im Gleichgewicht?',
+              normal: b => ` (normal ${b} mV)`,
+              okH: (mv, nrm) => `<b>In Ordnung</b> · Zellspannungsdifferenz nach Vollladung ${mv} mV${nrm}`,
+              letH: mv => `<b>Achtung</b> · Zellspannungsdifferenz 2× höher als normal (2 Messungen hintereinander, jetzt ${mv} mV)`,
+              advH: (n, mv) => `<b>Zellkalibrierung empfohlen</b> · Zellspannungsdifferenz 2× höher als normal (${n}× in 45 Tagen, jetzt ${mv} mV)`,
+              letBox: 'Lade die Batterie voll und lass sie etwa <b>4 Stunden</b> voll stehen (hat dein Modell einen UPS-Modus: in der Marstek-App 4 Stunden einschalten, danach zurück in deinen Modus).',
+              advBox: 'Empfehlung: Zellkalibrierung — lade voll und schalte in der Marstek-App den <b>UPS-Modus 8 Stunden</b> ein (kein UPS-Modus: lass sie 8 Stunden im Lademodus), danach zurück in deinen Modus. Kalibrieren dauert lange. Bleibt die Differenz danach hoch, melde es über die Marstek-App.',
+              row: 'Zellen im Gleichgewicht',
+              spread: (mv, nrm) => `Zellspannungsdifferenz nach Vollladung ${mv} mV${nrm}`, rest: h => `${h} Stunden voll in Ruhe`, temp: t => `Zellen ${t} °C`, n: n => `${n} Messungen`,
+              words: {up: 'steigt', down: 'sinkt', flat: 'stabil'},
+              sub: (b, lim) => 'Differenz zwischen höchster und niedrigster Zelle bei voller Batterie. ' + (b ? `Normal für diese Batterie: ${b} mV. „Achtung“ erst bei doppelt so viel (${lim} mV), 2× hintereinander.` : 'Was für diese Batterie normal ist, ermittelt der Monitor aus den ersten 3 Monaten.') + ' Zeige auf ein Feld für Details.',
+              none: 'Noch keine Messung: folgt nach der nächsten Vollladung, sobald die Batterie 5 Minuten geruht hat.'},
             reason: (eol, life) => `Herstellerangabe: ${eol} % nach ${life} Zyklen (keine Garantie). Grün bis 5 Punkte darunter, orange noch tiefer, rot bei 75 % oder weniger.`
           } : nl ? {
             title: 'Capaciteit', nominal: 'Opgegeven', usable: 'Bruikbaar', measured: 'Gemeten',
@@ -99,9 +127,35 @@ button_card_templates:
               interrupted: 'vorige ontlading telde niet mee (onderbroken)'
             },
             chart: 'Grafiek', win3: 'recente 3 jaar van garantieperiode', chartTitle: 'Nog beschikbaar per maand (%)', noData: 'Nog geen metingen in deze periode. De grafiek vult zich na de eerste volledige ontlading.',
-            legCap: 'gemeten', legSpec: 'verwacht volgens fabrikant', legRed: 'melden bij Marstek',
-            how: '<b>Hoe lees je dit?</b> Elke stip is een maand: hoeveel procent van de bruikbare capaciteit er toen nog was. De grijze stippellijn is wat de fabrikant op die leeftijd verwacht. Kijk vooral of de stippen dicht bij of boven die lijn blijven; langzaam dalen is normaal. Zakken ze richting de rode lijn, meld het dan bij Marstek.',
-            cell: {title: 'Celverschil na volle lading', none: 'Nog geen meting: volgt na de volgende volle lading, als de batterij 5 minuten in rust is.', note: 'Verschil tussen hoogste en laagste cel, gemeten in rust bij een volle batterij. Zonder kleur: Marstek geeft geen normaalwaarde.', last: 'laatste'},
+            legCap: 'gemeten, geijkt', legOpen: 'minder betrouwbaar', legSpec: 'verwacht volgens specificatie', legRed: 'melden bij Marstek',
+            less: 'minder betrouwbaar', why: {no_calibration: 'in de 14 dagen vóór de meting niet helemaal vol', cold: 'cellen kouder dan 5 °C'}, refAge: d => `laatst helemaal vol ${d} dagen vóór de meting`,
+            dismiss: 'Wegklikken', gone: 'Weggeklikt · komt terug bij een nieuwe reeks.',
+            soc: {pill: 'SOC', q: 'Klopt mijn SOC-meter nog?',
+              days: n => n === null ? 'nog niet gezien' : n === 0 ? 'vandaag' : n === 1 ? 'gisteren' : `${n} dagen geleden`,
+              okH: d => `<b>In orde</b> · laatst helemaal vol: ${d} · de SOC-meter klopt`,
+              letH: l => `<b>Let op</b> · de SOC-meter zat de laatste tijd 2× flink ernaast${l}`,
+              advH: (n, l) => `<b>SOC-drift geconstateerd</b> · de SOC-meter zat ${n}× in 45 dagen flink ernaast${l}`,
+              last: v => ` (laatst ${v} %)`, lastNoFull: ' (lang niet helemaal vol)',
+              letBox: 'Om SOC-drift te voorkomen: ontlaad de batterij <b>één keer</b> tot de ontlaadgrens en laad hem daarna in één keer vol, tot het laden echt stopt.',
+              advBox: 'Advies: ontlaad de batterij <b>twee keer</b> tot de ontlaadgrens en laad hem elke keer in één keer vol, tot het laden echt stopt. De monitor ziet dat zelf; daarna verdwijnt dit advies.',
+              full: 'Dagen helemaal vol', ok: 'SOC-meter klopte', off: v => `⚠ ${v} %`,
+              dev: v => `grootste afwijking ${v} %`, b99: v => `bij vol laden nog ${v} % bijgeladen terwijl hij 99 % aangaf`, jump: v => `grootste sprong ${v} %`,
+              hang: v => `bleef bij ontladen ${v} % lang op 100 % staan`, nofull: v => `langst niet helemaal vol: ${v} dagen`,
+              words: {up: 'hoger', down: 'lager', flat: 'stabiel', good: 'goed', bad: 'wijkt af'},
+              sub: '✓ = de SOC-meter zat er minder dan 5 % naast · ⚠ = zoveel zat hij ernaast. Wijs een vakje aan voor de details. Eén afwijking wordt alleen vastgelegd; pas bij 2× in 45 dagen komt „let op”.',
+              none: 'Nog geen gegevens: de monitor houdt dit vanaf nu bij.'},
+            cell: {pill: 'Cellen', q: 'Zijn mijn cellen nog in balans?',
+              normal: b => ` (normaal ${b} mV)`,
+              okH: (mv, nrm) => `<b>In orde</b> · celverschil na volle lading ${mv} mV${nrm}`,
+              letH: mv => `<b>Let op</b> · celverschil 2× hoger dan normaal (2 metingen achter elkaar, nu ${mv} mV)`,
+              advH: (n, mv) => `<b>Celkalibratie aanbevolen</b> · celverschil 2× hoger dan normaal (${n}× in 45 dagen, nu ${mv} mV)`,
+              letBox: 'Laad de batterij vol en laat hem ongeveer <b>4 uur</b> vol staan (heeft je model UPS-modus: zet die in de Marstek-app 4 uur aan en daarna terug naar je eigen modus).',
+              advBox: 'Advies: celkalibratie — laad vol en zet in de Marstek-app <b>UPS-modus 8 uur</b> aan (heeft je model geen UPS-modus: laat hem 8 uur in de laadmodus staan), zet hem daarna terug naar je eigen modus. Kalibreren duurt lang. Blijft het celverschil daarna hoog, meld het dan via de Marstek-app.',
+              row: 'Cellen in balans',
+              spread: (mv, nrm) => `celverschil na volle lading ${mv} mV${nrm}`, rest: h => `${h} uur vol in rust`, temp: t => `cellen ${t} °C`, n: n => `${n} metingen`,
+              words: {up: 'stijgt', down: 'daalt', flat: 'stabiel'},
+              sub: (b, lim) => 'Verschil tussen de hoogste en de laagste cel als de batterij vol is. ' + (b ? `Normaal voor deze batterij: ${b} mV. „Let op” pas bij 2× zo veel (${lim} mV), 2 keer achter elkaar.` : 'Wat normaal is voor deze batterij, haalt de monitor uit de eerste 3 maanden.') + ' Wijs een vakje aan voor de details.',
+              none: 'Nog geen meting: volgt na de volgende volle lading, als de batterij 5 minuten in rust is.'},
             reason: (eol, life) => `Specificatie fabrikant: ${eol} % na ${life} cycli (geen garantie). Groen tot 5 punten eronder, oranje daaronder, rood bij 75 % en lager.`
           } : {
             title: 'Capacity', nominal: 'Rated', usable: 'Usable', measured: 'Measured',
@@ -123,9 +177,35 @@ button_card_templates:
               interrupted: 'last discharge did not count (interrupted)'
             },
             chart: 'Chart', win3: 'recent 3 years of warranty', chartTitle: 'Remaining per month (%)', noData: 'No measurements in this period yet. The chart fills after the first full discharge.',
-            legCap: 'measured', legSpec: 'expected by manufacturer', legRed: 'report to Marstek',
-            how: '<b>How to read this?</b> Each dot is one month: how much of the usable capacity was left. The grey dashed line is what the manufacturer expects at that age. Mainly check that the dots stay close to or above that line; a slow decline is normal. If they sink towards the red line, report it to Marstek.',
-            cell: {title: 'Cell spread after full charge', none: 'No measurement yet: follows after the next full charge, once the battery has rested for 5 minutes.', note: 'Difference between the highest and lowest cell, measured at rest with a full battery. No colours: Marstek gives no normal value.', last: 'last'},
+            legCap: 'measured, calibrated', legOpen: 'less reliable', legSpec: 'expected per spec', legRed: 'report to Marstek',
+            less: 'less reliable', why: {no_calibration: 'not completely full in the 14 days before the measurement', cold: 'cells colder than 5 °C'}, refAge: d => `last completely full ${d} days before the measurement`,
+            dismiss: 'Dismiss', gone: 'Dismissed · comes back with a new series.',
+            soc: {pill: 'SOC', q: 'Is my SOC meter still right?',
+              days: n => n === null ? 'not seen yet' : n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`,
+              okH: d => `<b>OK</b> · last completely full: ${d} · the SOC meter is right`,
+              letH: l => `<b>Attention</b> · the SOC meter was clearly off twice recently${l}`,
+              advH: (n, l) => `<b>SOC drift detected</b> · the SOC meter was clearly off ${n}× in 45 days${l}`,
+              last: v => ` (last ${v} %)`, lastNoFull: ' (not completely full for a long time)',
+              letBox: 'To prevent SOC drift: discharge the battery <b>once</b> down to the discharge limit, then charge it to full in one go, until charging really stops.',
+              advBox: 'Advice: discharge the battery <b>twice</b> down to the discharge limit and charge it to full in one go each time, until charging really stops. The monitor sees this itself; then this advice disappears.',
+              full: 'Days completely full', ok: 'SOC meter was right', off: v => `⚠ ${v} %`,
+              dev: v => `largest deviation ${v} %`, b99: v => `when charging, ${v} % more went in while it showed 99 %`, jump: v => `largest jump ${v} %`,
+              hang: v => `stayed at 100 % for ${v} % of a discharge`, nofull: v => `longest not completely full: ${v} days`,
+              words: {up: 'higher', down: 'lower', flat: 'stable', good: 'good', bad: 'off'},
+              sub: '✓ = the SOC meter was less than 5 % off · ⚠ = how much it was off. Point at a cell for details. One deviation is only recorded; “attention” comes only after 2× in 45 days.',
+              none: 'No data yet: the monitor keeps track of this from now on.'},
+            cell: {pill: 'Cells', q: 'Are my cells still in balance?',
+              normal: b => ` (normally ${b} mV)`,
+              okH: (mv, nrm) => `<b>OK</b> · cell spread after a full charge ${mv} mV${nrm}`,
+              letH: mv => `<b>Attention</b> · cell spread 2× higher than normal (2 measurements in a row, now ${mv} mV)`,
+              advH: (n, mv) => `<b>Cell calibration advised</b> · cell spread 2× higher than normal (${n}× in 45 days, now ${mv} mV)`,
+              letBox: 'Charge the battery to full and keep it full for about <b>4 hours</b> (if your model has UPS mode: switch it on in the Marstek app for 4 hours, then back to your own mode).',
+              advBox: 'Advice: cell calibration — charge to full and switch on <b>UPS mode for 8 hours</b> in the Marstek app (no UPS mode on your model: leave it in charge mode for 8 hours), then back to your own mode. Calibrating takes a long time. If the spread stays high after that, report it via the Marstek app.',
+              row: 'Cells in balance',
+              spread: (mv, nrm) => `cell spread after a full charge ${mv} mV${nrm}`, rest: h => `${h} hours full at rest`, temp: t => `cells ${t} °C`, n: n => `${n} measurements`,
+              words: {up: 'rising', down: 'falling', flat: 'stable'},
+              sub: (b, lim) => 'Difference between the highest and the lowest cell when the battery is full. ' + (b ? `Normal for this battery: ${b} mV. “Attention” only at twice as much (${lim} mV), 2× in a row.` : 'What is normal for this battery, the monitor learns from the first 3 months.') + ' Point at a cell for details.',
+              none: 'No measurement yet: follows after the next full charge, once the battery has rested for 5 minutes.'},
             reason: (eol, life) => `Manufacturer spec: ${eol} % after ${life} cycles (not a warranty). Green up to 5 points below, orange below that, red at 75 % or lower.`
           };
           // variables.demo (optional): fake states for a demo/gallery, nothing is written to HA
@@ -215,37 +295,85 @@ button_card_templates:
               ${step ? `<div style="font-size:11px;${muted};margin-left:14px">${step}${intr}</div>` : ''}</div>`;
           }
 
-          // Cell balance (only when cell sensors are configured)
-          const cs = g('cell_spread');
-          let cells = '';
-          if (cs) {
-            const ct = (cs.attributes.trend || []).slice(0, variables.months || 6);
-            const C = T.cell;
-            if (!ct.length) {
-              cells = `<div style="margin-top:10px;font-size:12px"><b>${C.title}</b><div style="font-size:11px;${muted}">${C.none}</div></div>`;
-            } else {
-              const d = ct.length > 1 ? ct[0].spread_mv - ct[ct.length - 1].spread_mv : 0;
-              const arrow = ct.length < 2 ? '·' : d > 2 ? '▲' : d < -2 ? '▼' : '▬';
-              const mon2 = k => new Date(k + '-15').toLocaleString(T.loc, {month: 'short', year: '2-digit'});
-              const cc = ct.map(t => `<td style="padding:2px 8px;text-align:right">
-                  <div style="font-size:11px;${muted}">${mon2(t.month)}</div>
-                  <div style="font-weight:600">${f(t.spread_mv, 0)} mV</div>
-                  <div style="font-size:10px;${muted}">n=${t.n}</div></td>`).join('');
-              cells = `<div style="margin-top:10px;font-size:12px"><b>${C.title}</b> · ${C.last} ${f(cs.state, 0)} mV
-                <table style="margin-top:4px;border-collapse:collapse;width:100%"><tr>
-                <td style="padding:2px 8px 2px 0;${muted};font-size:11px;vertical-align:middle">${T.trend}<div style="font-size:18px">${arrow}</div></td>
-                ${cc}</tr></table>
-                <div style="font-size:11px;${muted}">${C.note}</div></div>`;
-            }
+          // Buttons Chart · SOC · Cells under the status line: one panel open at a time.
+          const panel = (this && this._mcPanel) || '';
+          const gone = (this && this._mcGone) || '';  // clicked away on a demo card
+          const act = js => `onclick="event.stopPropagation();const h=this.getRootNode().host;${js}h._config={...h._config};"`;
+          const sh = g('soc_health'), ch = g('cell_health'), cs = g('cell_spread');
+          // Let op (⚠) / advice (🔧) that has not been clicked away
+          const shown = (s, kind) => !!s && ['letop', 'advies'].includes(s.state) && !s.attributes.dismissed && !gone.includes(kind);
+          const sym = s => !s || !['letop', 'advies'].includes(s.state) ? '<span style="color:#66bb6a">●</span>'
+            : s.state === 'advies' ? '<span style="color:#ef5350">🔧</span>' : '<span style="color:#ffa726">⚠</span>';
+          const badge = (s, kind) => shown(s, kind) ? ' ' + sym(s) : '';
+          const pill = (key, label) => `<span ${act(`h._mcPanel=h._mcPanel==='${key}'?'':'${key}';`)} style="display:inline-block;margin:0 6px 4px 0;font-size:12px;padding:1px 11px;border:1px solid ${panel === key ? '#5a6170' : '#3a3f4b'};border-radius:12px;background:${panel === key ? '#2f3542' : 'transparent'};color:${panel === key ? '#e8eaed' : '#9aa0a6'};cursor:pointer;user-select:none;pointer-events:auto">${label}</span>`;
+          const pills = `<div style="margin-top:8px">${pill('chart', T.chart)}${sh ? pill('soc', T.soc.pill + badge(sh, 'soc')) : ''}${ch || cs ? pill('cells', T.cell.pill + badge(ch, 'cells')) : ''}</div>`;
+          const dismissAct = kind => variables.demo ? `h._mcGone=(h._mcGone||'')+'${kind}';`
+            : `h.hass.callService('marstek_capacity_monitor','dismiss_advice',{battery:'${id}',kind:'${kind}'});`;
+          const adviceBox = (s, kind, text) => `<div style="border-left:3px solid ${s.state === 'advies' ? '#ef5350' : '#ffa726'};background:#2a2c31;padding:8px 10px;border-radius:6px;margin:8px 0;font-size:12.5px">${text}<br>
+              <span ${act(dismissAct(kind))} style="display:inline-block;margin-top:6px;border:1px solid #5a6170;border-radius:10px;padding:1px 10px;font-size:11.5px;color:#c4c7cc;cursor:pointer;pointer-events:auto">${T.dismiss}</span></div>`;
+          const advice = (s, kind, A) => shown(s, kind) ? adviceBox(s, kind, s.state === 'advies' ? A.advBox : A.letBox)
+            : s && ['letop', 'advies'].includes(s.state) ? `<div style="font-size:11px;${muted};margin-top:4px">${T.gone}</div>` : '';
+          const panelS = 'margin-top:4px;padding:8px 10px;background:#22262e;border-radius:8px';
+          const qS = `font-size:11px;${muted};margin-bottom:4px`, subS = `font-size:11px;${muted};margin-top:6px;line-height:1.35`;
+          const thS = `${muted};font-weight:400;font-size:11px;text-align:right;padding:2px 4px;white-space:nowrap`;
+          const tdS = 'color:#e8eaed;text-align:right;padding:3px 4px;border-top:1px solid #333744;white-space:nowrap';
+          const td1 = 'text-align:left;padding:3px 8px 3px 0;border-top:1px solid #333744;color:#c4c7cc;white-space:nowrap';
+          const monS = k => new Date(k + '-15').toLocaleString(T.loc, {month: 'short', year: '2-digit'});
+          const monL = k => new Date(k + '-15').toLocaleString(T.loc, {month: 'short', year: 'numeric'});
+          const nd0 = new Date(), nowKey = `${nd0.getFullYear()}-${String(nd0.getMonth() + 1).padStart(2, '0')}`;
+          // Monthly table: trend column first, then newest -> oldest
+          const table = (months, rows) => `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:12px">
+              <tr><th></th><th style="${thS}">${T.trend}</th>${months.map(k => `<th style="${thS}">${monS(k)}</th>`).join('')}</tr>${rows}</table></div>`;
+          // newest value against the middle of the other months
+          const trendWord = (vals, W, badUp) => {
+            if (vals.length < 2) return `<span style="${muted}">·</span>`;
+            const rest = vals.slice(1).sort((x, y) => x - y), md = rest[Math.floor(rest.length / 2)];
+            const c = up => (up === badUp ? '#ffa726' : '#66bb6a');
+            return vals[0] > md * 1.2 + 1 ? `<span style="color:${c(true)}">${W.up}</span>`
+              : vals[0] < md / 1.2 - 1 ? `<span style="color:${c(false)}">${W.down}</span>` : `<span style="${muted}">${W.flat}</span>`;
+          };
+
+          // SOC panel: is the SOC meter still right?
+          let socPanel = '';
+          if (panel === 'soc' && sh) {
+            const A = T.soc, sa = sh.attributes;
+            const tr = (sa.trend || []).slice(0, variables.months || 6);
+            const ago = sa.last_calibration ? Math.max(0, Math.floor((Date.now() - new Date(sa.last_calibration)) / 86400000)) : null;
+            const last = sa.last_size > 0 ? A.last(f(sa.last_size, 0)) : sa.count ? A.lastNoFull : '';
+            const head = sh.state === 'advies' ? A.advH(sa.count ?? 3, last) : sh.state === 'letop' ? A.letH(last) : A.okH(A.days(ago));
+            const share = t => { const d = t.month === nowKey ? nd0.getDate() : new Date(+t.month.slice(0, 4), +t.month.slice(5, 7), 0).getDate(); return 30 * t.full_days / d; };
+            const tip = t => [`${monL(t.month)}: ${A.dev(f(t.dev, 0))}`, t.b99 ? A.b99(f(t.b99, 0)) : '', t.jump ? A.jump(f(t.jump, 0)) : '',
+              t.hang ? A.hang(f(t.hang, 0)) : '', t.no_full_days ? A.nofull(t.no_full_days) : ''].filter(x => x).join('&#10;');
+            const rows = !tr.length ? '' : `<tr><td style="${td1}">${A.full}</td><td style="${tdS}">${trendWord(tr.map(share), A.words, false)}</td>
+                ${tr.map(t => `<td style="${tdS}${t.month !== nowKey && t.full_days < 7 ? ';color:#ffa726;font-weight:600' : ''}">${t.full_days}</td>`).join('')}</tr>
+              <tr><td style="${td1}">${A.ok}</td><td style="${tdS}">${tr[0].dev >= 5 ? `<span style="color:#ffa726">${A.words.bad}</span>` : `<span style="color:#66bb6a">${A.words.good}</span>`}</td>
+                ${tr.map(t => `<td title="${tip(t)}" style="${tdS};${t.dev >= 5 ? 'color:#ffa726;font-weight:600' : 'color:#66bb6a'}">${t.dev >= 5 ? A.off(f(t.dev, 0)) : '✓'}</td>`).join('')}</tr>`;
+            socPanel = `<div style="${panelS}"><div style="${qS}">${A.q}</div><div>${sym(sh)} ${head}</div>${advice(sh, 'soc', A)}
+                ${tr.length ? table(tr.map(t => t.month), rows) + `<div style="${subS}">${A.sub}</div>` : `<div style="${subS}">${A.none}</div>`}</div>`;
           }
 
-          // Chart, opened with the small button under the status (top right).
-          // The chart shows the most recent 3 years (never before the installation date).
-          const open = !!(this && this._mcChart);
-          const act = js => `onclick="event.stopPropagation();const h=this.getRootNode().host;${js}h._config={...h._config};"`;
-          const chartBtn = `<div ${act('h._mcChart=!h._mcChart;')} style="margin-top:4px;display:inline-block;font-size:11px;padding:1px 8px;border:1px solid #333744;border-radius:10px;color:#9aa0a6;cursor:pointer;user-select:none;pointer-events:auto">${T.chart} ${open ? '▾' : '▸'}</div>`;
+          // Cells panel: are the cells still in balance?
+          let cellPanel = '';
+          if (panel === 'cells' && (ch || cs)) {
+            const A = T.cell, ca = ch ? ch.attributes : {};
+            const tr = ((ch || cs).attributes.trend || []).slice(0, variables.months || 6);
+            const base = ca.base_mv, lim = ca.limit_mv ?? (base ? 2 * base : null);
+            const nrm = base ? A.normal(f(base, 0)) : '';
+            const now = f(ca.last_mv ?? (cs ? cs.state : null), 0);
+            const head = !ch ? '' : ch.state === 'advies' ? A.advH(ca.count ?? 3, now) : ch.state === 'letop' ? A.letH(now) : tr.length ? A.okH(now, nrm) : '';
+            const tip = t => [`${monL(t.month)}: ${A.spread(f(t.spread_mv, 0), nrm)}`, t.rest_h != null ? A.rest(f(t.rest_h, 1)) : '',
+              t.temp_c != null ? A.temp(f(t.temp_c, 0)) : '', t.n ? A.n(t.n) : ''].filter(x => x).join('&#10;');
+            const high = t => lim && t.spread_mv >= lim;
+            const rows = !tr.length ? '' : `<tr><td style="${td1}">${A.row}</td><td style="${tdS}">${trendWord(tr.map(t => t.spread_mv), A.words, true)}</td>
+                ${tr.map(t => `<td title="${tip(t)}" style="${tdS}${high(t) ? ';color:#ffa726;font-weight:600' : ''}">${high(t) ? '⚠ ' : ''}${f(t.spread_mv, 0)} mV</td>`).join('')}</tr>`;
+            cellPanel = `<div style="${panelS}"><div style="${qS}">${A.q}</div>${head ? `<div>${sym(ch)} ${head}</div>` : ''}${advice(ch, 'cells', A)}
+                ${tr.length ? table(tr.map(t => t.month), rows) + `<div style="${subS}">${A.sub(base ? f(base, 0) : null, lim ? f(lim, 0) : null)}</div>` : `<div style="${subS}">${A.none}</div>`}</div>`;
+          }
+
+          // Chart: the most recent 3 years (never before the installation date).
+          // Open dot = less reliable: not completely full in the 14 days before, or cold cells.
           let chart = '';
-          if (open) {
+          if (panel === 'chart') {
             const km = k => { const [yy, mm] = k.split('-').map(Number); return yy * 12 + mm - 1; };
             const nd = new Date(), nowI = nd.getFullYear() * 12 + nd.getMonth();
             const startI = nowI - Math.round((ea.age_years ?? 0) * 12);
@@ -272,22 +400,24 @@ button_card_templates:
             if (!isNaN(exp) && (!sp.length || sp[sp.length - 1][0] < nowI)) sp.push([nowI, exp]);
             if (sp.length > 1) svg += `<polyline points="${sp.map(([i, v]) => `${X(i)},${Y(v)}`).join(' ')}" fill="none" stroke="#9aa0a6" stroke-opacity="0.7" stroke-width="1" stroke-dasharray="4 3"/>`;
             if (pts.length > 1) svg += `<polyline points="${pts.map(t => `${X(km(t.month))},${Y(t.pct)}`).join(' ')}" fill="none" stroke="#66bb6a" stroke-opacity="0.45" stroke-width="1.2"/>`;
-            const monL = k => new Date(k + '-15').toLocaleString(T.loc, {month: 'short', year: 'numeric'});
-            svg += pts.map(t => `<circle cx="${X(km(t.month))}" cy="${Y(t.pct)}" r="${pts.length > 40 ? 2.2 : 3}" fill="${col(t.pct, t.expected_pct)}"><title>${monL(t.month)}: ${f(t.pct, 1)} % (${T.legSpec} ${f(t.expected_pct, 0)} %${t.temp_c != null ? `, ${f(t.temp_c, 0)} °C` : ''})</title></circle>`).join('');
+            const why = t => t.why === 'both' ? `${T.why.no_calibration}, ${T.why.cold}` : (T.why[t.why] || '');
+            const tip = t => `${monL(t.month)}: ${f(t.pct, 1)} % (${T.legSpec} ${f(t.expected_pct, 0)} %${t.temp_c != null ? `, ${f(t.temp_c, 0)} °C` : ''})`
+              + (t.reliable === false ? `\n${T.less}: ${why(t)}` : '') + (t.ref_age_d != null ? `\n${T.refAge(f(t.ref_age_d, 0))}` : '');
+            svg += pts.map(t => { const c = col(t.pct, t.expected_pct);
+              return `<circle cx="${X(km(t.month))}" cy="${Y(t.pct)}" r="${pts.length > 40 ? 2.2 : 3}" fill="${t.reliable === false ? '#22262e' : c}" stroke="${c}" stroke-width="1.4"><title>${tip(t)}</title></circle>`; }).join('');
             if (pts.length) { const t = pts[pts.length - 1]; svg += `<text x="${X(km(t.month))}" y="${Y(t.pct) - 6}" font-size="10" fill="#e8eaed" text-anchor="middle">${f(t.pct, 0)}</text>`; }
-            chart = `<div style="margin-top:8px;padding:8px 10px;background:#22262e;border-radius:8px">
+            chart = `<div style="${panelS}">
                 <div style="display:flex;flex-wrap:wrap;justify-content:space-between;column-gap:10px;font-size:11px;${muted}"><span>${T.chartTitle}</span><span>${T.win3}</span></div>
                 ${pts.length ? `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:100%;height:auto;display:block;margin-top:4px">${svg}</svg>` : ''}
                 ${pts.length ? '' : `<div style="font-size:11px;${muted};margin:4px 0">${T.noData}</div>`}
-                <div style="font-size:10px;${muted};margin-top:2px"><span style="color:#66bb6a">●</span> ${T.legCap} · <span style="color:#9aa0a6">┄</span> ${T.legSpec} · <span style="color:#ef5350">┄</span> ${T.legRed}</div>
-                <div style="font-size:11px;${muted};margin-top:6px;line-height:1.35">${T.how}</div>
+                <div style="font-size:10.5px;${muted};margin-top:2px"><span style="color:#66bb6a">●</span> ${T.legCap} · <span style="color:#66bb6a">○</span> ${T.legOpen} · <span style="color:#9aa0a6">┄</span> ${T.legSpec} · <span style="color:#ef5350">┄</span> ${T.legRed}</div>
               </div>`;
           }
 
           return `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
               <span style="font-size:15px;font-weight:600">${name} · ${T.title}</span>
-              <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:${col(pct)}">${status}</div>${chartBtn}</div></div>
-            ${chart}${monLine}${boxes}${bar}${expLine}${trend}${cells}${foot}`;
+              <div style="text-align:right;flex-shrink:0;font-size:12px;color:${col(pct)}">${status}</div></div>
+            ${monLine}${pills}${chart}${socPanel}${cellPanel}${boxes}${bar}${expLine}${trend}${foot}`;
         ]]]
 
   # -------------------------------------------------------------------------
@@ -301,10 +431,10 @@ button_card_templates:
         [[[
           const nl = variables.lang === 'nl';
           const T = variables.lang === 'de'
-            ? {title: 'Kapazität Heimspeicher — % noch verfügbar pro Monat', bat: 'Batterie', trend: 'Trend', now: 'Jetzt', exp: 'Herstellerangabe', loc: 'de-DE', none: 'sammelt Daten', mon: {measuring: 'Messung läuft', collecting: 'sammelt Daten', no_recent_data: 'keine aktuellen Daten', sensor_missing: 'Sensor nicht verfügbar'}, legend: 'Grün: im Rahmen der Herstellerangabe (bis 5 Punkte darunter) · orange: unter Herstellerangabe · rot: 75 % oder weniger, über die Marstek-App melden. Kleine Zahl = Herstellerangabe für diesen Monat. ✓ Messung läuft · ⏳ sammelt Daten · ⚠ Verbindung prüfen.'}
+            ? {title: 'Kapazität Heimspeicher — % noch verfügbar pro Monat', bat: 'Batterie', trend: 'Trend', now: 'Jetzt', exp: 'Herstellerangabe', loc: 'de-DE', none: 'sammelt Daten', mon: {measuring: 'Messung läuft', collecting: 'sammelt Daten', no_recent_data: 'keine aktuellen Daten', sensor_missing: 'Sensor nicht verfügbar'}, legend: 'Grün: im Rahmen der Herstellerangabe (bis 5 Punkte darunter) · orange: unter Herstellerangabe · rot: 75 % oder weniger, über die Marstek-App melden. Kleine Zahl = Herstellerangabe für diesen Monat. ✓ Messung läuft · ⏳ sammelt Daten · ⚠ Verbindung prüfen oder Achtung · 🔧 Empfehlung (SOC-Drift oder Zellkalibrierung, siehe die Karte dieser Batterie).', adv: 'SOC-Drift oder Zellkalibrierung: siehe die Karte dieser Batterie'}
             : nl
-            ? {title: 'Capaciteit thuisbatterijen — % nog beschikbaar per maand', bat: 'Batterij', trend: 'Trend', now: 'Nu', exp: 'Specificatie', loc: 'nl-NL', none: 'verzamelt data', mon: {measuring: 'meting werkt', collecting: 'verzamelt data', no_recent_data: 'geen recente data', sensor_missing: 'sensor niet beschikbaar'}, legend: 'Groen: volgens specificatie fabrikant (tot 5 punten eronder) · oranje: onder specificatie · rood: 75 % of lager, melden via de Marstek-app. Klein getal = specificatie voor die maand. ✓ meting werkt · ⏳ verzamelt data · ⚠ controleer de koppeling.'}
-            : {title: 'Home battery capacity — % remaining per month', bat: 'Battery', trend: 'Trend', now: 'Now', exp: 'Spec', loc: 'en-GB', none: 'collecting data', mon: {measuring: 'monitor working', collecting: 'collecting data', no_recent_data: 'no recent data', sensor_missing: 'sensor unavailable'}, legend: 'Green: within manufacturer spec (up to 5 points below) · orange: below spec · red: 75 % or lower, report via the Marstek app. Small number = spec for that month. ✓ monitor working · ⏳ collecting data · ⚠ check the connection.'};
+            ? {title: 'Capaciteit thuisbatterijen — % nog beschikbaar per maand', bat: 'Batterij', trend: 'Trend', now: 'Nu', exp: 'Specificatie', loc: 'nl-NL', none: 'verzamelt data', mon: {measuring: 'meting werkt', collecting: 'verzamelt data', no_recent_data: 'geen recente data', sensor_missing: 'sensor niet beschikbaar'}, legend: 'Groen: volgens specificatie fabrikant (tot 5 punten eronder) · oranje: onder specificatie · rood: 75 % of lager, melden via de Marstek-app. Klein getal = specificatie voor die maand. ✓ meting werkt · ⏳ verzamelt data · ⚠ controleer de koppeling of let op · 🔧 advies (SOC-drift of celkalibratie, zie de kaart van die batterij).', adv: 'SOC-drift of celkalibratie: zie de kaart van deze batterij'}
+            : {title: 'Home battery capacity — % remaining per month', bat: 'Battery', trend: 'Trend', now: 'Now', exp: 'Spec', loc: 'en-GB', none: 'collecting data', mon: {measuring: 'monitor working', collecting: 'collecting data', no_recent_data: 'no recent data', sensor_missing: 'sensor unavailable'}, legend: 'Green: within manufacturer spec (up to 5 points below) · orange: below spec · red: 75 % or lower, report via the Marstek app. Small number = spec for that month. ✓ monitor working · ⏳ collecting data · ⚠ check the connection or attention · 🔧 advice (SOC drift or cell calibration, see the card of that battery).', adv: 'SOC drift or cell calibration: see the card of this battery'};
           const f = (v, d = 0) => (v === null || v === undefined || isNaN(v)) ? '–'
             : Number(v).toLocaleString(T.loc, {minimumFractionDigits: d, maximumFractionDigits: d});
           const muted = 'color:#9aa0a6';
@@ -315,7 +445,10 @@ button_card_templates:
             const p = S[`sensor.marstek_${b.id}_capacity_pct`];
             const e = S[`sensor.marstek_${b.id}_expected_capacity`];
             const s = S[`sensor.marstek_${b.id}_monitor_status`];
-            return {b, m, p, e, s, trend: m ? (m.attributes.trend || []) : []};
+            // SOC drift / cell calibration that has not been clicked away
+            const adv = ['soc_health', 'cell_health'].map(k => S[`sensor.marstek_${b.id}_${k}`])
+              .filter(h => h && ['letop', 'advies'].includes(h.state) && !h.attributes.dismissed);
+            return {b, m, p, e, s, adv, trend: m ? (m.attributes.trend || []) : []};
           });
           const months = [...new Set(rows.flatMap(r => r.trend.map(t => t.month)))]
             .sort().reverse().slice(0, variables.months || 6);
@@ -342,7 +475,9 @@ button_card_templates:
             return `<tr style="border-top:1px solid #333744">
                 <td style="padding:4px 16px 4px 0;white-space:nowrap"><span style="color:${col(now)}">●</span> ${name}${r.s ? (() => {
                   const sym = {measuring: ['✓', '#66bb6a'], collecting: ['⏳', '#42a5f5'], no_recent_data: ['⚠', '#ffa726'], sensor_missing: ['⚠', '#ef5350']}[r.s.state] || ['', ''];
-                  return ` <span title="${T.mon[r.s.state] || r.s.state}" style="font-size:11px;color:${sym[1]}">${sym[0]}</span>`; })() : ''}</td>
+                  return ` <span title="${T.mon[r.s.state] || r.s.state}" style="font-size:11px;color:${sym[1]}">${sym[0]}</span>`; })() : ''}${r.adv.length ? (() => {
+                  const big = r.adv.some(h => h.state === 'advies');
+                  return ` <span title="${T.adv}" style="font-size:11px;color:${big ? '#ef5350' : '#ffa726'}">${big ? '🔧' : '⚠'}</span>`; })() : ''}</td>
                 <td style="padding:4px 10px;text-align:right;color:${d < -1 ? col(now) : '#9aa0a6'}">${arrow}</td>
                 <td style="padding:4px 10px;text-align:right;font-weight:600;color:${col(now)}">${isNaN(now) ? `<span style="font-weight:400;font-size:11px;${muted}">${T.none}</span>` : f(now, 1) + '%'}</td>
                 ${cells}
