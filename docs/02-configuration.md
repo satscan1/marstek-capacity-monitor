@@ -8,7 +8,7 @@ All values are set when you add a battery. Change them later under **Settings �
 |---|---|---|
 | Rated capacity | 5.12 kWh | Total in the cells per manufacturer |
 | Internal reserve | 0.51 kWh | Part the battery never releases; rated capacity × (100 % − depth of discharge). 0.51 = 90 %, 0.61 = 88 % |
-| Model | – | Venus E v1/v2, Venus E v3, Venus D or other. Fills in the factory data when adding; see [Supported batteries](05-supported-batteries.md#factory-data-per-model) |
+| Model | – | Venus E v1/v2, Venus E v3, Venus E 4.0, Venus E Max, Venus E Pro, Venus D or other. Fills in the factory data when adding; see [Supported batteries](05-supported-batteries.md#factory-data-per-model) |
 | Installation date | – | For age and the end of the warranty period |
 | Warranty period | 10 years | Shown on the card for information only |
 | Rated cycle life | 6,000 | Manufacturer spec |
@@ -19,6 +19,7 @@ All values are set when you add a battery. Change them later under **Settings �
 | Sign of the power sensor | Automatic | Only change if automatic detection gets it wrong |
 | Highest / lowest cell temperature | empty | Optional, experimental. Stored with every measurement as context (a cold battery gives less). Only cell temperatures, never MOS / board temperatures |
 | Highest / lowest cell voltage | empty | Optional, for the cell balance check. Fill in both or neither. Only cell **voltages**: some connections report MOSFET temperatures as "cell temperature" |
+| Notifications | on | Message on your phone and under Repairs for SOC drift or cell calibration, only for a pattern. Off = no messages; the card still shows it. See [How it works](03-how-it-works.md#messages-and-dismissing-from-05) |
 
 ## Sensors
 
@@ -32,15 +33,23 @@ All values are set when you add a battery. Change them later under **Settings �
 | `sensor.marstek_mt1_warranty_status` | Capacity status: `good` / `attention` / `critical` / `no_measurement` |
 | `sensor.marstek_mt1_monitor_status` | Is the measurement itself working: `measuring` / `collecting` / `no_recent_data` / `sensor_missing`. Attributes: `phase` (next step to a measurement), `soc`, `full_discharges`, `power_sign` |
 | `sensor.marstek_mt1_cell_spread` | Only with cell sensors: spread between highest and lowest cell after the last full charge (mV). Attributes: `trend` (monthly median, new → old) and `history` |
+| `sensor.marstek_mt1_soc_health` | SOC drift: `ok` / `letop` (attention) / `advies` (advice). Attributes: `count` (occurrences in 45 days), `since`, `last_size` (%), `last_calibration` (last time completely full), `dismissed`, `notify`, `trend` (per month: `full_days`, `dev`, `b99`, `jump`, `hang`, `no_full_days`) |
+| `sensor.marstek_mt1_cell_health` | Only with cell sensors: cell calibration `ok` / `letop` / `advies`. Attributes: `count`, `since`, `base_mv` (normal, first 3 months), `limit_mv` (2× normal), `last_mv`, `dismissed`, `notify`, `trend` (per month: `spread_mv`, `n`, `rest_h`, `temp_c`) |
 | `sensor.marstek_mt1_last_full_discharge` · `_last_full_charge` | Date and time of the last full discharge (≥ 95 % → ≤ 15 %) and full charge (≤ 15 % → ≥ 95 %) |
 | `sensor.marstek_mt1_nominal_capacity` · `_usable_capacity` · `_red_threshold` · `_warranty_end` · `_dc_discharged` | Diagnostics. `_dc_discharged` also shows which sensors are used and how the sign was detected |
 
 After every recorded swing, the integration fires the event `marstek_capacity_monitor_session`. You can use it to forward the records yourself, for example to InfluxDB.
 
+When the SOC drift or cell calibration level changes, it fires `marstek_capacity_monitor_advice` (`entry_id`, `name`, `battery`, `kind` = `soc` or `cells`, `level`, `count`, `size`). Use it for your own notification, for example on a speaker.
+
 Write load stays low:
 
 * the `trend` and `history` lists are not written to the recorder database;
 * the sensors only change after a measurement or once per hour.
+
+## Dismissing a message
+
+The action `marstek_capacity_monitor.dismiss_advice` with `battery` (e.g. `mt1`) and `kind` (`soc` or `cells`) does the same as **Dismiss** on the card: the message disappears everywhere and only comes back with a new series.
 
 ## Resetting measurements
 
