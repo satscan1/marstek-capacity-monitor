@@ -111,6 +111,18 @@ NOTIFY_ACTION_PREFIX = "MCM_DISMISS"
 KIND_SOC = "soc"
 KIND_CELLS = "cells"
 
+# How sensitive the SOC drift and cell calibration checks are (0.5):
+# off = only shown on the card, never "let op" or advice.
+CONF_SOC_SENSITIVITY = "soc_sensitivity"
+CONF_CELL_SENSITIVITY = "cell_sensitivity"
+SENSITIVITIES = ["off", "relaxed", "normal", "strict"]
+DEFAULTS[CONF_SOC_SENSITIVITY] = "normal"
+DEFAULTS[CONF_CELL_SENSITIVITY] = "normal"
+# SOC: an occurrence is a deviation of at least this many percent
+SOC_EVENT_PCT = {"relaxed": 8.0, "normal": 5.0, "strict": 3.0, "off": 5.0}
+# Cells: an occurrence is a spread of at least this times the own normal value
+CELL_FACTORS = {"relaxed": 3.0, "normal": 2.0, "strict": 1.5, "off": 2.0}
+
 # Optional: highest / lowest cell voltage for the cell balance check
 CONF_CELL_MAX_ENTITY = "cell_max_entity"
 CONF_CELL_MIN_ENTITY = "cell_min_entity"
