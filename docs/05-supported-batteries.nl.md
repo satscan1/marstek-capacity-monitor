@@ -26,10 +26,16 @@ Bij het toevoegen kies je het model; deze waarden worden dan ingevuld. Je kunt z
 | Venus E v1 / v2 | 5,12 kWh | 0,51 kWh (90 %) | 6.000 · 80 % | 10 jaar |
 | Venus E v3 | 5,12 kWh | 0,51 kWh (90 %) | 6.000 · 80 % | 10 jaar |
 | Venus D | 2,56 kWh per pakket (1–6 pakketten) | 10 % van opgegeven (90 %) | 6.000 · 80 % ¹ | 10 jaar ² |
+| Venus E 4.0 | 5,024 kWh | 0,60 kWh (88 %) | 10.000 · 80 % ³ | 10 jaar ² |
+| Venus E Max | 10,048 kWh | 1,00 kWh (90 %) | 10.000 · 80 % ³ | 10 jaar ² |
+| Venus E Pro | 2,08 kWh per pakket (1–6 pakketten: basis plus 0–5 extra) | 10 % van opgegeven (90 %) | 10.000 · 80 % ³ | 10 jaar ² |
 | Ander model | zelf invullen | zelf invullen | zelf invullen | zelf invullen |
 
 ¹ Marstek noemt voor de Venus D meer dan 10.000 cycli, maar geen capaciteitspercentage; de monitor gebruikt de voorzichtigere lijn van de Venus E.
-² Niet genoemd voor de Venus D; controleer je eigen voorwaarden.
+² Niet genoemd voor dit model; controleer je eigen voorwaarden.
+³ Marstek noemt meer dan 10.000 cycli (25 °C), maar geen capaciteitspercentage; de monitor gaat uit van 80 % na 10.000 cycli. De lijn is vlakker dan bij de oudere modellen.
+
+De Venus E Mini staat niet in de lijst: die koppelt alleen via Bluetooth en wifi, dus er is geen lokale sensor voor het DC-vermogen. Heb je laadtoestand en DC-vermogen wel lokaal, kies dan *Ander model*. De Venus D AC-versie volgt zodra de specificaties duidelijk zijn. Venus E v1 en v2 blijven één keuze: zelfde firmware, registers en modelcode.
 
 De Venus A heeft nog geen vooraf ingevulde waarden: er is geen openbare capaciteit gevonden. Kies *Ander model* en vul de fabrieksgegevens zelf in.
 
@@ -42,12 +48,15 @@ De Venus A heeft nog geen vooraf ingevulde waarden: er is geen openbare capacite
 | Venus E v1 / v2 | 90 % volgens de datasheet; in de praktijk stoppen sommige exemplaren rond 11–12 %, dus 88 % | 0,51 kWh (of 0,61 kWh bij 88 %) | Datasheet Venus E / eigen meting |
 | Venus E v3 | 90 % | 0,51 kWh | Handleiding Venus E 3.0 |
 | Venus D (2,56 kWh) | Niet als specificatie vermeld; Marstek rekent op de productpagina met 90 % | 0,26 kWh | Productpagina Venus D |
+| Venus E 4.0 (5,024 kWh) | 88 % | 0,60 kWh | Brochure Venus E 4.0 |
+| Venus E Max (10,048 kWh) | 90 % | 1,00 kWh | Brochure Venus E Max |
+| Venus E Pro (2,08 kWh per pakket) | 90 % | 0,21 kWh per pakket | Brochure Venus E Pro |
 
 Tip: kijk bij een volledige ontlading tot welk percentage jouw batterij zakt. Stopt hij rond 10 %, gebruik dan 90 %; stopt hij rond 12 %, gebruik dan 88 %.
 
 ## Bronnen voor de specificaties van de fabrikant
 
-Geraadpleegd op 20-10-2026. Waar bronnen elkaar tegenspreken, gebruikt de tool de voorzichtigste waarde; je kunt alles zelf aanpassen.
+Geraadpleegd op 20-10-2026 (nieuwe modellen op 22-10-2026). Waar bronnen elkaar tegenspreken, gebruikt de tool de voorzichtigste waarde; je kunt alles zelf aanpassen.
 
 | Gegeven | Waarde | Bron |
 |---|---|---|
@@ -57,6 +66,9 @@ Geraadpleegd op 20-10-2026. Waar bronnen elkaar tegenspreken, gebruikt de tool d
 | Ontlaaddiepte Venus E 3.0 | 90 % · 5.120 Wh · meer dan 6.000 cycli (25 °C) | [Marstek – Download Center, gebruikershandleiding Venus E 3.0](https://marstekenergy.com/en-us/pages/download-center) |
 | Ontlaaddiepte Venus E (eerdere uitvoering) | 90 % · 5.120 Wh · meer dan 6.000 cycli (25 °C) | Specificatieblad Venus E "plug-in battery", zoals verspreid door verkopers (geen openbare link bij Marstek) |
 | Venus D | 2,56 kWh per unit · meer dan 10.000 cycli · rekenvoorbeelden met 90 % ontlaaddiepte | [Marstek – Venus D](https://marstekenergy.com/en-us/products/marstek-venus-d-ac-version) |
+| Venus E 4.0 | 5.024 Wh (314 Ah, 16 V) · 88 % ontlaaddiepte · meer dan 10.000 cycli (25 °C) | [Marstek – brochure Venus E 4.0 (pdf)](https://cdn.shopify.com/s/files/1/0746/1575/0952/files/MARSTEK_VENUS-4.0.pdf) |
+| Venus E Max | 10.048 Wh (314 Ah, 32 V) · 90 % ontlaaddiepte · meer dan 10.000 cycli (25 °C) | [Marstek – brochure Venus E Max (pdf)](https://cdn.shopify.com/s/files/1/0746/1575/0952/files/VENUS_E_MAX.pdf) |
+| Venus E Pro | 2.080 Wh per pakket (41,6 V), basis plus maximaal 5 extra pakketten · 90 % ontlaaddiepte · meer dan 10.000 cycli (25 °C) · LAN met Modbus | [Marstek – brochure Venus E Pro (pdf)](https://cdn.shopify.com/s/files/1/0746/1575/0952/files/VENUS_E_Pro_EU_EN.pdf), [productpagina](https://marstekenergy.com/de-de/products/venus-e-pro) |
 | Garantie | Materiaal- en fabricagefouten; geen capaciteitspercentage; normale slijtage en aansluiting op hardware/software van derden uitgesloten | [Marstek – Garantiebeleid](https://marstekenergy.com/nl-nl/pages/warranty) |
 
 Controleer je eigen voorwaarden. Je past de waarden aan via **Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren**.
