@@ -68,8 +68,8 @@
         }
       },
       "packs": {
-        "title": "Venus D: Anzahl Batteriepacks",
-        "description": "Eine Venus D hat 2,56 kWh pro Pack. Nennkapazität und Reserve werden aus der Anzahl der Packs berechnet.",
+        "title": "{model}: Anzahl Batteriepacks",
+        "description": "Eine {model} hat {kwh} kWh pro Pack. Nennkapazität und Reserve werden aus der Anzahl der Packs berechnet.",
         "data": {
           "packs": "Anzahl Batteriepacks"
         }
@@ -105,7 +105,8 @@
           "cell_max_entity": "Höchste Zellspannung (optional)",
           "cell_min_entity": "Niedrigste Zellspannung (optional)",
           "temp_max_entity": "Höchste Zelltemperatur (optional, experimentell)",
-          "temp_min_entity": "Niedrigste Zelltemperatur (optional, experimentell)"
+          "temp_min_entity": "Niedrigste Zelltemperatur (optional, experimentell)",
+          "notify": "Hinweise"
         },
         "data_description": {
           "nominal_kwh": "Gesamtkapazität der Zellen, z. B. 5,12 kWh.",
@@ -120,7 +121,8 @@
           "cell_max_entity": "Spannung der höchsten Zelle, in V oder mV. Nur Zellspannungen, keine Temperaturen.",
           "cell_min_entity": "Spannung der niedrigsten Zelle, in V oder mV.",
           "temp_max_entity": "Wird bei jeder Messung gespeichert: eine kalte Batterie gibt weniger ab. Nur Zelltemperaturen, keine MOS- oder Platinentemperaturen.",
-          "temp_min_entity": "Wird bei jeder Messung gespeichert: eine kalte Batterie gibt weniger ab. Nur Zelltemperaturen, keine MOS- oder Platinentemperaturen."
+          "temp_min_entity": "Wird bei jeder Messung gespeichert: eine kalte Batterie gibt weniger ab. Nur Zelltemperaturen, keine MOS- oder Platinentemperaturen.",
+          "notify": "Eine Nachricht auf dem Handy (Home-Assistant-App) und unter Einstellungen → Reparaturen, wenn die SOC-Anzeige abweicht oder die Zellen aus dem Gleichgewicht geraten, mit Empfehlung. Nur bei einem Muster: 1× wird nur festgehalten, 2× in 45 Tagen ist \"Achtung\", 3× ist eine Empfehlung. Aus = keine Nachrichten; die Karte zeigt es trotzdem."
         }
       }
     },
@@ -188,6 +190,22 @@
       },
       "cell_spread": {
         "name": "Zellspannungsdifferenz nach Vollladung"
+      },
+      "soc_health": {
+        "name": "SOC-Anzeige",
+        "state": {
+          "ok": "In Ordnung",
+          "letop": "Achtung",
+          "advies": "Empfehlung"
+        }
+      },
+      "cell_health": {
+        "name": "Zellbalance",
+        "state": {
+          "ok": "In Ordnung",
+          "letop": "Achtung",
+          "advies": "Empfehlung"
+        }
       }
     }
   },
@@ -199,6 +217,24 @@
         "config_entry_id": {
           "name": "Batterie",
           "description": "Die Batterie, deren Messungen gelöscht werden."
+        }
+      }
+    },
+    "dismiss_advice": {
+      "name": "Empfehlung ausblenden",
+      "description": "Blendet das aktuelle \"Achtung\" oder die Empfehlung einer Batterie einmal aus. Kommt erst bei einer neuen Reihe wieder.",
+      "fields": {
+        "battery": {
+          "name": "Batterie",
+          "description": "Kurzer Code der Batterie, z. B. mt1."
+        },
+        "config_entry_id": {
+          "name": "Batterie (Eintrag)",
+          "description": "Oder wähle die Batterie."
+        },
+        "kind": {
+          "name": "Thema",
+          "description": "soc = SOC-Drift, cells = Zellkalibrierung."
         }
       }
     }
@@ -215,9 +251,36 @@
       "options": {
         "venus_e_v12": "Venus E v1 / v2 (5,12 kWh)",
         "venus_e_v3": "Venus E v3 (5,12 kWh)",
+        "venus_e_v4": "Venus E 4.0 (5,02 kWh)",
+        "venus_e_max": "Venus E Max (10,05 kWh)",
+        "venus_e_pro": "Venus E Pro (2,08 kWh pro Pack)",
         "venus_d": "Venus D (2,56 kWh pro Pack)",
         "other": "Anderes Modell: Herstellerdaten selbst eingeben"
       }
+    },
+    "kind": {
+      "options": {
+        "soc": "SOC-Drift",
+        "cells": "Zellkalibrierung"
+      }
+    }
+  },
+  "issues": {
+    "soc_letop": {
+      "title": "{name}: Achtung, SOC-Anzeige",
+      "description": "{message}\n\nDiese Meldung verschwindet von selbst, sobald der Monitor es gesehen hat. Ignorieren = ausblenden bis zu einer neuen Reihe."
+    },
+    "soc_advies": {
+      "title": "{name}: SOC-Drift festgestellt",
+      "description": "{message}\n\nDiese Meldung verschwindet von selbst, sobald der Monitor es gesehen hat. Ignorieren = ausblenden bis zu einer neuen Reihe."
+    },
+    "cells_letop": {
+      "title": "{name}: Achtung, Zellbalance",
+      "description": "{message}\n\nDiese Meldung verschwindet von selbst, sobald der Monitor es gesehen hat. Ignorieren = ausblenden bis zu einer neuen Reihe."
+    },
+    "cells_advies": {
+      "title": "{name}: Zellkalibrierung empfohlen",
+      "description": "{message}\n\nDiese Meldung verschwindet von selbst, sobald der Monitor es gesehen hat. Ignorieren = ausblenden bis zu einer neuen Reihe."
     }
   }
 }
