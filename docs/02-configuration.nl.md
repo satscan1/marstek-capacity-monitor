@@ -13,7 +13,7 @@ Alle waarden stel je in bij het toevoegen van een batterij. Later wijzigen kan v
 | Garantietermijn | 10 jaar | Alleen ter informatie op de kaart |
 | Opgegeven aantal cycli | 6.000 | Specificatie fabrikant |
 | Capaciteit na die cycli | 80 % | Specificatie fabrikant; samen met het aantal cycli de specificatielijn |
-| Cycli vóór de monitoring | 0 | Schatting voor een batterij die al in gebruik was: totaal ontladen kWh ÷ bruikbare capaciteit |
+| Cycli vóór de monitoring | 0 | Voor een batterij die al in gebruik was: totaal ontladen kWh ÷ bruikbare capaciteit. Heeft de batterij een teller *totaal ontladen* (Modbus, ESPHome), dan vult de monitor dit zelf in. Die teller meet aan de AC-kant: een schatting, minder precies dan de cycli die de monitor zelf aan de DC-kant telt. Zie [Extra sensoren gevonden](#extra-sensoren-gevonden) |
 | Rode grens | 75 % | Op of onder dit percentage: melden via de Marstek-app |
 | Marge onder specificatie | 5 punten | Zolang de meting hooguit zoveel onder de specificatie zit, blijft de status groen |
 | Teken van de vermogensensor | Automatisch | Alleen aanpassen als de automatische herkenning het mis heeft |
@@ -28,7 +28,7 @@ Alle waarden stel je in bij het toevoegen van een batterij. Later wijzigen kan v
 |---|---|
 | `sensor.marstek_mt1_measured_capacity` | Gemeten capaciteit (kWh). Attributen: `trend` (per maand, nieuw → oud) en `history` (laatste 10 volledige ontladingen), allebei met `temp_c` als er celtemperatuur-sensoren zijn ingesteld |
 | `sensor.marstek_mt1_capacity_pct` | Nog beschikbaar: gemeten capaciteit als % van nieuw |
-| `sensor.marstek_mt1_expected_capacity` | Specificatie fabrikant (%) bij het huidige aantal cycli |
+| `sensor.marstek_mt1_expected_capacity` | Specificatie fabrikant (%) bij het huidige aantal cycli. Attributen: `cycles`, `initial_cycles` (cycli vóór de monitoring), `cycle_counter` (de teller waar die vandaan komt, leeg = zelf ingevuld) |
 | `sensor.marstek_mt1_margin` | Marge ten opzichte van de specificatie (kWh) |
 | `sensor.marstek_mt1_cycles` | Aantal volle cycli |
 | `sensor.marstek_mt1_warranty_status` | Status beschikbare capaciteit: `good` / `attention` / `critical` / `no_measurement` |
@@ -47,6 +47,15 @@ De schrijfbelasting blijft laag:
 
 * de lijsten `trend` en `history` gaan niet naar de recorder-database;
 * de sensoren veranderen alleen na een meting of één keer per uur.
+
+## Extra sensoren gevonden
+
+Staan er op het apparaat van een batterij sensoren die de monitor nog niet gebruikt, dan meldt hij dat onder **Instellingen → Reparaties** (*MT1: extra sensoren gevonden*). Dat gebeurt na het opstarten, dus ook na een update:
+
+* **Celspanning hoogste en laagste**, als die nog niet zijn ingevuld. Daarmee volgt de monitor de celbalans.
+* **Teller totaal ontladen**, als *Cycli vóór de monitoring* nog 0 is. De monitor rekent uit: (teller − wat hij zelf al heeft geteld) ÷ bruikbare capaciteit. Die teller meet aan de AC-kant, dus dit is een schatting, minder precies dan de cycli die de monitor zelf aan de DC-kant telt. Een waarde die je zelf hebt ingevuld wordt nooit overschreven.
+
+Open de melding, vink aan wat je wilt toevoegen en kies **Verzenden**. Vink je iets niet aan, dan vraagt hij er niet meer om; later toevoegen kan altijd via **Configureren**. Bij een nieuwe batterij gebeurt dit meteen bij het toevoegen.
 
 ## Een melding wegklikken
 

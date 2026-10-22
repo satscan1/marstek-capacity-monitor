@@ -34,8 +34,8 @@ Selbst anordnen? Verwende den Ansichtstyp **Abschnitte** (Sections) von Home Ass
 4. **Einstellungen** (Zahnrad): führt zu dieser Batterie unter Einstellungen → Geräte & Dienste; das Zahnrad dort öffnet *Konfigurieren*.
 5. **Drei Kapazitäten**: *Nennwert* (auf dem Typenschild), *Nutzbar* (Nennwert abzüglich der Reserve, die die Batterie selbst behält) und *Gemessen* (was jetzt wirklich herauskommt, und wie viel Prozent der nutzbaren Kapazität das sind).
 6. **Balken**: die gemessene Kapazität, mit einem weißen Strich für die Herstellerangabe und einem roten Strich bei 75 %.
-7. **Abstand**: wie weit du über (+) oder unter (−) der Herstellerangabe liegst, mit Zyklen und Alter. Zeige darauf für die Herstellerangabe in kWh.
-8. **Letzte vollständige Entladung und Ladung**, die Anzahl der Messungen und die Version der Karte.
+7. **Abstand**: wie weit du über (+) oder unter (−) der Herstellerangabe liegst, mit Zyklen und Alter. Zeige darauf für die Herstellerangabe in kWh und woher die Zyklen vor der Überwachung kommen.
+8. **Letzte vollständige Entladung und Ladung** und die Version der Karte.
 
 **Das Diagramm** zeigt die jüngsten 3 Jahre. Jeder Punkt ist ein Monat: wie viel der nutzbaren Kapazität damals noch vorhanden war. ● gemessen, kalibriert · ○ weniger zuverlässig (in den 14 Tagen davor nicht ganz voll, oder Zellen kälter als 5 °C) · graue gestrichelte Linie: erwartet laut Herstellerangabe · rote gestrichelte Linie: an Marstek melden (75 %). Zeige auf einen Punkt für Wert, Herstellerangabe und Zelltemperatur in diesem Monat.
 

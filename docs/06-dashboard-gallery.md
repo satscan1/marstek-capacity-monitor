@@ -34,8 +34,8 @@ Arranging it yourself? Use Home Assistant's standard **Sections** layout. An exa
 4. **Settings** (cog): takes you to this battery under Settings → Devices & services; the cog there opens *Configure*.
 5. **Three capacities**: *Rated* (on the type plate), *Usable* (rated minus the reserve the battery keeps) and *Measured* (what really comes out now, and what percentage of usable that is).
 6. **Bar**: the measured capacity, with a white mark for the manufacturer spec and a red mark at 75 %.
-7. **Margin**: how far above (+) or below (−) the manufacturer spec you are, with the cycles and the age. Point at it for the spec in kWh.
-8. **Last full discharge and full charge**, the number of measurements and the version of the card.
+7. **Margin**: how far above (+) or below (−) the manufacturer spec you are, with the cycles and the age. Point at it for the spec in kWh and where the cycles before monitoring come from.
+8. **Last full discharge and full charge** and the version of the card.
 
 **The chart** shows the most recent 3 years. Each dot is one month: how much of the usable capacity was left. ● measured, calibrated · ○ less reliable (not completely full in the 14 days before, or cells colder than 5 °C) · grey dashed line: expected per spec · red dashed line: report to Marstek (75 %). Point at a dot for the value, the spec and the cell temperature that month.
 

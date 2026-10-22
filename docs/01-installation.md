@@ -97,7 +97,7 @@ These cards use [button-card](https://github.com/custom-cards/button-card). Inst
 #### In an existing dashboard
 
 1. **Templates (once per dashboard):** open the dashboard, click the **pencil**, then the **three dots → Raw configuration editor**. Copy everything from [`marstek_capacity_templates.yaml`](../dashboard/button-card/marstek_capacity_templates.yaml) and paste it at the very top, above the line `views:`. Is there already a line `button_card_templates:` (from other cards)? Then paste only what is below it, under your existing templates. Save and close the editor.
-2. **Cards:** still in edit mode: **Add card** → at the bottom **Manual**. [`examples.yaml`](../dashboard/button-card/examples.yaml) has two examples, separated by a line `---`: first the overview of all your batteries, then the card for one battery. Paste one example at a time, not the whole file. Replace `mt1` everywhere with your own code; the examples use Dutch text, so change `lang: nl` to `lang: en`. Save. Repeat this per battery and for the overview.
+2. **Cards:** still in edit mode: **Add card** → at the bottom **Manual**. [`examples.yaml`](../dashboard/button-card/examples.yaml) has two examples, separated by a line `---`: first the overview of all your batteries, then the card for one battery. Paste one example at a time, not the whole file. Replace `mt1` everywhere with your own code and save. The text follows the language of Home Assistant; for a fixed language add `lang: en`, `lang: nl` or `lang: de` under `variables`. Repeat this per battery and for the overview.
 
 How to arrange the cards and what everything on the card means: [06 – Dashboard and gallery](06-dashboard-gallery.md).
 
