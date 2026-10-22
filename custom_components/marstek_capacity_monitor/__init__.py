@@ -6,6 +6,7 @@ side, against factory data and warranty terms.
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 import voluptuous as vol
@@ -37,6 +38,10 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 CARD_URL = f"/{DOMAIN}_frontend"
 
 
+def _fingerprint(path: Path) -> str:
+    return hashlib.sha1(path.read_bytes()).hexdigest()[:8]
+
+
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Serve the integration's own card and dashboard, on every frontend page.
 
@@ -48,8 +53,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     await hass.http.async_register_static_paths(
         [StaticPathConfig(CARD_URL, str(Path(__file__).parent / "frontend"), True)]
     )
-    # ?v= so a browser loads the new file after an update (31-day cache)
-    add_extra_js_url(hass, f"{CARD_URL}/marstek-capacity-card.js?v={integration.version}")
+    # ?v= so a browser loads the new file after an update (31-day cache).
+    # Version plus a short fingerprint of the file: a test version (rc) with
+    # the same version number also gets a new address.
+    card = Path(__file__).parent / "frontend" / "marstek-capacity-card.js"
+    tag = await hass.async_add_executor_job(_fingerprint, card)
+    add_extra_js_url(hass, f"{CARD_URL}/marstek-capacity-card.js?v={integration.version}-{tag}")
 
     async def _dismiss(call: ServiceCall) -> None:
         """Dismiss a "let op" or advice once (the button on the card)."""
