@@ -14,7 +14,7 @@ Volg in Home Assistant of je Marstek-thuisbatterij zijn capaciteit houdt, gemete
 - **Gemeten bij een volle ontlading** (≥ 95 % → ≤ 15 %) en vergeleken met de bruikbare capaciteit van een nieuwe batterij.
 - **Specificatie van de fabrikant** als maatstaf: 80 % na 6.000 cycli. Groen volgens specificatie, oranje eronder, rood bij 75 % of lager: melden via de Marstek-app.
 - **Elke koppeling die laadtoestand en DC-vermogen levert:** ESPHome, Modbus (RS485 of LAN) of een andere integratie. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus D.
-- **Plug & play:** kies je model en installatiedatum; de fabrieksgegevens worden voor je ingevuld.
+- **Plug & play:** kies je model en installatiedatum; de fabrieksgegevens worden voor je ingevuld. De cycli van vóór de monitor komen uit de teller van de batterij als die er is (AC-kant, een schatting). Later gevonden sensoren staan klaar onder Reparaties.
 - **Laat zien of het werkt:** een status per batterij, en "verzamelt data" tot de eerste volledige ontlading.
 - **Optioneel: celbalans:** het verschil tussen de hoogste en laagste cel na een volle lading.
 - **SOC-drift en celkalibratie** (nieuw in 0.5): de monitor ziet wanneer de SOC-meter gaat afwijken of de cellen uit balans raken, en geeft alleen bij een patroon een seintje met wat je kunt doen. Eén klik en het is weg.
