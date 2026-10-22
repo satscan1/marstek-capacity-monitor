@@ -410,15 +410,21 @@ def evaluate_soc(
     alive_days: list[str],
     now_ts: float,
     other_jumps: list[float] | None = None,
+    event_pct: float = EVENT_PCT,
+    enabled: bool = True,
 ) -> dict[str, Any]:
-    """Level, monthly table and the head line of the SOC panel."""
+    """Level, monthly table and the head line of the SOC panel.
+
+    event_pct: deviation that counts as an occurrence (sensitivity);
+    enabled=False: the table is kept, but never "let op" or advice.
+    """
     ev = clean_jumps(events, other_jumps or [])
     full = set(full_days)
 
     # Occurrences: one per day, the biggest deviation of that day.
     per_day: dict[str, tuple[float, float]] = {}
     for e in _deviation_events(ev):
-        if e["value"] < EVENT_PCT:
+        if e["value"] < event_pct:
             continue
         day = day_of(e["ts"])
         if day not in per_day or e["value"] > per_day[day][1]:
@@ -430,7 +436,7 @@ def evaluate_soc(
     ]
     samples += [(ts, True, 0.0) for ts in _no_full_occurrences(full_days, alive_days)]
     cycles = [(e["ts"], e.get("value", 0.0)) for e in ev if e["type"] == "cycle"]
-    ladder = run_ladder(samples, cycles, _soc_done, now_ts)
+    ladder = run_ladder(samples if enabled else [], cycles, _soc_done, now_ts)
 
     # Monthly table, newest month first
     months: dict[str, dict[str, Any]] = {}
@@ -462,6 +468,7 @@ def evaluate_soc(
         **ladder,
         "last_top": tops[-1] if tops else None,
         "last_deviation": last_dev["value"] if last_dev else None,
+        "limit_pct": event_pct,
         "trend": trend,
     }
 
@@ -476,8 +483,14 @@ def evaluate_cell_health(
     rest_events: list[dict[str, Any]],
     now_ts: float,
     rest_now_h: float = 0.0,
+    factor: float = CELL_FACTOR,
+    enabled: bool = True,
 ) -> dict[str, Any]:
-    """Baseline (own normal value), level and per month the hours full at rest."""
+    """Baseline (own normal value), level and per month the hours full at rest.
+
+    factor: how many times the own normal value is an occurrence (sensitivity);
+    enabled=False: never "let op" or advice.
+    """
     recs = sorted(cell_records, key=lambda r: r["ts"])
     base = None
     if recs:
@@ -486,10 +499,10 @@ def evaluate_cell_health(
         if len(early) >= CELL_BASE_MIN:
             base = round(median(early), 1)
     samples: list[tuple[float, bool, float]] = []
-    if base:
+    if base and enabled:
         first = recs[0]["ts"]
         samples = [
-            (r["ts"], r["spread_mv"] >= CELL_FACTOR * base, r["spread_mv"])
+            (r["ts"], r["spread_mv"] >= factor * base, r["spread_mv"])
             for r in recs
             if r["ts"] - first > CELL_BASE_DAYS * 86400
         ]
@@ -504,7 +517,7 @@ def evaluate_cell_health(
     return {
         **ladder,
         "base_mv": base,
-        "limit_mv": round(CELL_FACTOR * base, 1) if base else None,
+        "limit_mv": round(factor * base, 1) if base else None,
         "rest_trend": [
             {"month": k, "rest_h": rest_month[k]} for k in sorted(rest_month, reverse=True)[:TREND_MONTHS]
         ],

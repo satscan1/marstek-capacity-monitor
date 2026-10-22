@@ -23,7 +23,10 @@ from .const import (
     CONF_MODEL,
     CONF_TEMP_MAX_ENTITY,
     CONF_TEMP_MIN_ENTITY,
+    CONF_CELL_SENSITIVITY,
     CONF_NOTIFY,
+    CONF_SOC_SENSITIVITY,
+    SENSITIVITIES,
     CONF_PACKS,
     MAX_PACKS,
     MODEL_PRESETS,
@@ -393,6 +396,16 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
         return MarstekCapacityOptionsFlow()
 
 
+def _sensitivity_selector() -> selector.SelectSelector:
+    return selector.SelectSelector(
+        selector.SelectSelectorConfig(
+            options=SENSITIVITIES,
+            translation_key="sensitivity",
+            mode=selector.SelectSelectorMode.DROPDOWN,
+        )
+    )
+
+
 class MarstekCapacityOptionsFlow(OptionsFlow):
     """Change factory data / warranty terms later."""
 
@@ -423,6 +436,14 @@ class MarstekCapacityOptionsFlow(OptionsFlow):
                     CONF_NOTIFY,
                     default=bool(current.get(CONF_NOTIFY, DEFAULTS[CONF_NOTIFY])),
                 ): selector.BooleanSelector(),
+                vol.Required(
+                    CONF_SOC_SENSITIVITY,
+                    default=current.get(CONF_SOC_SENSITIVITY, DEFAULTS[CONF_SOC_SENSITIVITY]),
+                ): _sensitivity_selector(),
+                vol.Required(
+                    CONF_CELL_SENSITIVITY,
+                    default=current.get(CONF_CELL_SENSITIVITY, DEFAULTS[CONF_CELL_SENSITIVITY]),
+                ): _sensitivity_selector(),
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema, errors=errors)
