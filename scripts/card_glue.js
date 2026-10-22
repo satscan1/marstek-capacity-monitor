@@ -36,6 +36,11 @@ function mcBatteries(hass) {
   return out;
 }
 
+// Dark (the original look) or light, following the Home Assistant theme
+function mcDark(hass) {
+  return !(hass && hass.themes && hass.themes.darkMode === false);
+}
+
 function mcLang(hass, config) {
   if (config && config.lang) return config.lang;
   const l = (hass && ((hass.locale && hass.locale.language) || hass.language)) || "en";
@@ -55,6 +60,7 @@ const MC_STYLE = `
   ha-card { background: #1e2128; border: 1px solid #333744; border-radius: 12px;
     padding: 14px; color: #e8eaed; font-size: 13px; height: 100%; box-sizing: border-box;
     text-align: left; white-space: normal; }
+  ha-card.light { background: #ffffff; border-color: #e0e3e7; color: #1f2328; }
   [data-mc] { cursor: pointer; }
 `;
 
@@ -91,7 +97,7 @@ class MarstekCapacityBase extends HTMLElement {
       this._lastObjs = objs;
       this._rev = (this._rev || 0) + 1;
     }
-    return `${mcLang(this._hass, this._config)}|${ids.join(",")}|${this._rev}`;
+    return `${mcLang(this._hass, this._config)}|${mcDark(this._hass)}|${ids.join(",")}|${this._rev}`;
   }
 
   _render() {
@@ -112,7 +118,7 @@ class MarstekCapacityBase extends HTMLElement {
     } catch (err) {
       html = `<span style="color:#ef5350">Marstek Capacity Monitor: ${mcEsc(err)}</span>`;
     }
-    this.shadowRoot.innerHTML = `<style>${MC_STYLE}</style><ha-card>${html}</ha-card>`;
+    this.shadowRoot.innerHTML = `<style>${MC_STYLE}</style><ha-card class="${mcDark(this._hass) ? "" : "light"}">${html}</ha-card>`;
   }
 
   _action(_act) {}
@@ -175,7 +181,7 @@ class MarstekCapacityCard extends MarstekCapacityBase {
         de: "Noch keine Batterie gefunden. Füge eine hinzu: Einstellungen → Geräte & Dienste → Integration hinzufügen → Marstek Capacity Monitor.",
       }[lang] || "No battery found yet. Add one via Settings → Devices & services → Add integration → Marstek Capacity Monitor.";
     }
-    const variables = { battery: b.id, name: b.name, lang, months: this._config.months || 6, demo: this._config.demo, version: MC_VERSION, entry_id: this._entryId(b.id) };
+    const variables = { battery: b.id, name: b.name, lang, months: this._config.months || 6, demo: this._config.demo, version: MC_VERSION, entry_id: this._entryId(b.id), dark: mcDark(this._hass) };
     return batteryBody(this._hass.states, variables, { panel: this._panel, gone: this._gone, width: this.offsetWidth });
   }
 
@@ -211,7 +217,7 @@ class MarstekCapacityOverviewCard extends MarstekCapacityBase {
       return { nl: "Nog geen batterij gevonden.", de: "Noch keine Batterie gefunden." }[lang] || "No battery found yet.";
     }
     const months = this._config.months || (list.length <= 2 ? 3 : 6);
-    return overviewBody(this._hass.states, { batteries: list, lang, months, demo: this._config.demo });
+    return overviewBody(this._hass.states, { batteries: list, lang, months, demo: this._config.demo, dark: mcDark(this._hass) });
   }
 
   getGridOptions() {
