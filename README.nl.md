@@ -13,11 +13,12 @@ Volg in Home Assistant of je Marstek-thuisbatterij zijn capaciteit houdt, gemete
 - **Twee sensoren die je al hebt:** laadtoestand en DC-vermogen van de batterij. De integratie vindt ze zelf.
 - **Gemeten bij een volle ontlading** (≥ 95 % → ≤ 15 %) en vergeleken met de bruikbare capaciteit van een nieuwe batterij.
 - **Specificatie van de fabrikant** als maatstaf: 80 % na 6.000 cycli. Groen volgens specificatie, oranje eronder, rood bij 75 % of lager: melden via de Marstek-app.
-- **Elke koppeling die laadtoestand en DC-vermogen levert:** ESPHome, Modbus (RS485 of LAN) of een andere integratie. Venus E v1, v2, v3, Venus A, Venus D.
+- **Elke koppeling die laadtoestand en DC-vermogen levert:** ESPHome, Modbus (RS485 of LAN) of een andere integratie. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus D.
 - **Plug & play:** kies je model en installatiedatum; de fabrieksgegevens worden voor je ingevuld.
 - **Laat zien of het werkt:** een status per batterij, en "verzamelt data" tot de eerste volledige ontlading.
 - **Optioneel: celbalans:** het verschil tussen de hoogste en laagste cel na een volle lading.
-- **Celtemperatuur als context (experimenteel)** en een **grafiek** op de batterijkaart (de recente 3 jaar): één druk op de knop Grafiek.
+- **SOC-drift en celkalibratie** (nieuw in 0.5): de monitor ziet wanneer de SOC-meter gaat afwijken of de cellen uit balans raken, en geeft alleen bij een patroon een seintje met wat je kunt doen. Eén klik en het is weg.
+- **Celtemperatuur als context (experimenteel)** en knopjes **Grafiek · SOC · Cellen** op de batterijkaart.
 - **Licht en lokaal:** alles in Home Assistant, geen InfluxDB of cloud.
 
 ## Installeren in 3 stappen
@@ -67,7 +68,7 @@ Wijzigingen per versie: [CHANGELOG](CHANGELOG.md) (Engels).
 
 ![Apparaat](screenshots/06-device.png)
 
-**6. De kaarten: overzicht en batterijkaarten, één met de grafiek open (Nederlands en Engels). Meer voorbeelden, van 1 tot 6 batterijen: [galerij](docs/06-dashboard-gallery.nl.md)**
+**6. De kaarten: overzicht en batterijkaarten, één met het SOC-paneel en één met de grafiek open (Nederlands en Engels). Meer voorbeelden, van 1 tot 6 batterijen: [galerij](docs/06-dashboard-gallery.nl.md)**
 
 ![Dashboard NL](screenshots/08-dashboard-nl.png)
 
