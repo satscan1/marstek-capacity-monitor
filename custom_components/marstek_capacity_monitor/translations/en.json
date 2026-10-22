@@ -106,7 +106,9 @@
           "cell_min_entity": "Lowest cell voltage (optional)",
           "temp_max_entity": "Highest cell temperature (optional, experimental)",
           "temp_min_entity": "Lowest cell temperature (optional, experimental)",
-          "notify": "Notifications"
+          "notify": "Notifications",
+          "soc_sensitivity": "Sensitivity SOC drift",
+          "cell_sensitivity": "Sensitivity cell calibration"
         },
         "data_description": {
           "nominal_kwh": "Total capacity of the cells, e.g. 5.12 kWh.",
@@ -122,7 +124,9 @@
           "cell_min_entity": "Voltage of the lowest cell, in V or mV.",
           "temp_max_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures.",
           "temp_min_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures.",
-          "notify": "A message on your phone (Home Assistant app) and under Settings → Repairs when the SOC meter drifts or the cells get out of balance, with advice. Only for a pattern: once is only recorded, 2× in 45 days is \"attention\", 3× is advice. Off = no messages; the card still shows it."
+          "notify": "A message on your phone (Home Assistant app) and under Settings → Repairs when the SOC meter drifts or the cells get out of balance, with advice. Only for a pattern: once is only recorded, 2× in 45 days is \"attention\", 3× is advice. Off = no messages; the card still shows it.",
+          "soc_sensitivity": "When a deviation of the SOC meter counts. Normal: 5 % or more. Relaxed: 8 %. Strict: 3 %. Off: only shown on the card, never \"attention\" or advice.",
+          "cell_sensitivity": "When the cell spread counts as too high. Normal: 2× the own normal value. Relaxed: 3×. Strict: 1.5×. Off: only shown on the card. Only with cell voltage sensors."
         }
       }
     },
@@ -262,6 +266,14 @@
       "options": {
         "soc": "SOC drift",
         "cells": "Cell calibration"
+      }
+    },
+    "sensitivity": {
+      "options": {
+        "off": "Off",
+        "relaxed": "Relaxed",
+        "normal": "Normal",
+        "strict": "Strict"
       }
     }
   },
