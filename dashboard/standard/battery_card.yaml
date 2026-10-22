@@ -18,8 +18,11 @@ cards:
       - entity: sensor.marstek_mt1_measured_capacity
       - type: section
       - entity: sensor.marstek_mt1_cycles
+      # SOC drift: ok / let op / advies (from 0.5.0)
+      - entity: sensor.marstek_mt1_soc_health
       # Only when you filled in the cell voltage sensors:
       # - entity: sensor.marstek_mt1_cell_spread
+      # - entity: sensor.marstek_mt1_cell_health
   # Pattern over time: remaining capacity against the manufacturer spec line
   - type: statistics-graph
     title: Remaining capacity vs manufacturer spec (%)
