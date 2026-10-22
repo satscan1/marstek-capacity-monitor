@@ -19,6 +19,7 @@ All values are set when you add a battery. Change them later under **Settings �
 | Sign of the power sensor | Automatic | Only change if automatic detection gets it wrong |
 | Highest / lowest cell temperature | empty | Optional, experimental. Stored with every measurement as context (a cold battery gives less). Only cell temperatures, never MOS / board temperatures |
 | Highest / lowest cell voltage | empty | Optional, for the cell balance check. Fill in both or neither. Only cell **voltages**: some connections report MOSFET temperatures as "cell temperature" |
+| Sensitivity SOC drift / cell calibration | Normal | Off (only on the card), Relaxed (SOC 8 %, cells 3× normal), Normal (5 %, 2×) or Strict (3 %, 1.5×). See [How it works](03-how-it-works.md#messages-and-dismissing-from-05) |
 | Notifications | on | Message on your phone and under Repairs for SOC drift or cell calibration, only for a pattern. Off = no messages; the card still shows it. See [How it works](03-how-it-works.md#messages-and-dismissing-from-05) |
 
 ## Sensors

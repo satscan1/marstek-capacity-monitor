@@ -121,6 +121,7 @@ The monitor sees by itself how long the battery stayed full and at rest (4 hours
 * **Where:** on the card (buttons **SOC** and **Cells** with ⚠ or 🔧), as a message on your phone (Home Assistant app) and under **Settings → Repairs**.
 * **Dismiss:** one click is enough: **Dismiss** on the card, in the message on your phone, or **Ignore** under Repairs. It applies everywhere. The message only comes back with a new series of occurrences.
 * **Completely off:** per battery under **Configure → Notifications** (on by default). The card keeps showing the state; you just get no more messages.
+* **Sensitivity:** per battery under **Configure**, separately for SOC drift and cell calibration: *Off* (only on the card, never attention or advice), *Relaxed* (SOC 8 %, cells 3× normal), *Normal* (5 %, 2×, default) or *Strict* (3 %, 1.5×).
 * For automations: the sensors `sensor.marstek_<id>_soc_health` and `sensor.marstek_<id>_cell_health` (ok / letop / advies), the event `marstek_capacity_monitor_advice` and the service `marstek_capacity_monitor.dismiss_advice`.
 
 ## Cell temperature (experimental)
@@ -133,11 +134,11 @@ Only **cell** temperatures belong here. Some connections report MOSFET (switchin
 
 ## Chart
 
-Under the status there are three small buttons: **Chart · SOC · Cells**. One panel is open at a time; press the same button again to close it. The chart (old → new, left to right) shows the most recent 3 years and nothing more than:
+Under the status there are three small buttons: **Chart · SOC · Cells**, and a cog on the right for the settings. *Chart* replaces the capacities (press again to go back), so the card keeps its height; *SOC* and *Cells* open as a window in the middle of the screen. The chart (old → new, left to right) shows the most recent 3 years and nothing more than:
 
 * **●** measured, calibrated
 * **○** less reliable: not completely full in the 14 days before the measurement, or cells colder than 5 °C
 * **grey dashed line**: expected per spec
 * **red dashed line**: report to Marstek (75 %)
 
-Hover over a dot for the value, the cell temperature and why it is less reliable. The **SOC** panel shows per month *Days completely full* and *SOC meter was right* (✓ or ⚠ with how much it was off); **Cells** shows *Cells in balance* (cell spread in mV, ⚠ at twice normal). There too, point at a cell for the details. See [06 – Dashboard and gallery](06-dashboard-gallery.md) for the card explained with numbers.
+Hover over a dot for the value, the cell temperature and why it is less reliable. The **SOC** window shows per month *Days completely full* and *SOC meter was right* (✓ or ⚠ with how much it was off); **Cells** shows *Cells in balance* (cell spread in mV, ⚠ from the limit set by the sensitivity). There too, point at a cell for the details. See [06 – Dashboard and gallery](06-dashboard-gallery.md) for the card explained with numbers.
