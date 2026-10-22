@@ -12,11 +12,14 @@ Cell calibration (with cell voltage sensors)
 - New: `sensor.marstek_<id>_cell_health`. Normal is what your own battery did in its first 3 months; an occurrence is a cell spread of 2× that. 2 in a row is **attention** (keep it full for about 4 hours), 3 in 45 days is **cell calibration advised** (8 hours in UPS mode, or in charge mode without UPS mode; if it stays high, report it via the Marstek app). The monitor sees how long the battery stood full and at rest.
 
 Messages
+- **Sensitivity** per battery under Configure, separately for SOC drift and cell calibration: Off, Relaxed (8 % / 3×), Normal (5 % / 2×, default) or Strict (3 % / 1.5×).
 - **Attention** and advice as a message on your phone (Home Assistant app) and under Settings → Repairs, in English, Dutch or German. On by default; per battery under **Configure → Notifications**.
 - **Dismiss** once — on the card, in the phone message, or *Ignore* under Repairs — and it is gone everywhere until a new series. Also as the action `marstek_capacity_monitor.dismiss_advice`, and the event `marstek_capacity_monitor_advice` for your own automations.
 
 Card
-- Three small buttons under the status: **Chart · SOC · Cells**, one panel at a time. ⚠ or 🔧 on a button means: look inside.
+- Three small buttons under the status: **Chart · SOC · Cells**. *Chart* opens in place of the capacities, so the card keeps its height; *SOC* and *Cells* open as a window in the middle of the screen. ⚠ or 🔧 on a button means: look inside.
+- Calmer and the same height side by side: the monthly row is gone (the chart shows the months), the spec line is one short line (*Margin · cycles · age*, details when you point at it), the next-step line only shows while collecting data or during a full discharge, and the foot line sits at the bottom with the version of the card.
+- A cog next to the buttons takes you to the battery's settings.
 - SOC panel: *Days completely full* and *SOC meter was right* (✓ or ⚠ with how much it was off) per month; Cells panel: *Cells in balance* (mV, ⚠ at 2× normal). Details when you point at a cell.
 - Chart, simpler: ● measured, calibrated · ○ less reliable (not completely full in the 14 days before, or cells below 5 °C) · grey dashed line expected per spec · red dashed line report to Marstek. The *How to read this?* text is gone; details when you point at a dot.
 - The cell spread moved from the card into the Cells panel.
