@@ -13,12 +13,13 @@ Behalte in Home Assistant im Blick, ob dein Marstek-Heimspeicher seine Kapazitä
 - **Zwei Sensoren, die du schon hast:** Ladezustand und DC-Leistung der Batterie. Die Integration findet sie selbst.
 - **Gemessen bei einer vollständigen Entladung** (≥ 95 % → ≤ 15 %) und verglichen mit der nutzbaren Kapazität im Neuzustand.
 - **Herstellerangabe** als Maßstab: 80 % nach 6000 Zyklen. Grün im Rahmen der Herstellerangabe, orange darunter, rot bei 75 % oder weniger: über die Marstek-App melden.
-- **Jede Anbindung, die Ladezustand und DC-Leistung liefert:** ESPHome, Modbus (RS485 oder LAN) oder eine andere Integration. Venus E v1, v2, v3, Venus A, Venus D.
+- **Jede Anbindung, die Ladezustand und DC-Leistung liefert:** ESPHome, Modbus (RS485 oder LAN) oder eine andere Integration. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus D.
 - **Plug & Play:** Modell und Datum der Inbetriebnahme wählen; die Herstellerdaten werden für dich ausgefüllt.
 - **Eigene Karten und ein Dashboard mit einem Klick:** kein button-card nötig.
 - **Zeigt, ob es funktioniert:** ein Status pro Batterie und „sammelt Daten“ bis zur ersten vollständigen Entladung. Gab es in den letzten Tagen schon eine, gibt es sofort eine erste Messung.
 - **Optional:** Zellspannungsdifferenz nach Vollladung und Zelltemperatur als Kontext (experimentell).
-- **Diagramm** auf der Batteriekarte (die jüngsten 3 Jahre): ein Klick auf „Diagramm“.
+- **SOC-Drift und Zellkalibrierung** (neu in 0.5): Der Monitor erkennt, wenn die SOC-Anzeige abweicht oder die Zellen aus dem Gleichgewicht geraten, und gibt nur bei einem Muster einen Hinweis mit dem, was zu tun ist. Ein Klick blendet ihn aus.
+- Schaltflächen **Diagramm · SOC · Zellen** auf der Batteriekarte.
 - **Schlank und lokal:** alles in Home Assistant, ohne InfluxDB und ohne Cloud.
 
 ## Installation in 3 Schritten
