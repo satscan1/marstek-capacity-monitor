@@ -35,7 +35,9 @@ async def test_card_is_loaded_on_every_page(hass: HomeAssistant) -> None:
     await hass.async_block_till_done()
     version = json.loads(build_card.MANIFEST.read_text())["version"]
     urls = hass.data[DATA_EXTRA_MODULE_URL].urls
-    assert f"/marstek_capacity_monitor_frontend/marstek-capacity-card.js?v={version}" in urls
+    import hashlib
+    tag = hashlib.sha1(build_card.OUT.read_bytes()).hexdigest()[:8]
+    assert f"/marstek_capacity_monitor_frontend/marstek-capacity-card.js?v={version}-{tag}" in urls
 
 
 NODE_TEST = r"""
@@ -92,3 +94,96 @@ def test_dashboard_layout_for_1_to_6_batteries(tmp_path):
                              "de": "Batteriekapazität", "fr": "Battery capacity"}
     assert out["cards"] == ["marstek-capacity-card", "marstek-capacity-overview-card"]
     assert out["strategies"] == [["marstek-capacity", "dashboard"]]
+
+
+ACTION_TEST = r"""
+const fs = require("fs");
+global.HTMLElement = class {};
+const defined = {};
+global.customElements = { get: (n) => defined[n], define: (n, c) => { defined[n] = c; } };
+global.window = {};
+global.console = { info() {}, log: console.log };
+eval(fs.readFileSync(process.argv[2], "utf8"));
+const S = {
+  "sensor.marstek_mt1_measured_capacity": { state: "4.4", attributes: { trend: [] } },
+  "sensor.marstek_mt1_capacity_pct": { state: "97", attributes: {} },
+  "sensor.marstek_mt1_expected_capacity": { state: "96", attributes: {} },
+  "sensor.marstek_mt1_soc_health": { state: "advies", attributes: { count: 3, last_size: 12, trend: [] } },
+  "sensor.marstek_mt1_cell_health": { state: "ok", attributes: { trend: [] } },
+};
+const card = new defined["marstek-capacity-card"]();
+const calls = [];
+card._config = { battery: "mt1" };
+card._hass = { states: S, entities: {}, devices: {}, callService: (...a) => calls.push(a) };
+const out = {};
+const acts = (html) => [...html.matchAll(/data-mc="([^"]*)"/g)].map((m) => m[1]);
+const pills = (html) => acts(html).filter((a) => a.includes("_mcPanel"));
+out.closed = pills(card._html()).length;
+out.closedHasAdvice = /twice/.test(card._html());
+card._action(pills(card._html())[1]);
+out.panel = card._panel;
+const html = card._html();
+out.advice = html.includes("twice") && html.includes("position:fixed");
+card._action(acts(html).find((a) => a.includes("dismiss_advice")));
+out.calls = calls;
+card._action(pills(card._html())[1]);
+out.closedAgain = card._panel;
+process.stdout.write(JSON.stringify(out));
+"""
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
+def test_card_buttons_open_panels_and_dismiss(tmp_path):
+    script = tmp_path / "t.js"
+    script.write_text(ACTION_TEST)
+    out = json.loads(subprocess.run(
+        ["node", str(script), str(build_card.OUT)], capture_output=True, text=True, check=True
+    ).stdout)
+    assert out["closed"] == 3  # Chart · SOC · Cells
+    assert not out["closedHasAdvice"]  # SOC and Cells only open as a popup
+    assert out["panel"] == "soc"
+    assert out["advice"]
+    assert out["calls"] == [["marstek_capacity_monitor", "dismiss_advice", {"battery": "mt1", "kind": "soc"}]]
+    assert out["closedAgain"] == ""
+
+
+TEXT_TEST = r"""
+const fs = require("fs");
+global.HTMLElement = class {};
+const defined = {};
+global.customElements = { get: (n) => defined[n], define: (n, c) => { defined[n] = c; } };
+global.window = {};
+global.console = { info() {}, log: console.log };
+eval(fs.readFileSync(process.argv[2], "utf8"));
+const S = {
+  "sensor.marstek_mt1_measured_capacity": { state: "4.4", attributes: { trend: [], measurement_count: 3 } },
+  "sensor.marstek_mt1_capacity_pct": { state: "97", attributes: {} },
+  "sensor.marstek_mt1_expected_capacity": { state: "96", attributes: {
+    cycles: 400, initial_cycles: 352, cycle_counter: "sensor.x_total_discharging_energy", trend: [] } },
+  "sensor.marstek_mt1_monitor_status": { state: "measuring", attributes: {} },
+};
+const out = {};
+for (const [lang, cfg] of [["nl", {}], ["de", {}], ["nl", { lang: "en" }]]) {
+  const card = new defined["marstek-capacity-card"]();
+  card._config = { battery: "mt1", ...cfg };
+  card._hass = { states: S, entities: {}, devices: {}, locale: { language: lang }, language: lang };
+  out[lang + (cfg.lang || "")] = card._html();
+}
+process.stdout.write(JSON.stringify(out));
+"""
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
+def test_card_language_foot_and_cycles_note(tmp_path):
+    script = tmp_path / "t.js"
+    script.write_text(TEXT_TEST)
+    out = json.loads(subprocess.run(
+        ["node", str(script), str(build_card.OUT)], capture_output=True, text=True, check=True
+    ).stdout)
+    # Language follows Home Assistant unless the card sets one
+    assert "cycli" in out["nl"] and "Zyklen" in out["de"] and "cycles" in out["nlen"]
+    # No "n=" for users in the foot line
+    assert "n=" not in out["nl"]
+    # Cycles before monitoring: from the counter, AC side, an estimate
+    assert "Waarvan 352 vóór de monitoring" in out["nl"] and "AC-kant" in out["nl"]
+    assert "AC side" in out["nlen"]

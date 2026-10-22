@@ -29,24 +29,25 @@ Zelf indelen? Gebruik hiervoor de standaardindeling van Home Assistant met **sec
 ![Batterijkaart met nummers](../screenshots/gallery/card-numbered-nl.png)
 
 1. **Status**: *Goed*, *Onder specificatie*, *Melden bij Marstek (app)* of *Verzamelt data*. De kleur volgt de laatste meting.
-2. **Grafiek**: druk op dit knopje om de grafiek te openen, druk nog eens om hem te sluiten. De rest van de kaart doet niets als je erop klikt.
-3. **Periode**: *recente 3 jaar van garantieperiode*: de grafiek toont de meest recente 3 jaar sinds de installatie.
-4. **Grafiek**: elke stip is een maand, met hoeveel procent van de bruikbare capaciteit er toen nog was. De grijze stippellijn is wat de fabrikant op die leeftijd verwacht, de rode lijn is 75 %. Ga met de muis over een stip voor het precieze getal en de celtemperatuur in die maand (als je temperatuursensoren hebt gekoppeld).
-5. **Hoe lees je dit?** Korte uitleg onder de grafiek: kijk of de stippen dicht bij of boven de grijze lijn blijven. Langzaam dalen is normaal; zakken ze richting de rode lijn, meld het dan bij Marstek.
-6. **Werkt de meting?** Groen: de meting werkt en zoveel volledige ontladingen zijn gemeten. Blauw: nog data aan het verzamelen. Oranje of rood: geen nieuwe gegevens of een sensor ontbreekt. De regel eronder zegt wat de volgende stap is (bijvoorbeeld *volledig laden tot 95 %*).
-7. **Drie capaciteiten**: *Opgegeven* (op het typeplaatje), *Bruikbaar* (opgegeven min de reserve die de batterij zelf vasthoudt) en *Gemeten* (wat er nu echt uitkomt, en hoeveel procent van bruikbaar dat is).
-8. **Balk**: de gemeten capaciteit, met een wit streepje voor de specificatie van de fabrikant en een rood streepje bij 75 %.
-9. **Specificatie van de fabrikant** bij het huidige aantal cycli en de leeftijd, en de marge: hoeveel je erboven (+) of eronder (−) zit.
-10. **Trend per maand**: eerst de richting (▲ ▬ ▼), dan de maanden van nieuw naar oud. Groot getal = gemeten, klein getal = specificatie voor die maand, en eventueel de celtemperatuur.
-11. **Laatste volle ontlading en volle lading**, en het aantal metingen.
+2. **Werkt de meting?** Groen: de meting werkt en zoveel volledige ontladingen zijn gemeten. Blauw: nog data aan het verzamelen. Oranje of rood: geen nieuwe gegevens of een sensor ontbreekt. Tijdens het verzamelen of een volledige ontlading staat de volgende stap eronder; anders zie je die bij aanwijzen.
+3. **Grafiek · SOC · Cellen**: *Grafiek* toont de grafiek op de plek van de capaciteiten (nog eens drukken = terug); de kaart blijft even hoog. *SOC* en *Cellen* openen een venster midden op het scherm; ✕ of klikken ernaast sluit het. Een ⚠ (let op) of 🔧 (advies) op *SOC* of *Cellen* betekent: kijk even. *Cellen* staat er alleen als de celspanningen zijn ingevuld.
+4. **Instellingen** (tandwiel): brengt je naar deze batterij onder Instellingen → Apparaten en diensten; het tandwiel daar opent *Configureren*.
+5. **Drie capaciteiten**: *Opgegeven* (op het typeplaatje), *Bruikbaar* (opgegeven min de reserve die de batterij zelf vasthoudt) en *Gemeten* (wat er nu echt uitkomt, en hoeveel procent van bruikbaar dat is).
+6. **Balk**: de gemeten capaciteit, met een wit streepje voor de specificatie van de fabrikant en een rood streepje bij 75 %.
+7. **Marge**: hoeveel je boven (+) of onder (−) de specificatie zit, met het aantal cycli en de leeftijd. Wijs aan voor de specificatie in kWh en waar de cycli van vóór de monitoring vandaan komen.
+8. **Laatste volle ontlading en volle lading** en de versie van de kaart.
 
-Heb je sensoren voor de hoogste en laagste celspanning gekoppeld, dan staat onder de trend ook het **celverschil na volle lading** (zie Demo 2 in de galerij).
+**De grafiek** toont de meest recente 3 jaar. Elke stip is een maand: hoeveel van de bruikbare capaciteit er toen nog was. ● gemeten, geijkt · ○ minder betrouwbaar (in de 14 dagen ervoor niet helemaal vol, of cellen kouder dan 5 °C) · grijze stippellijn: verwacht volgens specificatie · rode stippellijn: melden bij Marstek (75 %). Wijs een stip aan voor het getal, de specificatie en de celtemperatuur in die maand.
+
+**SOC en Cellen** beantwoorden *Klopt mijn SOC-meter nog?* (per maand *Dagen helemaal vol* en *SOC-meter klopte*) en *Zijn mijn cellen nog in balans?* (celverschil per maand). Bij let op of advies staat in het venster wat je kunt doen en een knop **Wegklikken**. Zie [Hoe het werkt](03-how-it-works.nl.md#soc-drift-vanaf-05).
+
+Heb je sensoren voor de hoogste en laagste celspanning gekoppeld, dan staat het **celverschil na volle lading** in het paneel **Cellen** (tot en met 0.4 onder de trend).
 
 ## Het overzicht
 
 Het overzicht zet alle batterijen (tot 6) onder elkaar:
 
-- **Batterij**: met ✓ (meting werkt), ⏳ (verzamelt data) of ⚠ (controleer de koppeling).
+- **Batterij**: met ✓ (meting werkt), ⏳ (verzamelt data) of ⚠ (controleer de koppeling). Vanaf 0.5 ook ⚠ (let op) of 🔧 (advies) voor SOC-drift of celkalibratie; wijs hem aan om te zien welke, en open de kaart van die batterij.
 - **Trend**: ▲ stijgend, ▬ gelijk, ▼ dalend over de getoonde maanden.
 - **Nu**: de laatste meting.
 - **Maanden**, van nieuw naar oud: groot getal = gemeten, klein getal = specificatie voor die maand.
@@ -60,11 +61,11 @@ De zes demobatterijen laten elk een andere situatie zien:
 
 | Batterij | Situatie |
 |---|---|
-| Demo 1 | 4 jaar oud, goed |
-| Demo 2 | 1,6 jaar oud, goed, met celverschil |
+| Demo 1 | 4 jaar oud, goed; staat buiten, dus open stippen in de winter; SOC-meter 2× flink ernaast: ⚠ let op bij SOC |
+| Demo 2 | 1,6 jaar oud, goed, met celverschil: 🔧 celkalibratie aanbevolen |
 | Demo 3 | Net geïnstalleerd: verzamelt data voor de eerste meting |
 | Demo 4 | 6,5 jaar oud, onder specificatie (oranje) |
-| Demo 5 | 9 jaar oud, net onder 75 %: melden bij Marstek (rood) |
+| Demo 5 | 9 jaar oud, net onder 75 %: melden bij Marstek (rood), cellen in balans |
 | Demo 6 | 2,8 jaar oud, goed, maar al even geen nieuwe gegevens (⚠) |
 
 ### 1 batterij

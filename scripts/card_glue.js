@@ -14,7 +14,8 @@ function mcEsc(text) {
 
 // The sensors a card reads (fixed list, so no scanning of all states).
 const MC_KEYS = ["measured_capacity", "capacity_pct", "expected_capacity", "warranty_status",
-  "warranty_end", "margin", "last_full_discharge", "last_full_charge", "monitor_status", "cell_spread"];
+  "warranty_end", "margin", "last_full_discharge", "last_full_charge", "monitor_status", "cell_spread",
+  "soc_health", "cell_health"];
 
 // Batteries of this integration, found through the entity registry.
 // Cached per registry object: HA replaces it only when the registry changes.
@@ -33,6 +34,11 @@ function mcBatteries(hass) {
   out.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
   mcCache = { entities: hass.entities, devices: hass.devices, list: out };
   return out;
+}
+
+// Dark (the original look) or light, following the Home Assistant theme
+function mcDark(hass) {
+  return !(hass && hass.themes && hass.themes.darkMode === false);
 }
 
 function mcLang(hass, config) {
@@ -54,6 +60,7 @@ const MC_STYLE = `
   ha-card { background: #1e2128; border: 1px solid #333744; border-radius: 12px;
     padding: 14px; color: #e8eaed; font-size: 13px; height: 100%; box-sizing: border-box;
     text-align: left; white-space: normal; }
+  ha-card.light { background: #ffffff; border-color: #e0e3e7; color: #1f2328; }
   [data-mc] { cursor: pointer; }
 `;
 
@@ -90,7 +97,7 @@ class MarstekCapacityBase extends HTMLElement {
       this._lastObjs = objs;
       this._rev = (this._rev || 0) + 1;
     }
-    return `${mcLang(this._hass, this._config)}|${ids.join(",")}|${this._rev}`;
+    return `${mcLang(this._hass, this._config)}|${mcDark(this._hass)}|${ids.join(",")}|${this._rev}`;
   }
 
   _render() {
@@ -111,7 +118,7 @@ class MarstekCapacityBase extends HTMLElement {
     } catch (err) {
       html = `<span style="color:#ef5350">Marstek Capacity Monitor: ${mcEsc(err)}</span>`;
     }
-    this.shadowRoot.innerHTML = `<style>${MC_STYLE}</style><ha-card>${html}</ha-card>`;
+    this.shadowRoot.innerHTML = `<style>${MC_STYLE}</style><ha-card class="${mcDark(this._hass) ? "" : "light"}">${html}</ha-card>`;
   }
 
   _action(_act) {}
@@ -139,8 +146,30 @@ class MarstekCapacityCard extends MarstekCapacityBase {
     return b.id ? [b.id] : [];
   }
 
+  // The config entry of a battery, for the settings button
+  _entryId(id) {
+    const ent = this._hass.entities && this._hass.entities[`sensor.marstek_${id}_monitor_status`];
+    const dev = ent && ent.device_id && this._hass.devices ? this._hass.devices[ent.device_id] : null;
+    return (dev && (dev.config_entries || [])[0]) || "";
+  }
+
+  // The template's buttons, translated: open/close a panel, click advice away.
   _action(act) {
-    if (act.includes("_mcChart")) this._chart = !this._chart;
+    const nav = /pushState\(null,'','([^']+)'\)/.exec(act);
+    if (nav) {
+      history.pushState(null, "", nav[1]);
+      window.dispatchEvent(new CustomEvent("location-changed"));
+      return;
+    }
+    if (act.includes("_mcPanel=''")) this._panel = "";
+    const panel = /_mcPanel==='(\w+)'/.exec(act);
+    if (panel) this._panel = this._panel === panel[1] ? "" : panel[1];
+    const kind = /kind:'(\w+)'/.exec(act) || /_mcGone\|\|''\)\+'(\w+)'/.exec(act);
+    if (kind && act.includes("dismiss_advice")) {
+      this._hass.callService(MC_DOMAIN, "dismiss_advice", { battery: this._battery().id, kind: kind[1] });
+    } else if (kind) {
+      this._gone = (this._gone || "") + kind[1];
+    }
   }
 
   _html() {
@@ -152,8 +181,8 @@ class MarstekCapacityCard extends MarstekCapacityBase {
         de: "Noch keine Batterie gefunden. Füge eine hinzu: Einstellungen → Geräte & Dienste → Integration hinzufügen → Marstek Capacity Monitor.",
       }[lang] || "No battery found yet. Add one via Settings → Devices & services → Add integration → Marstek Capacity Monitor.";
     }
-    const variables = { battery: b.id, name: b.name, lang, months: this._config.months || 6, demo: this._config.demo };
-    return batteryBody(this._hass.states, variables, { chart: this._chart, width: this.offsetWidth });
+    const variables = { battery: b.id, name: b.name, lang, months: this._config.months || 6, demo: this._config.demo, version: MC_VERSION, entry_id: this._entryId(b.id), dark: mcDark(this._hass) };
+    return batteryBody(this._hass.states, variables, { panel: this._panel, gone: this._gone, width: this.offsetWidth });
   }
 
   getGridOptions() {
@@ -188,7 +217,7 @@ class MarstekCapacityOverviewCard extends MarstekCapacityBase {
       return { nl: "Nog geen batterij gevonden.", de: "Noch keine Batterie gefunden." }[lang] || "No battery found yet.";
     }
     const months = this._config.months || (list.length <= 2 ? 3 : 6);
-    return overviewBody(this._hass.states, { batteries: list, lang, months, demo: this._config.demo });
+    return overviewBody(this._hass.states, { batteries: list, lang, months, demo: this._config.demo, dark: mcDark(this._hass) });
   }
 
   getGridOptions() {

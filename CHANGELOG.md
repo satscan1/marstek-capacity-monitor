@@ -1,5 +1,44 @@
 # Changelog
 
+## v0.5.0 — 2026-10-22
+
+**SOC drift and cell calibration: the monitor sees when the SOC meter drifts or the cells get out of balance, and tells you what to do. Plus three new models.**
+
+SOC drift
+- New: `sensor.marstek_<id>_soc_health` — `ok` / `letop` (attention) / `advies` (advice). The monitor compares every step of the state of charge with the DC energy that went in or out. A jump the energy does not explain, extra charging while it says 99 %, hanging at 100 % while discharging, or 14 days never completely full: that is an occurrence (5 % or more). Gaps in the data, restarts, a brief 0 % and jumps on two batteries at the same time (the connection) do not count; neither does a battery that is full almost every day.
+- Only for a pattern, within **45 days**: 1× is only recorded, 2× is **attention** (discharge once to the discharge limit and charge to full in one go), 3× is **SOC drift detected** (do that twice). The monitor sees when you have done it and the message disappears; also after 45 quiet days.
+
+Cell calibration (with cell voltage sensors)
+- New: `sensor.marstek_<id>_cell_health`. Normal is what your own battery did in its first 3 months; an occurrence is a cell spread of 2× that. 2 in a row is **attention** (keep it full for about 4 hours), 3 in 45 days is **cell calibration advised** (8 hours in UPS mode, or in charge mode without UPS mode; if it stays high, report it via the Marstek app). The monitor sees how long the battery stood full and at rest.
+
+Messages
+- **Sensitivity** per battery under Configure, separately for SOC drift and cell calibration: Off, Relaxed (8 % / 3×), Normal (5 % / 2×, default) or Strict (3 % / 1.5×).
+- **Attention** and advice as a message on your phone (Home Assistant app) and under Settings → Repairs, in English, Dutch or German. On by default; per battery under **Configure → Notifications**.
+- **Dismiss** once — on the card, in the phone message, or *Ignore* under Repairs — and it is gone everywhere until a new series. Also as the action `marstek_capacity_monitor.dismiss_advice`, and the event `marstek_capacity_monitor_advice` for your own automations.
+
+Card
+- Three small buttons under the status: **Chart · SOC · Cells**. *Chart* opens in place of the capacities, so the card keeps its height; *SOC* and *Cells* open as a window in the middle of the screen. ⚠ or 🔧 on a button means: look inside.
+- Calmer and the same height side by side: the monthly row is gone (the chart shows the months), the spec line is one short line (*Margin · cycles · age*, details when you point at it), the next-step line only shows while collecting data or during a full discharge, and the foot line sits at the bottom with the version of the card.
+- A cog next to the buttons takes you to the battery's settings.
+- SOC panel: *Days completely full* and *SOC meter was right* (✓ or ⚠ with how much it was off) per month; Cells panel: *Cells in balance* (mV, ⚠ at 2× normal). Details when you point at a cell.
+- Chart, simpler: ● measured, calibrated · ○ less reliable (not completely full in the 14 days before, or cells below 5 °C) · grey dashed line expected per spec · red dashed line report to Marstek. The *How to read this?* text is gone; details when you point at a dot.
+- The cell spread moved from the card into the Cells panel.
+- Overview: ⚠ or 🔧 after the battery name.
+- The cards follow the light or dark theme of Home Assistant.
+- The foot line no longer shows *n=*; the status line already says how many full discharges were measured.
+- The button-card templates follow the language of Home Assistant too when `lang` is left out (as the integration's own cards already did).
+- After an update the browser loads the new card by itself, also for a test version with the same number.
+- Button-card templates and ready-made dashboards updated: paste the new `marstek_capacity_templates.yaml` again if you use them.
+
+Cycles before monitoring and extra sensors
+- New: **cycles before monitoring filled in by itself.** If the battery has its own *total discharged* counter (Modbus, ESPHome), the monitor uses it when you add a battery: counter ÷ usable capacity. That counter measures on the AC side, so this is an estimate, less exact than the cycles the monitor counts itself on the DC side; the settings screen and the card (point at the cycles line) say so. A value you entered yourself is never overwritten.
+- New: **extra sensors found** under Settings → Repairs, after start-up (so also after this update): cell voltage sensors that are not filled in yet, and the *total discharged* counter while *cycles before monitoring* is still 0. Tick what you want to add and press Submit; what you leave unticked is not asked again.
+
+Models
+- New: **Venus E 4.0** (5.024 kWh, 88 %), **Venus E Max** (10.048 kWh, 90 %) and **Venus E Pro** (2.08 kWh per pack, 1–6 packs, 90 %). Marstek lists more than 10,000 cycles without a capacity percentage; the monitor assumes 80 % after 10,000. See [Supported batteries](docs/05-supported-batteries.md).
+
+Upgrade: update in HACS, restart Home Assistant and refresh your browser (Ctrl+F5). Measurements and settings are unchanged. SOC drift is tracked from the update onwards (a newly added battery also looks at the recorder history); cell calibration uses the cell measurements you already have. Older capacity measurements show as a filled dot.
+
 ## v0.4.0 — 2026-10-21
 
 **Plug & play cards: no button-card, a dashboard in one click, and a first measurement from history.**

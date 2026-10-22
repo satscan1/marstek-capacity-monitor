@@ -645,3 +645,333 @@ async def test_stop_saves_exact_power_time(hass: HomeAssistant, freezer) -> None
     assert s["power_ts"] == pytest.approx(dt_util.utcnow().timestamp(), abs=1)
     assert s["e_discharge_kwh"] == pytest.approx(800 * 45 / 3_600_000, rel=0.01)
 
+
+
+# ---------------------------------------------------------------------------
+# 0.5: new models, SOC drift and cell calibration
+# ---------------------------------------------------------------------------
+
+
+async def _flow_to_model(hass: HomeAssistant, model: str, battery_id: str = "ep"):
+    hass.states.async_set(SOC, 50, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W", "device_class": "power"})
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {"battery_id": battery_id, "name": "Test", "soc_entity": SOC, "power_entity": POWER},
+    )
+    return await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"model": model, "purchase_date": "2026-09-01"}
+    )
+
+
+async def test_venus_e_pro_packs(hass: HomeAssistant) -> None:
+    result = await _flow_to_model(hass, "venus_e_pro")
+    assert result["step_id"] == "packs"
+    assert result["description_placeholders"]["model"] == "Venus E Pro"
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"packs": 4})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"]["nominal_kwh"] == 8.32
+    assert result["data"]["reserve_kwh"] == 0.83
+    assert result["data"]["cycle_life"] == 10000
+    assert result["data"]["notify"] is True
+
+
+@pytest.mark.parametrize(
+    ("model", "nominal", "reserve"),
+    [("venus_e_v4", 5.024, 0.603), ("venus_e_max", 10.048, 1.005)],
+)
+async def test_new_models(hass: HomeAssistant, model, nominal, reserve) -> None:
+    result = await _flow_to_model(hass, model, battery_id=model[-3:].strip("_"))
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"]["nominal_kwh"] == nominal
+    assert result["data"]["reserve_kwh"] == reserve
+    assert result["data"]["cycle_life"] == 10000
+
+
+async def _setup_with_phone(hass: HomeAssistant, **extra):
+    calls = []
+
+    async def _notify(call):
+        calls.append(dict(call.data))
+
+    hass.services.async_register("notify", "mobile_app_phone", _notify)
+    hass.states.async_set(SOC, 60, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    entry = _entry(**extra)
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    return entry, calls
+
+
+def _drift(monitor, days_ago=(40, 20, 2), size=8.0):
+    """Three clear SOC corrections, on days the battery was hardly ever full."""
+    now = dt_util.utcnow().timestamp()
+    monitor.soc_events = [
+        {"ts": now - d * 86400, "type": "jump", "value": size} for d in days_ago
+    ]
+    monitor.alive_days = [
+        dt_util.as_local(dt_util.utcnow() - timedelta(days=d)).strftime("%Y-%m-%d")
+        for d in range(60, -1, -1)
+    ]
+    monitor.full_days = monitor.alive_days[::3]
+    monitor._recalculate()  # noqa: SLF001
+
+
+async def test_soc_drift_advice_and_dismiss(hass: HomeAssistant, freezer) -> None:
+    from homeassistant.helpers import issue_registry as ir
+
+    freezer.move_to("2026-10-22 12:00:00+00:00")
+    entry, calls = await _setup_with_phone(hass)
+    state = hass.states.get("sensor.marstek_mt1_soc_health")
+    assert state.state == "ok" and state.attributes["notify"] is True
+    events = []
+    hass.bus.async_listen(f"{DOMAIN}_advice", lambda e: events.append(e.data))
+
+    monitor = entry.runtime_data
+    _drift(monitor)
+    await hass.async_block_till_done()
+
+    state = hass.states.get("sensor.marstek_mt1_soc_health")
+    assert state.state == "advies" and state.attributes["count"] == 3
+    assert events and events[-1]["level"] == "advies" and events[-1]["kind"] == "soc"
+    issues = [i for (d, i) in ir.async_get(hass).issues if d == DOMAIN]
+    assert len(issues) == 1 and issues[0].startswith("soc_")
+    sent = [c for c in calls if c.get("message") != "clear_notification"]
+    assert "twee keer" in sent[-1]["message"] or "twice" in sent[-1]["message"]
+    action = sent[-1]["data"]["actions"][0]["action"]
+
+    # Phone button "Dismiss"
+    hass.bus.async_fire("mobile_app_notification_action", {"action": action})
+    await hass.async_block_till_done()
+    state = hass.states.get("sensor.marstek_mt1_soc_health")
+    assert state.state == "advies" and state.attributes["dismissed"] is True
+    assert not [i for (d, i) in ir.async_get(hass).issues if d == DOMAIN]
+    assert calls[-1]["message"] == "clear_notification"
+
+    # Stays dismissed after a recalculation; a new series comes back
+    n = len(calls)
+    monitor._recalculate()  # noqa: SLF001
+    await hass.async_block_till_done()
+    assert len(calls) == n
+    _drift(monitor, days_ago=(70, 50, 30, 14, 7, 1))
+    await hass.async_block_till_done()
+
+
+async def test_dismiss_service_and_repairs_ignore(hass: HomeAssistant, freezer) -> None:
+    from homeassistant.helpers import issue_registry as ir
+
+    freezer.move_to("2026-10-22 12:00:00+00:00")
+    entry, _calls = await _setup_with_phone(hass)
+    _drift(entry.runtime_data)
+    await hass.async_block_till_done()
+    await hass.services.async_call(
+        DOMAIN, "dismiss_advice", {"battery": "mt1", "kind": "soc"}, blocking=True
+    )
+    assert hass.states.get("sensor.marstek_mt1_soc_health").attributes["dismissed"] is True
+
+    # Ignoring under Settings -> Repairs does the same
+    await hass.services.async_call(
+        DOMAIN, "reset_measurements", {"config_entry_id": entry.entry_id}, blocking=True
+    )
+    _drift(entry.runtime_data)
+    await hass.async_block_till_done()
+    issue_id = next(i for (d, i) in ir.async_get(hass).issues if d == DOMAIN)
+    ir.async_ignore_issue(hass, DOMAIN, issue_id, True)
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.marstek_mt1_soc_health").attributes["dismissed"] is True
+
+
+async def test_notifications_off(hass: HomeAssistant, freezer) -> None:
+    from homeassistant.helpers import issue_registry as ir
+
+    freezer.move_to("2026-10-22 12:00:00+00:00")
+    entry, calls = await _setup_with_phone(hass, notify=False)
+    _drift(entry.runtime_data)
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.marstek_mt1_soc_health").state == "advies"  # card shows it
+    assert not calls
+    assert not [i for (d, i) in ir.async_get(hass).issues if d == DOMAIN]
+
+
+async def test_options_have_notify_switch(hass: HomeAssistant) -> None:
+    entry = _entry()
+    entry.add_to_hass(hass)
+    hass.states.async_set(SOC, 60)
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert "notify" in result["data_schema"].schema
+
+
+async def test_live_jump_and_calibration_point(hass: HomeAssistant, freezer) -> None:
+    freezer.move_to("2026-01-07 07:00:00+00:00")
+    hass.states.async_set(SOC, 57, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 2200, {"unit_of_measurement": "W"})
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    async def step(seconds, soc=None, power=None):
+        freezer.tick(timedelta(seconds=seconds))
+        if power is not None:
+            hass.states.async_set(POWER, power, {"unit_of_measurement": "W"})
+        if soc is not None:
+            hass.states.async_set(SOC, soc, {"unit_of_measurement": "%"})
+        async_fire_time_changed(hass, dt_util.utcnow())
+        await hass.async_block_till_done()
+
+    await step(30, soc=91, power=2210)  # MT1, 7 Jan: 57 -> 91 % within a minute
+    for i in range(10):
+        await step(60, soc=92 + min(i, 7), power=2200 + i)
+    await step(60, soc=100, power=5)
+    for _ in range(12):
+        await step(60, power=5)
+    types = [e["type"] for e in entry.runtime_data.soc_events]
+    assert "jump" in types and "top" in types
+    state = hass.states.get("sensor.marstek_mt1_soc_health")
+    assert state.attributes["last_calibration"] is not None
+    assert state.attributes["trend"][0]["dev"] >= 34
+
+
+async def test_sensitivity_options(hass: HomeAssistant, freezer) -> None:
+    freezer.move_to("2026-10-22 12:00:00+00:00")
+    entry, calls = await _setup_with_phone(hass)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert "soc_sensitivity" in result["data_schema"].schema
+    hass.config_entries.async_update_entry(entry, options={**entry.options, "soc_sensitivity": "off"})
+    await hass.async_block_till_done()
+    monitor = entry.runtime_data
+    _drift(monitor)
+    await hass.async_block_till_done()
+    state = hass.states.get("sensor.marstek_mt1_soc_health")
+    assert state.state == "ok" and state.attributes["sensitivity"] == "off"
+    assert state.attributes["trend"]
+    assert not [c for c in calls if c.get("message") != "clear_notification"]
+
+
+KWH = {"unit_of_measurement": "kWh", "device_class": "energy", "state_class": "total_increasing"}
+MV = {"unit_of_measurement": "mV", "device_class": "voltage"}
+
+
+async def test_new_battery_takes_start_cycles_from_counter(hass: HomeAssistant) -> None:
+    """The battery's own discharge counter fills in the cycles before monitoring
+    (AC side, an estimate); daily counters are not used."""
+    W = {"unit_of_measurement": "W", "device_class": "power"}
+    P = {"unit_of_measurement": "%", "device_class": "battery"}
+    pre = "sensor.venus_veranda_marstek_"
+    hass.states.async_set(pre + "battery_state_of_charge", 80, P)
+    hass.states.async_set(pre + "battery_power", 0, W)
+    hass.states.async_set(pre + "daily_discharging_energy", 3.2, KWH)
+    hass.states.async_set(pre + "total_discharging_energy", 1589.5, KWH)
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"candidate": "0"})
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {"battery_id": "mt1", "name": "MT1", "soc_entity": pre + "battery_state_of_charge",
+         "power_entity": pre + "battery_power"},
+    )
+    assert result["step_id"] == "model"
+    note = result["description_placeholders"]["counter"]
+    assert pre + "total_discharging_energy" in note and "AC" in note
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"model": "venus_e_v12", "purchase_date": "2024-02-01"}
+    )
+    data = result["data"]
+    assert data["initial_cycles"] == round(1589.5 / 4.61, 1)
+    assert data["cycle_counter"] == pre + "total_discharging_energy"
+    await hass.async_block_till_done()
+    attrs = hass.states.get("sensor.marstek_mt1_expected_capacity").attributes
+    assert attrs["initial_cycles"] == data["initial_cycles"]
+    assert attrs["cycle_counter"] == pre + "total_discharging_energy"
+
+
+async def _repairs_flow(hass, issue_id):
+    from homeassistant.components.repairs import repairs_flow_manager
+
+    manager = repairs_flow_manager(hass)
+    return manager, await manager.async_init(DOMAIN, data={"issue_id": issue_id})
+
+
+async def test_found_sensors_offered_under_repairs(hass: HomeAssistant) -> None:
+    """After an update: cell sensors and the discharge counter found on the
+    device are offered under Repairs; ticking adds them."""
+    from homeassistant.helpers import issue_registry as ir
+
+    hass.states.async_set(SOC, 60, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    hass.states.async_set("sensor.test_max_cell_voltage", 3330, MV)
+    hass.states.async_set("sensor.test_min_cell_voltage", 3310, MV)
+    hass.states.async_set("sensor.test_total_discharging_energy", 461.0, KWH)
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    issue_id = f"extras_{entry.entry_id}"
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, issue_id)
+    assert issue is not None and issue.is_fixable
+
+    manager, result = await _repairs_flow(hass, issue_id)
+    assert result["step_id"] == "confirm"
+    found = result["description_placeholders"]["found"]
+    assert "sensor.test_max_cell_voltage" in found and "AC" in found
+    result = await manager.async_configure(
+        result["flow_id"], {"add_cells": True, "add_cycles": True}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+    assert entry.options["cell_max_entity"] == "sensor.test_max_cell_voltage"
+    assert entry.options["initial_cycles"] == 100.0  # 461 kWh / 4.61 kWh
+    assert ir.async_get(hass).async_get_issue(DOMAIN, issue_id) is None
+    assert hass.states.get("sensor.marstek_mt1_cell_health") is not None
+
+    # The options form keeps the counter; a hand-changed value drops it
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    form = {
+        str(k): (k.default() if callable(getattr(k, "default", None)) else None)
+        for k in result["data_schema"].schema
+    }
+    form = {k: v for k, v in form.items() if v is not None}
+    result = await hass.config_entries.options.async_configure(result["flow_id"], form)
+    assert entry.options["cycle_counter"] == "sensor.test_total_discharging_energy"
+
+
+async def test_declined_sensors_are_not_offered_again(hass: HomeAssistant) -> None:
+    from homeassistant.helpers import issue_registry as ir
+
+    hass.states.async_set(SOC, 60, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    hass.states.async_set("sensor.test_total_discharging_energy", 461.0, KWH)
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    issue_id = f"extras_{entry.entry_id}"
+    manager, result = await _repairs_flow(hass, issue_id)
+    assert "add_cells" not in {str(k) for k in result["data_schema"].schema}
+    await manager.async_configure(result["flow_id"], {"add_cycles": False})
+    await hass.async_block_till_done()
+    assert entry.options["extras_declined"] == ["cycles"]
+    assert entry.options.get("initial_cycles") is None
+    assert ir.async_get(hass).async_get_issue(DOMAIN, issue_id) is None
+
+
+async def test_no_offer_when_start_value_entered(hass: HomeAssistant) -> None:
+    """A start value the user entered is never overwritten or questioned."""
+    from homeassistant.helpers import issue_registry as ir
+
+    hass.states.async_set(SOC, 60, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    hass.states.async_set("sensor.test_total_discharging_energy", 461.0, KWH)
+    entry = _entry(initial_cycles=352)
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert ir.async_get(hass).async_get_issue(DOMAIN, f"extras_{entry.entry_id}") is None

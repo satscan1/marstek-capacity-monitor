@@ -10,7 +10,7 @@ triggers_update:
   - sensor.marstek_mt2_capacity_pct
   - sensor.marstek_mt2_monitor_status
 variables:
-  lang: nl          # en | nl | de
+  # lang: nl        # en | nl | de; leave out to follow the language of Home Assistant
   months: 6
   batteries:
     - id: mt1
@@ -31,4 +31,3 @@ triggers_update:
 variables:
   battery: mt1
   name: MT1 veranda
-  lang: nl

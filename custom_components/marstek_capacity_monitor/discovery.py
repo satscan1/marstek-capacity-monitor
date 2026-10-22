@@ -251,3 +251,54 @@ def guess_model(hass: HomeAssistant, soc_entity: str) -> str | None:
     if re.search(r"(^|_)hmg($|_)|venus_?e_?(v_?[12]|2_0)", text):
         return MODEL_E_V12
     return None
+
+
+# ---------------------------------------------------------------------------
+# Cycles before the monitor: the battery's own "total discharged" counter
+# ---------------------------------------------------------------------------
+
+DISCHARGE_TOTAL_RE = re.compile(
+    r"total_?discharg|discharg\w*_total|lifetime_?discharg|discharg\w*_lifetime"
+)
+NOT_TOTAL_RE = re.compile(r"daily|today|(^|_)day($|_)|week|month|year|hour|session")
+ENERGY_FACTOR = {"Wh": 0.001, "kWh": 1.0, "MWh": 1000.0}
+
+
+def find_discharge_counter(hass: HomeAssistant, soc_entity: str) -> str | None:
+    """The battery's counter of all energy it ever discharged, on the same
+    device as the SOC sensor (Modbus and ESPHome usually have one)."""
+    ent_reg = er.async_get(hass)
+    soc_entry = ent_reg.async_get(soc_entity)
+    dev_id = soc_entry.device_id if soc_entry else None
+    prefix = _prefix(soc_entity, SOC_RE)
+    for state in sorted(hass.states.async_all("sensor"), key=lambda s: s.entity_id):
+        if state.attributes.get("unit_of_measurement") not in ENERGY_FACTOR:
+            continue
+        entry = ent_reg.async_get(state.entity_id)
+        if entry is not None and entry.platform == DOMAIN:
+            continue
+        same_device = dev_id is not None and entry is not None and entry.device_id == dev_id
+        same_name = bool(prefix) and state.entity_id.split(".", 1)[1].startswith(prefix)
+        if not (same_device or same_name):
+            continue
+        text = _text(state, entry)
+        if NOT_TOTAL_RE.search(text) or NOT_HOME_BATTERY_RE.search(
+            text.replace("total_discharg", "discharg")
+        ):
+            continue
+        if DISCHARGE_TOTAL_RE.search(text):
+            return state.entity_id
+    return None
+
+
+def counter_kwh(hass: HomeAssistant, entity_id: str | None) -> float | None:
+    """Current value of the counter in kWh; None when unknown."""
+    state = hass.states.get(entity_id) if entity_id else None
+    if state is None:
+        return None
+    factor = ENERGY_FACTOR.get(state.attributes.get("unit_of_measurement"))
+    try:
+        value = float(state.state) * factor if factor else None
+    except ValueError:
+        return None
+    return value if value is not None and value > 0 else None
