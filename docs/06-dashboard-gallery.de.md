@@ -29,15 +29,17 @@ Selbst anordnen? Verwende den Ansichtstyp **Abschnitte** (Sections) von Home Ass
 ![Batteriekarte mit Nummern](../screenshots/gallery/de/card-numbered-de.png)
 
 1. **Status**: *Gut*, *Unter Herstellerangabe*, *An Marstek melden (App)* oder *Sammelt Daten*. Die Farbe folgt der letzten Messung.
-2. **Läuft die Messung?** Grün: Die Messung läuft, mit der Zahl der gemessenen vollständigen Entladungen. Blau: sammelt noch Daten. Orange oder rot: keine neuen Daten oder ein Sensor fehlt. Die Zeile darunter nennt den nächsten Schritt (zum Beispiel *auf 95 % voll laden*).
-3. **Diagramm · SOC · Zellen** (ab 0.5 drei kleine Schaltflächen unter der Zeile *Messung läuft*): Drücke eine, um ihr Feld zu öffnen, und noch einmal, um es zu schließen. Ein ⚠ (Achtung) oder 🔧 (Empfehlung) auf *SOC* oder *Zellen* heißt: kurz hineinschauen. Der Rest der Karte reagiert nicht auf Klicks. Das SOC-Feld beantwortet *Stimmt meine SOC-Anzeige noch?* mit *Tage ganz voll* und *SOC-Anzeige stimmte* pro Monat; das Zellen-Feld *Sind meine Zellen noch im Gleichgewicht?*. Bei Achtung oder Empfehlung erscheint ein Kasten mit dem, was zu tun ist, und eine Schaltfläche **Ausblenden**.
-4. **Zeitraum**: *jüngste 3 Jahre der Garantiezeit*: Das Diagramm zeigt die jüngsten 3 Jahre seit der Inbetriebnahme.
-5. **Diagramm**: Jeder Punkt ist ein Monat, mit dem Prozentsatz der nutzbaren Kapazität, der damals noch vorhanden war. Die graue gestrichelte Linie zeigt, was der Hersteller in diesem Alter erwartet, die rote Linie liegt bei 75 %. Fährst du mit der Maus über einen Punkt, siehst du den genauen Wert und die Zelltemperatur in diesem Monat (wenn du Temperatursensoren verknüpft hast). Ein offener Punkt ○ heißt *weniger zuverlässig*: Die Batterie war in den 14 Tagen davor nicht ganz voll, oder die Zellen waren kälter als 5 °C.
-6. **Drei Kapazitäten**: *Nennwert* (auf dem Typenschild), *Nutzbar* (Nennwert abzüglich der Reserve, die die Batterie selbst behält) und *Gemessen* (was jetzt wirklich herauskommt, und wie viel Prozent der nutzbaren Kapazität das sind).
-7. **Balken**: die gemessene Kapazität, mit einem weißen Strich für die Herstellerangabe und einem roten Strich bei 75 %.
-8. **Herstellerangabe** bei der aktuellen Zyklenzahl und dem Alter, und der Abstand: wie weit du darüber (+) oder darunter (−) liegst.
-9. **Trend pro Monat**: zuerst die Richtung (▲ ▬ ▼), dann die Monate von neu nach alt. Große Zahl = gemessen, kleine Zahl = Herstellerangabe für diesen Monat, dazu die Zelltemperatur, falls vorhanden.
-10. **Letzte vollständige Entladung und Ladung**, und die Anzahl der Messungen.
+2. **Läuft die Messung?** Grün: Die Messung läuft, mit der Zahl der gemessenen vollständigen Entladungen. Blau: sammelt noch Daten. Orange oder rot: keine neuen Daten oder ein Sensor fehlt. Beim Sammeln oder während einer vollständigen Entladung steht der nächste Schritt darunter; sonst siehst du ihn beim Zeigen auf die Zeile.
+3. **Diagramm · SOC · Zellen**: *Diagramm* zeigt das Diagramm an der Stelle der Kapazitäten (noch einmal drücken = zurück); die Karte bleibt gleich hoch. *SOC* und *Zellen* öffnen ein Fenster in der Mitte des Bildschirms; ✕ oder ein Klick daneben schließt es. Ein ⚠ (Achtung) oder 🔧 (Empfehlung) auf *SOC* oder *Zellen* heißt: kurz hineinschauen. *Zellen* erscheint nur, wenn die Zellspannungen eingetragen sind.
+4. **Einstellungen** (Zahnrad): führt zu dieser Batterie unter Einstellungen → Geräte & Dienste; das Zahnrad dort öffnet *Konfigurieren*.
+5. **Drei Kapazitäten**: *Nennwert* (auf dem Typenschild), *Nutzbar* (Nennwert abzüglich der Reserve, die die Batterie selbst behält) und *Gemessen* (was jetzt wirklich herauskommt, und wie viel Prozent der nutzbaren Kapazität das sind).
+6. **Balken**: die gemessene Kapazität, mit einem weißen Strich für die Herstellerangabe und einem roten Strich bei 75 %.
+7. **Abstand**: wie weit du über (+) oder unter (−) der Herstellerangabe liegst, mit Zyklen und Alter. Zeige darauf für die Herstellerangabe in kWh.
+8. **Letzte vollständige Entladung und Ladung**, die Anzahl der Messungen und die Version der Karte.
+
+**Das Diagramm** zeigt die jüngsten 3 Jahre. Jeder Punkt ist ein Monat: wie viel der nutzbaren Kapazität damals noch vorhanden war. ● gemessen, kalibriert · ○ weniger zuverlässig (in den 14 Tagen davor nicht ganz voll, oder Zellen kälter als 5 °C) · graue gestrichelte Linie: erwartet laut Herstellerangabe · rote gestrichelte Linie: an Marstek melden (75 %). Zeige auf einen Punkt für Wert, Herstellerangabe und Zelltemperatur in diesem Monat.
+
+**SOC und Zellen** beantworten *Stimmt meine SOC-Anzeige noch?* (pro Monat *Tage ganz voll* und *SOC-Anzeige stimmte*) und *Sind meine Zellen noch im Gleichgewicht?* (Zellspannungsdifferenz pro Monat). Bei Achtung oder Empfehlung steht im Fenster, was zu tun ist, und eine Schaltfläche **Ausblenden**.
 
 Hast du Sensoren für die höchste und niedrigste Zellspannung verknüpft, steht die **Zellspannungsdifferenz nach Vollladung** im Feld **Zellen** (bis 0.4 unter dem Trend).
 

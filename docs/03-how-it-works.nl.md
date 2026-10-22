@@ -121,6 +121,7 @@ De monitor ziet zelf hoe lang de batterij vol en in rust stond (4 uur bij let op
 * **Waar:** op de kaart (knoppen **SOC** en **Cellen** met ⚠ of 🔧), als bericht op je telefoon (Home Assistant-app) en onder **Instellingen → Reparaties**.
 * **Wegklikken:** één klik is genoeg: **Wegklikken** op de kaart, in het bericht op je telefoon, of **Negeren** onder Reparaties. Dat geldt overal. De melding komt pas terug bij een nieuwe reeks voorvallen.
 * **Helemaal uit:** per batterij via **Configureren → Seintjes** (staat standaard aan). De kaart blijft de stand tonen; je krijgt alleen geen berichten meer.
+* **Gevoeligheid:** per batterij onder **Configureren**, apart voor SOC-drift en celkalibratie: *Uit* (alleen op de kaart, nooit let op of advies), *Ruim* (SOC 8 %, cellen 3× normaal), *Normaal* (5 %, 2×, standaard) of *Extra* (3 %, 1,5×).
 * Voor automatiseringen: de sensoren `sensor.marstek_<id>_soc_health` en `sensor.marstek_<id>_cell_health` (ok / letop / advies), het event `marstek_capacity_monitor_advice` en de dienst `marstek_capacity_monitor.dismiss_advice`.
 
 ## Celtemperatuur (experimenteel)
@@ -133,11 +134,11 @@ Alleen **cel**temperaturen horen hier. Sommige koppelingen geven MOSFET-temperat
 
 ## Grafiek
 
-Onder de status staan drie knopjes: **Grafiek · SOC · Cellen**. Er is steeds één paneel open; druk nog eens op hetzelfde knopje om het te sluiten. De grafiek (oud → nieuw, van links naar rechts) toont de meest recente 3 jaar en verder alleen:
+Onder de status staan drie knopjes: **Grafiek · SOC · Cellen**, en rechts een tandwiel voor de instellingen. *Grafiek* komt op de plek van de capaciteiten (nog eens drukken = terug), zodat de kaart even hoog blijft; *SOC* en *Cellen* openen als venster midden op het scherm. De grafiek (oud → nieuw, van links naar rechts) toont de meest recente 3 jaar en verder alleen:
 
 * **●** gemeten, geijkt
 * **○** minder betrouwbaar: in de 14 dagen vóór de meting niet helemaal vol, of cellen kouder dan 5 °C
 * **grijze stippellijn**: verwacht volgens specificatie
 * **rode stippellijn**: melden bij Marstek (75 %)
 
-Ga met de muis over een stip voor het getal, de celtemperatuur en waarom hij minder betrouwbaar is. Het paneel **SOC** toont per maand *Dagen helemaal vol* en *SOC-meter klopte* (✓ of ⚠ met hoeveel hij ernaast zat); **Cellen** toont *Cellen in balans* (celverschil in mV, ⚠ bij 2× normaal). Ook daar staan de details bij aanwijzen van een vakje. Zie [06 – Dashboard en galerij](06-dashboard-gallery.nl.md) voor de kaart genummerd uitgelegd.
+Ga met de muis over een stip voor het getal, de celtemperatuur en waarom hij minder betrouwbaar is. Het venster **SOC** toont per maand *Dagen helemaal vol* en *SOC-meter klopte* (✓ of ⚠ met hoeveel hij ernaast zat); **Cellen** toont *Cellen in balans* (celverschil in mV, ⚠ vanaf de grens die bij de gevoeligheid hoort). Ook daar staan de details bij aanwijzen van een vakje. Zie [06 – Dashboard en galerij](06-dashboard-gallery.nl.md) voor de kaart genummerd uitgelegd.
