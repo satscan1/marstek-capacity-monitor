@@ -43,7 +43,7 @@ Gedeeltelijke ontladingen tellen bewust niet mee: een procent onderin levert mee
 
 ## Specificatie fabrikant en kleuren
 
-De lijn waarmee de meting wordt vergeleken is de **specificatie van de fabrikant per cyclus**: 80 % capaciteit na 6.000 volle cycli, dus 0,0033 punt per cyclus. Het aantal volle cycli is de DC-ontladen kWh gedeeld door de bruikbare capaciteit, plus eventueel de cycli van vóór de monitoring. Het getal "specificatie" op de kaart is die lijn, doorgerekend naar het aantal cycli van nu (bijvoorbeeld 98,8 % bij 369 cycli).
+De lijn waarmee de meting wordt vergeleken is de **specificatie van de fabrikant per cyclus**: 80 % capaciteit na 6.000 volle cycli, dus 0,0033 punt per cyclus. Het aantal volle cycli is de DC-ontladen kWh gedeeld door de bruikbare capaciteit, plus eventueel de cycli van vóór de monitoring. Die laatste komen, als de batterij een teller *totaal ontladen* heeft, uit die teller: die meet aan de AC-kant en is dus een schatting, minder precies dan wat de monitor zelf aan de DC-kant meet. Wijs op de kaart de regel met de cycli aan om te zien waar het getal vandaan komt. Het getal "specificatie" op de kaart is die lijn, doorgerekend naar het aantal cycli van nu (bijvoorbeeld 98,8 % bij 369 cycli).
 
 Dit is een **specificatie, geen garantie**. Marstek geeft geen capaciteitsgarantie in jaren; daarom is er geen tijdlijn.
 
@@ -122,6 +122,7 @@ De monitor ziet zelf hoe lang de batterij vol en in rust stond (4 uur bij let op
 * **Wegklikken:** één klik is genoeg: **Wegklikken** op de kaart, in het bericht op je telefoon, of **Negeren** onder Reparaties. Dat geldt overal. De melding komt pas terug bij een nieuwe reeks voorvallen.
 * **Helemaal uit:** per batterij via **Configureren → Seintjes** (staat standaard aan). De kaart blijft de stand tonen; je krijgt alleen geen berichten meer.
 * **Gevoeligheid:** per batterij onder **Configureren**, apart voor SOC-drift en celkalibratie: *Uit* (alleen op de kaart, nooit let op of advies), *Ruim* (SOC 8 %, cellen 3× normaal), *Normaal* (5 %, 2×, standaard) of *Extra* (3 %, 1,5×).
+* **Extra sensoren gevonden:** celspanningen of een teller *totaal ontladen* die nog niet gebruikt worden, staan ook onder Reparaties; daar voeg je ze met één klik toe. Zie [Instellingen](02-configuration.nl.md#extra-sensoren-gevonden).
 * Voor automatiseringen: de sensoren `sensor.marstek_<id>_soc_health` en `sensor.marstek_<id>_cell_health` (ok / letop / advies), het event `marstek_capacity_monitor_advice` en de dienst `marstek_capacity_monitor.dismiss_advice`.
 
 ## Celtemperatuur (experimenteel)

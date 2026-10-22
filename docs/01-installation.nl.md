@@ -97,7 +97,7 @@ In [`dashboard/ready-made/nl/`](../dashboard/ready-made/nl/) staat per aantal ba
 #### In een bestaand dashboard
 
 1. **Sjablonen (eenmalig per dashboard):** open het dashboard, klik op het **potlood**, dan op de **drie puntjes → Ruwe configuratie-editor**. Kopieer alles uit [`marstek_capacity_templates.yaml`](../dashboard/button-card/marstek_capacity_templates.yaml) en plak het helemaal bovenaan, boven de regel `views:`. Staat er al een regel `button_card_templates:` (van andere kaarten)? Plak dan alleen wat eronder staat, onder je bestaande sjablonen. Bewaar en sluit de editor.
-2. **Kaarten:** nog steeds in bewerken: **Voeg kaart toe** → helemaal onderaan **Handmatig**. [`examples.yaml`](../dashboard/button-card/examples.yaml) bevat twee voorbeelden, gescheiden door een regel `---`: eerst het overzicht van al je batterijen, daarna de kaart voor één batterij. Plak telkens één voorbeeld, niet het hele bestand. Vervang overal `mt1` door je eigen code (`lang: nl` geeft Nederlandse tekst, `lang: en` Engelse) en sla op. Herhaal dit per batterij en voor het overzicht.
+2. **Kaarten:** nog steeds in bewerken: **Voeg kaart toe** → helemaal onderaan **Handmatig**. [`examples.yaml`](../dashboard/button-card/examples.yaml) bevat twee voorbeelden, gescheiden door een regel `---`: eerst het overzicht van al je batterijen, daarna de kaart voor één batterij. Plak telkens één voorbeeld, niet het hele bestand. Vervang overal `mt1` door je eigen code en sla op. De tekst volgt de taal van Home Assistant; een vaste taal kan met `lang: nl`, `lang: en` of `lang: de` onder `variables`. Herhaal dit per batterij en voor het overzicht.
 
 Hoe je de kaarten naast elkaar zet en wat alles op de kaart betekent: [06 – Dashboard en galerij](06-dashboard-gallery.nl.md).
 
