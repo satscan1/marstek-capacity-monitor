@@ -27,7 +27,7 @@
           "reserve_kwh": "Part of the nominal capacity the battery never releases. Datasheet: 90 % DoD, so 5.12 − 0.51 = 4.61 kWh = 100 % of new.",
           "cycle_life": "E.g. 6000 full cycles.",
           "cycle_eol_pct": "Manufacturer spec: e.g. 80 % after 6000 cycles (Marstek, Venus E Gen 3.0 product page). This is the spec line; not a warranty.",
-          "initial_cycles": "Estimate: total discharged kWh so far divided by the usable capacity. Leave 0 for a new battery.",
+          "initial_cycles": "Cycles before this monitor. Filled in from the battery's own total discharged counter when one is found (divided by the usable capacity). That counter measures on the AC side: an estimate, less exact than the cycles the monitor counts itself on the DC side. Without a counter: total discharged kWh so far ÷ usable capacity; leave 0 for a new battery.",
           "red_pct": "At or below this % remaining the status turns red: the moment to report it to Marstek via the Marstek app. Default 75 %.",
           "tolerance_pct": "Green while the measurement is at most this many points below the manufacturer spec line. Default 5.",
           "purchase_date": "The date the battery went into use. Warranty and age are counted from here."
@@ -58,7 +58,7 @@
       },
       "model": {
         "title": "Which Marstek is {name}?",
-        "description": "Pick your model and the date it was installed. The factory data (capacity, depth of discharge, cycles) are filled in for you. You can change them later under Configure.",
+        "description": "Pick your model and the date it was installed. The factory data (capacity, depth of discharge, cycles) are filled in for you. You can change them later under Configure.{counter}",
         "data": {
           "model": "Model",
           "purchase_date": "Installation date"
@@ -68,8 +68,8 @@
         }
       },
       "packs": {
-        "title": "Venus D: number of battery packs",
-        "description": "A Venus D holds 2.56 kWh per pack. Rated capacity and reserve are calculated from the number of packs.",
+        "title": "{model}: number of battery packs",
+        "description": "A {model} holds {kwh} kWh per pack. Rated capacity and reserve are calculated from the number of packs.",
         "data": {
           "packs": "Number of battery packs"
         }
@@ -105,14 +105,17 @@
           "cell_max_entity": "Highest cell voltage (optional)",
           "cell_min_entity": "Lowest cell voltage (optional)",
           "temp_max_entity": "Highest cell temperature (optional, experimental)",
-          "temp_min_entity": "Lowest cell temperature (optional, experimental)"
+          "temp_min_entity": "Lowest cell temperature (optional, experimental)",
+          "notify": "Notifications",
+          "soc_sensitivity": "Sensitivity SOC drift",
+          "cell_sensitivity": "Sensitivity cell calibration"
         },
         "data_description": {
           "nominal_kwh": "Total capacity of the cells, e.g. 5.12 kWh.",
           "reserve_kwh": "Part of the nominal capacity the battery never releases. Datasheet: 90 % DoD, so 5.12 − 0.51 = 4.61 kWh = 100 % of new.",
           "cycle_life": "E.g. 6000 full cycles.",
           "cycle_eol_pct": "Manufacturer spec: e.g. 80 % after 6000 cycles (Marstek, Venus E Gen 3.0 product page). This is the spec line; not a warranty.",
-          "initial_cycles": "Estimate: total discharged kWh so far divided by the usable capacity. Leave 0 for a new battery.",
+          "initial_cycles": "Cycles before this monitor. Filled in from the battery's own total discharged counter when one is found (divided by the usable capacity). That counter measures on the AC side: an estimate, less exact than the cycles the monitor counts itself on the DC side. Without a counter: total discharged kWh so far ÷ usable capacity; leave 0 for a new battery.",
           "red_pct": "At or below this % remaining the status turns red: the moment to report it to Marstek via the Marstek app. Default 75 %.",
           "tolerance_pct": "Green while the measurement is at most this many points below the manufacturer spec line. Default 5.",
           "power_sign": "Automatic: detected on the first charge or discharge. Change only if detection gets it wrong.",
@@ -120,7 +123,10 @@
           "cell_max_entity": "Voltage of the highest cell, in V or mV. Only cell voltages, not temperatures.",
           "cell_min_entity": "Voltage of the lowest cell, in V or mV.",
           "temp_max_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures.",
-          "temp_min_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures."
+          "temp_min_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures.",
+          "notify": "A message on your phone (Home Assistant app) and under Settings → Repairs when the SOC meter drifts or the cells get out of balance, with advice. Only for a pattern: once is only recorded, 2× in 45 days is \"attention\", 3× is advice. Off = no messages; the card still shows it.",
+          "soc_sensitivity": "When a deviation of the SOC meter counts. Normal: 5 % or more. Relaxed: 8 %. Strict: 3 %. Off: only shown on the card, never \"attention\" or advice.",
+          "cell_sensitivity": "When the cell spread counts as too high. Normal: 2× the own normal value. Relaxed: 3×. Strict: 1.5×. Off: only shown on the card. Only with cell voltage sensors."
         }
       }
     },
@@ -188,6 +194,22 @@
       },
       "cell_spread": {
         "name": "Cell spread after full charge"
+      },
+      "soc_health": {
+        "name": "SOC meter",
+        "state": {
+          "ok": "OK",
+          "letop": "Attention",
+          "advies": "Advice"
+        }
+      },
+      "cell_health": {
+        "name": "Cell balance",
+        "state": {
+          "ok": "OK",
+          "letop": "Attention",
+          "advies": "Advice"
+        }
       }
     }
   },
@@ -199,6 +221,24 @@
         "config_entry_id": {
           "name": "Battery",
           "description": "The battery whose measurements are removed."
+        }
+      }
+    },
+    "dismiss_advice": {
+      "name": "Dismiss advice",
+      "description": "Dismiss the current \"attention\" or advice of one battery once. It comes back only with a new series.",
+      "fields": {
+        "battery": {
+          "name": "Battery",
+          "description": "Short id of the battery, e.g. mt1."
+        },
+        "config_entry_id": {
+          "name": "Battery (entry)",
+          "description": "Or pick the battery."
+        },
+        "kind": {
+          "name": "Subject",
+          "description": "soc = SOC drift, cells = cell calibration."
         }
       }
     }
@@ -215,8 +255,61 @@
       "options": {
         "venus_e_v12": "Venus E v1 / v2 (5.12 kWh)",
         "venus_e_v3": "Venus E v3 (5.12 kWh)",
+        "venus_e_v4": "Venus E 4.0 (5.02 kWh)",
+        "venus_e_max": "Venus E Max (10.05 kWh)",
+        "venus_e_pro": "Venus E Pro (2.08 kWh per pack)",
         "venus_d": "Venus D (2.56 kWh per pack)",
         "other": "Other model: enter factory data yourself"
+      }
+    },
+    "kind": {
+      "options": {
+        "soc": "SOC drift",
+        "cells": "Cell calibration"
+      }
+    },
+    "sensitivity": {
+      "options": {
+        "off": "Off",
+        "relaxed": "Relaxed",
+        "normal": "Normal",
+        "strict": "Strict"
+      }
+    }
+  },
+  "issues": {
+    "soc_letop": {
+      "title": "{name}: attention, SOC meter",
+      "description": "{message}\n\nThis message disappears by itself once the monitor has seen it. Ignore = dismiss it until a new series."
+    },
+    "soc_advies": {
+      "title": "{name}: SOC drift detected",
+      "description": "{message}\n\nThis message disappears by itself once the monitor has seen it. Ignore = dismiss it until a new series."
+    },
+    "cells_letop": {
+      "title": "{name}: attention, cell balance",
+      "description": "{message}\n\nThis message disappears by itself once the monitor has seen it. Ignore = dismiss it until a new series."
+    },
+    "cells_advies": {
+      "title": "{name}: cell calibration advised",
+      "description": "{message}\n\nThis message disappears by itself once the monitor has seen it. Ignore = dismiss it until a new series."
+    },
+    "extras_found": {
+      "title": "{name}: extra sensors found",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{name}: extra sensors found",
+            "description": "{found}",
+            "data": {
+              "add_cells": "Add cell voltage sensors (cell balance)",
+              "add_cycles": "Fill in cycles before monitoring (estimate, AC side)"
+            }
+          }
+        },
+        "abort": {
+          "battery_gone": "This battery no longer exists."
+        }
       }
     }
   }

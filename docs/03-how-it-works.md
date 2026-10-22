@@ -43,7 +43,7 @@ Partial discharges are deliberately ignored, because one percent near the bottom
 
 ## Manufacturer spec and colours
 
-The line the measurement is compared with is the **manufacturer's spec per cycle**: 80 % capacity after 6,000 full cycles, i.e. 0.0033 points per cycle. Full cycles = DC discharged kWh ÷ usable capacity, plus any cycles done before monitoring started. The "spec" figure on the card is that line at the current number of cycles (e.g. 98.8 % at 369 cycles).
+The line the measurement is compared with is the **manufacturer's spec per cycle**: 80 % capacity after 6,000 full cycles, i.e. 0.0033 points per cycle. Full cycles = DC discharged kWh ÷ usable capacity, plus any cycles done before monitoring started. If the battery has a *total discharged* counter, those come from that counter: it measures on the AC side, so they are an estimate, less exact than what the monitor measures itself on the DC side. Point at the cycles line on the card to see where the number comes from. The "spec" figure on the card is that line at the current number of cycles (e.g. 98.8 % at 369 cycles).
 
 This is a **specification, not a warranty**. Marstek gives no capacity guarantee in years, so there is no time line.
 
@@ -80,7 +80,50 @@ Optional, when your connection provides the highest and lowest cell voltage.
 * **Context:** the battery rests (power within ±50 W) for 5 minutes, so load does not distort the voltages. LFP cells hardly differ in the middle of the band; differences only show near full.
 * **Result:** the spread between the highest and lowest cell, in mV. One sample per full charge; the next sample needs the battery to drop below 90 % first. The card shows the monthly median, trend column first, new → old.
 
-There are **no colours** for the spread yet: Marstek publishes no normal value. Limits will only be added once enough data from real batteries supports them.
+Marstek publishes no normal value for the spread. From 0.5 the monitor therefore compares with what is normal for **your** battery (the first 3 months): a ⚠ at twice that. See Cell calibration below.
+
+## SOC drift (from 0.5)
+
+**What is it?** The battery does not know exactly how full it is; the state of charge (SOC) is an estimate it keeps by counting current. Small errors add up. Only when the battery is completely full (charging stops by itself) does it put the counter right again. If that does not happen for a long time, the SOC meter drifts further off: **SOC drift**. You notice it as jumps (e.g. from 57 % to 91 % in a minute), as "99 %" while a lot still goes in, or as a battery that stays at 100 % for a long time while discharging.
+
+**Why does it matter?** With a skewed SOC meter the battery stops too early or too late, and a capacity measurement becomes less certain. That is why a measurement gets an **open dot** in the chart when the battery was not completely full in the 14 days before (or when the cells were colder than 5 °C).
+
+**How does the monitor measure it?**
+* **Event:** the state of charge changes.
+* **Context:** the counted DC power. If the SOC moves more than 3 % faster than the energy explains, that is a correction. Gaps in the data, a restart, a brief 0 % and jumps that happen at the same time on another battery (then it is the connection) do not count.
+* **Result:** an **occurrence** is a deviation of 5 % or more, or 14 days not completely full (while Home Assistant was running). An occurrence only counts when the battery was completely full on fewer than 7 of the 14 days before; a battery that is full almost every day already corrects itself.
+
+**The ladder** (period 45 days):
+
+| Occurrences in 45 days | What you see | What to do |
+|---|---|---|
+| 1 | nothing, only recorded | – |
+| 2 | ⚠ **Attention** | discharge the battery **once** down to the discharge limit, then charge it to full in one go, until charging really stops |
+| 3 | 🔧 **SOC drift detected** | do that **twice** |
+
+The monitor sees by itself when you have done this (a discharge to 20 % or lower, then completely full); the message then disappears. After 45 days without a new occurrence it also disappears by itself.
+
+## Cell calibration (from 0.5)
+
+**What is it?** The cells in a battery slowly drift apart: one cell is full before the other. The battery brings them back in line (balancing), but only when it stays **full and at rest** for a while. If it is never full for long, the cell spread grows and the battery can store less.
+
+**How does the monitor measure it?** With the highest and lowest cell voltage (optional, see Cell balance above). What is normal differs per battery, so the monitor takes the middle of the **first 3 months** as normal. An **occurrence** is a cell spread of **2× normal** or more.
+
+| When | What you see | What to do |
+|---|---|---|
+| 2 occurrences in a row | ⚠ **Attention** | charge the battery to full and keep it full for about **4 hours** (if your model has UPS mode: switch it on in the Marstek app for 4 hours, then back to your own mode) |
+| 3 occurrences in 45 days | 🔧 **Cell calibration advised** | charge to full and switch on **UPS mode for 8 hours** (no UPS mode: leave it in charge mode for 8 hours), then back to your own mode. Calibrating takes a long time. If the spread stays high after that, report it via the Marstek app |
+
+The monitor sees by itself how long the battery stayed full and at rest (4 hours for attention, 8 hours for advice); the message then disappears.
+
+## Messages and dismissing (from 0.5)
+
+* **Where:** on the card (buttons **SOC** and **Cells** with ⚠ or 🔧), as a message on your phone (Home Assistant app) and under **Settings → Repairs**.
+* **Dismiss:** one click is enough: **Dismiss** on the card, in the message on your phone, or **Ignore** under Repairs. It applies everywhere. The message only comes back with a new series of occurrences.
+* **Completely off:** per battery under **Configure → Notifications** (on by default). The card keeps showing the state; you just get no more messages.
+* **Sensitivity:** per battery under **Configure**, separately for SOC drift and cell calibration: *Off* (only on the card, never attention or advice), *Relaxed* (SOC 8 %, cells 3× normal), *Normal* (5 %, 2×, default) or *Strict* (3 %, 1.5×).
+* **Extra sensors found:** cell voltages or a *total discharged* counter that are not used yet also show under Repairs; add them there with one click. See [Configuration](02-configuration.md#extra-sensors-found).
+* For automations: the sensors `sensor.marstek_<id>_soc_health` and `sensor.marstek_<id>_cell_health` (ok / letop / advies), the event `marstek_capacity_monitor_advice` and the service `marstek_capacity_monitor.dismiss_advice`.
 
 ## Cell temperature (experimental)
 
@@ -92,4 +135,11 @@ Only **cell** temperatures belong here. Some connections report MOSFET (switchin
 
 ## Chart
 
-Press the small **Chart** button under the status to open or close a chart (old → new, left to right): the measured capacity per month, the manufacturer spec as a grey dashed line and 75 % as a red line. It shows the most recent 3 years. Hover over a dot for the value and the cell temperature that month. See [06 – Dashboard and gallery](06-dashboard-gallery.md) for the card explained with numbers.
+Under the status there are three small buttons: **Chart · SOC · Cells**, and a cog on the right for the settings. *Chart* replaces the capacities (press again to go back), so the card keeps its height; *SOC* and *Cells* open as a window in the middle of the screen. The chart (old → new, left to right) shows the most recent 3 years and nothing more than:
+
+* **●** measured, calibrated
+* **○** less reliable: not completely full in the 14 days before the measurement, or cells colder than 5 °C
+* **grey dashed line**: expected per spec
+* **red dashed line**: report to Marstek (75 %)
+
+Hover over a dot for the value, the cell temperature and why it is less reliable. The **SOC** window shows per month *Days completely full* and *SOC meter was right* (✓ or ⚠ with how much it was off); **Cells** shows *Cells in balance* (cell spread in mV, ⚠ from the limit set by the sensitivity). There too, point at a cell for the details. See [06 – Dashboard and gallery](06-dashboard-gallery.md) for the card explained with numbers.

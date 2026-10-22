@@ -13,11 +13,12 @@ Track in Home Assistant whether your Marstek home battery keeps its capacity, me
 - **Two sensors you already have:** state of charge and DC battery power. The integration finds them itself.
 - **Measured on a full discharge** (≥ 95 % → ≤ 15 %) and compared with the usable capacity of a new battery.
 - **Manufacturer spec** as reference: 80 % after 6,000 cycles. Green within spec, orange below, red at 75 % or lower: report via the Marstek app.
-- **Any connection that gives the state of charge and DC power:** ESPHome, Modbus (RS485 or LAN) or another integration. Venus E v1, v2, v3, Venus A, Venus D.
-- **Plug & play:** pick your model and installation date; the factory data are filled in for you.
+- **Any connection that gives the state of charge and DC power:** ESPHome, Modbus (RS485 or LAN) or another integration. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus D.
+- **Plug & play:** pick your model and installation date; the factory data are filled in for you. Cycles done before the monitor come from the battery's own counter when it has one (AC side, an estimate). Sensors found later show up under Repairs, ready to add.
 - **Shows whether it works:** a status per battery, and "collecting data" until the first full discharge.
 - **Optional cell balance check:** the spread between the highest and lowest cell after a full charge.
-- **Cell temperature as context (experimental)** and a **chart** on the battery card (the most recent 3 years): one press on the Chart button.
+- **SOC drift and cell calibration** (new in 0.5): the monitor sees when the SOC meter drifts or the cells get out of balance, and only for a pattern gives a message with what to do. One click dismisses it.
+- **Cell temperature as context (experimental)** and buttons **Chart · SOC · Cells** on the battery card.
 - **Light and local:** everything inside Home Assistant, no InfluxDB or cloud.
 
 ## Install in 3 steps
@@ -67,7 +68,7 @@ Changes per version: [CHANGELOG](CHANGELOG.md).
 
 ![Device](screenshots/06-device.png)
 
-**6. The cards: overview and battery cards, one with the chart open (English and Dutch). More examples, from 1 to 6 batteries: [gallery](docs/06-dashboard-gallery.md)**
+**6. The cards: overview and battery cards, with the SOC window open (English and Dutch). More examples, from 1 to 6 batteries: [gallery](docs/06-dashboard-gallery.md)**
 
 ![Dashboard](screenshots/07-dashboard-en.png)
 

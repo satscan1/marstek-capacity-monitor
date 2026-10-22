@@ -27,7 +27,7 @@
           "reserve_kwh": "Deel van de fabriekscapaciteit dat de batterij nooit afgeeft. Datasheet: 90% ontlaaddiepte, dus 5,12 − 0,51 = 4,61 kWh = 100% van nieuw.",
           "cycle_life": "Bv. 6000 volle cycli.",
           "cycle_eol_pct": "Specificatie van de fabrikant: bv. 80% na 6000 cycli (Marstek, productpagina Venus E Gen 3.0). Dit is de specificatielijn; geen garantie.",
-          "initial_cycles": "Schatting: totaal ontladen kWh tot nu toe gedeeld door de bruikbare capaciteit. Laat 0 bij een nieuwe batterij.",
+          "initial_cycles": "Cycli vóór deze monitor. Wordt ingevuld met de teller totaal ontladen van de batterij als die er is (gedeeld door de bruikbare capaciteit). Die teller meet aan de AC-kant: een schatting, minder precies dan de cycli die de monitor zelf aan de DC-kant telt. Zonder teller: totaal ontladen kWh tot nu toe ÷ bruikbare capaciteit; laat 0 bij een nieuwe batterij.",
           "red_pct": "Op of onder dit % van nieuw wordt de status rood: het moment om het via de Marstek-app te melden. Standaard 75%.",
           "tolerance_pct": "Groen zolang de meting hooguit zoveel punten onder de specificatielijn van de fabrikant zit. Standaard 5.",
           "purchase_date": "De datum waarop de batterij in gebruik ging. Garantie en leeftijd tellen vanaf hier."
@@ -58,7 +58,7 @@
       },
       "model": {
         "title": "Welke Marstek is {name}?",
-        "description": "Kies je model en de datum waarop de batterij is geïnstalleerd. De fabrieksgegevens (capaciteit, ontlaaddiepte, cycli) worden voor je ingevuld. Je kunt ze later aanpassen via Configureren.",
+        "description": "Kies je model en de datum waarop de batterij is geïnstalleerd. De fabrieksgegevens (capaciteit, ontlaaddiepte, cycli) worden voor je ingevuld. Je kunt ze later aanpassen via Configureren.{counter}",
         "data": {
           "model": "Model",
           "purchase_date": "Installatiedatum"
@@ -68,8 +68,8 @@
         }
       },
       "packs": {
-        "title": "Venus D: aantal batterijpakketten",
-        "description": "Een Venus D heeft 2,56 kWh per pakket. Opgegeven capaciteit en reserve worden berekend uit het aantal pakketten.",
+        "title": "{model}: aantal batterijpakketten",
+        "description": "Een {model} heeft {kwh} kWh per pakket. Opgegeven capaciteit en reserve worden berekend uit het aantal pakketten.",
         "data": {
           "packs": "Aantal batterijpakketten"
         }
@@ -105,14 +105,17 @@
           "cell_max_entity": "Hoogste celspanning (optioneel)",
           "cell_min_entity": "Laagste celspanning (optioneel)",
           "temp_max_entity": "Hoogste celtemperatuur (optioneel, experimenteel)",
-          "temp_min_entity": "Laagste celtemperatuur (optioneel, experimenteel)"
+          "temp_min_entity": "Laagste celtemperatuur (optioneel, experimenteel)",
+          "notify": "Seintjes",
+          "soc_sensitivity": "Gevoeligheid SOC-drift",
+          "cell_sensitivity": "Gevoeligheid celkalibratie"
         },
         "data_description": {
           "nominal_kwh": "Totale capaciteit van de cellen, bv. 5,12 kWh.",
           "reserve_kwh": "Deel van de fabriekscapaciteit dat de batterij nooit afgeeft. Datasheet: 90% ontlaaddiepte, dus 5,12 − 0,51 = 4,61 kWh = 100% van nieuw.",
           "cycle_life": "Bv. 6000 volle cycli.",
           "cycle_eol_pct": "Specificatie van de fabrikant: bv. 80% na 6000 cycli (Marstek, productpagina Venus E Gen 3.0). Dit is de specificatielijn; geen garantie.",
-          "initial_cycles": "Schatting: totaal ontladen kWh tot nu toe gedeeld door de bruikbare capaciteit. Laat 0 bij een nieuwe batterij.",
+          "initial_cycles": "Cycli vóór deze monitor. Wordt ingevuld met de teller totaal ontladen van de batterij als die er is (gedeeld door de bruikbare capaciteit). Die teller meet aan de AC-kant: een schatting, minder precies dan de cycli die de monitor zelf aan de DC-kant telt. Zonder teller: totaal ontladen kWh tot nu toe ÷ bruikbare capaciteit; laat 0 bij een nieuwe batterij.",
           "red_pct": "Op of onder dit % van nieuw wordt de status rood: het moment om het via de Marstek-app te melden. Standaard 75%.",
           "tolerance_pct": "Groen zolang de meting hooguit zoveel punten onder de specificatielijn van de fabrikant zit. Standaard 5.",
           "power_sign": "Automatisch: wordt herkend bij de eerste laad- of ontlaadbeurt. Alleen aanpassen als de herkenning het mis heeft.",
@@ -120,7 +123,10 @@
           "cell_max_entity": "Spanning van de hoogste cel, in V of mV. Alleen celspanningen, geen temperaturen.",
           "cell_min_entity": "Spanning van de laagste cel, in V of mV.",
           "temp_max_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen.",
-          "temp_min_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen."
+          "temp_min_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen.",
+          "notify": "Een bericht op je telefoon (Home Assistant-app) en onder Instellingen → Reparaties als de SOC-meter afwijkt of de cellen uit balans raken, met advies. Alleen bij een patroon: 1× wordt alleen vastgelegd, 2× in 45 dagen is \"let op\", 3× is advies. Uit = geen berichten; de kaart laat het wel zien.",
+          "soc_sensitivity": "Wanneer een afwijking van de SOC-meter meetelt. Normaal: 5 % of meer. Ruim: 8 %. Extra: 3 %. Uit: alleen op de kaart, nooit \"let op\" of advies.",
+          "cell_sensitivity": "Wanneer het celverschil te hoog is. Normaal: 2× de eigen normale waarde. Ruim: 3×. Extra: 1,5×. Uit: alleen op de kaart. Alleen met celspanningssensoren."
         }
       }
     },
@@ -188,6 +194,22 @@
       },
       "cell_spread": {
         "name": "Celverschil na volle lading"
+      },
+      "soc_health": {
+        "name": "SOC-meter",
+        "state": {
+          "ok": "In orde",
+          "letop": "Let op",
+          "advies": "Advies"
+        }
+      },
+      "cell_health": {
+        "name": "Celbalans",
+        "state": {
+          "ok": "In orde",
+          "letop": "Let op",
+          "advies": "Advies"
+        }
       }
     }
   },
@@ -199,6 +221,24 @@
         "config_entry_id": {
           "name": "Batterij",
           "description": "De batterij waarvan de metingen worden gewist."
+        }
+      }
+    },
+    "dismiss_advice": {
+      "name": "Advies wegklikken",
+      "description": "Klik de huidige \"let op\" of het advies van één batterij één keer weg. Komt pas terug bij een nieuwe reeks.",
+      "fields": {
+        "battery": {
+          "name": "Batterij",
+          "description": "Korte code van de batterij, bijv. mt1."
+        },
+        "config_entry_id": {
+          "name": "Batterij (item)",
+          "description": "Of kies de batterij."
+        },
+        "kind": {
+          "name": "Onderwerp",
+          "description": "soc = SOC-drift, cells = celkalibratie."
         }
       }
     }
@@ -215,8 +255,61 @@
       "options": {
         "venus_e_v12": "Venus E v1 / v2 (5,12 kWh)",
         "venus_e_v3": "Venus E v3 (5,12 kWh)",
+        "venus_e_v4": "Venus E 4.0 (5,02 kWh)",
+        "venus_e_max": "Venus E Max (10,05 kWh)",
+        "venus_e_pro": "Venus E Pro (2,08 kWh per pakket)",
         "venus_d": "Venus D (2,56 kWh per pakket)",
         "other": "Ander model: fabrieksgegevens zelf invullen"
+      }
+    },
+    "kind": {
+      "options": {
+        "soc": "SOC-drift",
+        "cells": "Celkalibratie"
+      }
+    },
+    "sensitivity": {
+      "options": {
+        "off": "Uit",
+        "relaxed": "Ruim",
+        "normal": "Normaal",
+        "strict": "Extra"
+      }
+    }
+  },
+  "issues": {
+    "soc_letop": {
+      "title": "{name}: let op, SOC-meter",
+      "description": "{message}\n\nDeze melding verdwijnt vanzelf zodra de monitor dat heeft gezien. Negeren = wegklikken tot er een nieuwe reeks is."
+    },
+    "soc_advies": {
+      "title": "{name}: SOC-drift geconstateerd",
+      "description": "{message}\n\nDeze melding verdwijnt vanzelf zodra de monitor dat heeft gezien. Negeren = wegklikken tot er een nieuwe reeks is."
+    },
+    "cells_letop": {
+      "title": "{name}: let op, celbalans",
+      "description": "{message}\n\nDeze melding verdwijnt vanzelf zodra de monitor dat heeft gezien. Negeren = wegklikken tot er een nieuwe reeks is."
+    },
+    "cells_advies": {
+      "title": "{name}: celkalibratie aanbevolen",
+      "description": "{message}\n\nDeze melding verdwijnt vanzelf zodra de monitor dat heeft gezien. Negeren = wegklikken tot er een nieuwe reeks is."
+    },
+    "extras_found": {
+      "title": "{name}: extra sensoren gevonden",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{name}: extra sensoren gevonden",
+            "description": "{found}",
+            "data": {
+              "add_cells": "Celspanningen toevoegen (celbalans)",
+              "add_cycles": "Cycli vóór de monitoring invullen (schatting, AC-kant)"
+            }
+          }
+        },
+        "abort": {
+          "battery_gone": "Deze batterij bestaat niet meer."
+        }
       }
     }
   }
