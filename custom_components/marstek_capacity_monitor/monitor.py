@@ -52,8 +52,12 @@ from .const import (
     CONF_CELL_MAX_ENTITY,
     CONF_CELL_MIN_ENTITY,
     CONF_MODEL,
+    CELL_FACTORS,
+    CONF_CELL_SENSITIVITY,
     CONF_NOTIFY,
+    CONF_SOC_SENSITIVITY,
     EVENT_ADVICE,
+    SOC_EVENT_PCT,
     KIND_CELLS,
     KIND_SOC,
     NOTIFY_ACTION_PREFIX,
@@ -486,16 +490,28 @@ class BatteryMonitor:
 
     def _evaluate_health(self) -> None:
         now = self._now_ts()
+        soc_level = entry_setting(self.entry, CONF_SOC_SENSITIVITY)
+        cell_level = entry_setting(self.entry, CONF_CELL_SENSITIVITY)
         self.soc_result = evaluate_soc(
-            self.soc_events, self.full_days, self.alive_days, now, self._other_jumps()
+            self.soc_events,
+            self.full_days,
+            self.alive_days,
+            now,
+            self._other_jumps(),
+            event_pct=SOC_EVENT_PCT.get(soc_level, SOC_EVENT_PCT["normal"]),
+            enabled=soc_level != "off",
         )
+        self.soc_result["sensitivity"] = soc_level
         if self.has_cells:
             self.cell_health = evaluate_cell_health(
                 self.cell_records,
                 [e for e in self.soc_events if e["type"] == "rest"],
                 now,
                 self.health.rest_hours_now(now),
+                factor=CELL_FACTORS.get(cell_level, CELL_FACTORS["normal"]),
+                enabled=cell_level != "off",
             )
+            self.cell_health["sensitivity"] = cell_level
         else:
             self.cell_health = {"level": "ok"}
         self._update_advice()
