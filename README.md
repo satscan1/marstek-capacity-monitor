@@ -68,7 +68,7 @@ Changes per version: [CHANGELOG](CHANGELOG.md).
 
 ![Device](screenshots/06-device.png)
 
-**6. The cards: overview and battery cards, one with the SOC panel and one with the chart open (English and Dutch). More examples, from 1 to 6 batteries: [gallery](docs/06-dashboard-gallery.md)**
+**6. The cards: overview and battery cards, with the SOC window open (English and Dutch). More examples, from 1 to 6 batteries: [gallery](docs/06-dashboard-gallery.md)**
 
 ![Dashboard](screenshots/07-dashboard-en.png)
 

@@ -68,7 +68,7 @@ Wijzigingen per versie: [CHANGELOG](CHANGELOG.md) (Engels).
 
 ![Apparaat](screenshots/06-device.png)
 
-**6. De kaarten: overzicht en batterijkaarten, één met het SOC-paneel en één met de grafiek open (Nederlands en Engels). Meer voorbeelden, van 1 tot 6 batterijen: [galerij](docs/06-dashboard-gallery.nl.md)**
+**6. De kaarten: overzicht en batterijkaarten, met het SOC-venster open (Nederlands en Engels). Meer voorbeelden, van 1 tot 6 batterijen: [galerij](docs/06-dashboard-gallery.nl.md)**
 
 ![Dashboard NL](screenshots/08-dashboard-nl.png)
 
