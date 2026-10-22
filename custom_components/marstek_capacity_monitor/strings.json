@@ -27,7 +27,7 @@
           "reserve_kwh": "Part of the nominal capacity the battery never releases. Datasheet: 90 % DoD, so 5.12 − 0.51 = 4.61 kWh = 100 % of new.",
           "cycle_life": "E.g. 6000 full cycles.",
           "cycle_eol_pct": "Manufacturer spec: e.g. 80 % after 6000 cycles (Marstek, Venus E Gen 3.0 product page). This is the spec line; not a warranty.",
-          "initial_cycles": "Estimate: total discharged kWh so far divided by the usable capacity. Leave 0 for a new battery.",
+          "initial_cycles": "Cycles before this monitor. Filled in from the battery's own total discharged counter when one is found (divided by the usable capacity). That counter measures on the AC side: an estimate, less exact than the cycles the monitor counts itself on the DC side. Without a counter: total discharged kWh so far ÷ usable capacity; leave 0 for a new battery.",
           "red_pct": "At or below this % remaining the status turns red: the moment to report it to Marstek via the Marstek app. Default 75 %.",
           "tolerance_pct": "Green while the measurement is at most this many points below the manufacturer spec line. Default 5.",
           "purchase_date": "The date the battery went into use. Warranty and age are counted from here."
@@ -58,7 +58,7 @@
       },
       "model": {
         "title": "Which Marstek is {name}?",
-        "description": "Pick your model and the date it was installed. The factory data (capacity, depth of discharge, cycles) are filled in for you. You can change them later under Configure.",
+        "description": "Pick your model and the date it was installed. The factory data (capacity, depth of discharge, cycles) are filled in for you. You can change them later under Configure.{counter}",
         "data": {
           "model": "Model",
           "purchase_date": "Installation date"
@@ -115,7 +115,7 @@
           "reserve_kwh": "Part of the nominal capacity the battery never releases. Datasheet: 90 % DoD, so 5.12 − 0.51 = 4.61 kWh = 100 % of new.",
           "cycle_life": "E.g. 6000 full cycles.",
           "cycle_eol_pct": "Manufacturer spec: e.g. 80 % after 6000 cycles (Marstek, Venus E Gen 3.0 product page). This is the spec line; not a warranty.",
-          "initial_cycles": "Estimate: total discharged kWh so far divided by the usable capacity. Leave 0 for a new battery.",
+          "initial_cycles": "Cycles before this monitor. Filled in from the battery's own total discharged counter when one is found (divided by the usable capacity). That counter measures on the AC side: an estimate, less exact than the cycles the monitor counts itself on the DC side. Without a counter: total discharged kWh so far ÷ usable capacity; leave 0 for a new battery.",
           "red_pct": "At or below this % remaining the status turns red: the moment to report it to Marstek via the Marstek app. Default 75 %.",
           "tolerance_pct": "Green while the measurement is at most this many points below the manufacturer spec line. Default 5.",
           "power_sign": "Automatic: detected on the first charge or discharge. Change only if detection gets it wrong.",
@@ -293,6 +293,24 @@
     "cells_advies": {
       "title": "{name}: cell calibration advised",
       "description": "{message}\n\nThis message disappears by itself once the monitor has seen it. Ignore = dismiss it until a new series."
+    },
+    "extras_found": {
+      "title": "{name}: extra sensors found",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{name}: extra sensors found",
+            "description": "{found}",
+            "data": {
+              "add_cells": "Add cell voltage sensors (cell balance)",
+              "add_cycles": "Fill in cycles before monitoring (estimate, AC side)"
+            }
+          }
+        },
+        "abort": {
+          "battery_gone": "This battery no longer exists."
+        }
+      }
     }
   }
 }

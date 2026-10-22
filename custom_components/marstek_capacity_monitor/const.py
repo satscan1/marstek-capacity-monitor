@@ -24,6 +24,13 @@ CONF_TOLERANCE_PCT = "tolerance_pct"
 CONF_CYCLE_LIFE = "cycle_life"
 CONF_CYCLE_EOL = "cycle_eol_pct"
 CONF_INITIAL_CYCLES = "initial_cycles"
+# Battery counter "total discharged energy" the start value came from (AC side)
+CONF_CYCLE_COUNTER = "cycle_counter"
+# Found sensors the user chose not to add (Repairs): not offered again
+CONF_EXTRAS_DECLINED = "extras_declined"
+# Options the options form does not show but must keep
+HIDDEN_OPTIONS = (CONF_CYCLE_COUNTER, CONF_EXTRAS_DECLINED)
+EXTRAS_RECHECK_S = 600
 
 DEFAULTS = {
     CONF_POWER_SIGN: "auto",

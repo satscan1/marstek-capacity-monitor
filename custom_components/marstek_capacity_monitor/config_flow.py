@@ -24,6 +24,8 @@ from .const import (
     CONF_TEMP_MAX_ENTITY,
     CONF_TEMP_MIN_ENTITY,
     CONF_CELL_SENSITIVITY,
+    CONF_CYCLE_COUNTER,
+    HIDDEN_OPTIONS,
     CONF_NOTIFY,
     CONF_SOC_SENSITIVITY,
     SENSITIVITIES,
@@ -56,10 +58,13 @@ from .const import (
 from .discovery import (
     Candidate,
     find_candidates,
+    counter_kwh,
     find_cell_sensors,
+    find_discharge_counter,
     guess_model,
     looks_like_ac,
 )
+from .extras import FLOW_NOTE, lang_of, start_cycles
 
 CONF_CANDIDATE = "candidate"
 MANUAL = "manual"
@@ -334,10 +339,19 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_PURCHASE_DATE): selector.DateSelector(),
             }
         )
+        counter = find_discharge_counter(self.hass, self._data[CONF_SOC_ENTITY])
+        kwh = counter_kwh(self.hass, counter)
+        note = ""
+        if counter and kwh:
+            lang = lang_of(self.hass.config.language)
+            shown = f"{kwh:,.1f}"
+            if lang in ("nl", "de"):
+                shown = shown.replace(",", "_").replace(".", ",").replace("_", ".")
+            note = "\n\n" + FLOW_NOTE[lang].format(entity=counter, kwh=shown)
         return self.async_show_form(
             step_id="model",
             data_schema=schema,
-            description_placeholders={"name": self._data[CONF_NAME]},
+            description_placeholders={"name": self._data[CONF_NAME], "counter": note},
         )
 
     async def async_step_packs(
@@ -364,13 +378,31 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
             },
         )
 
+    def _with_counter(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Cycles before the monitor from the battery's own discharge counter
+        (AC side, an estimate), unless a start value was entered."""
+        if float(data.get(CONF_INITIAL_CYCLES) or 0):
+            return data
+        counter = find_discharge_counter(self.hass, data[CONF_SOC_ENTITY])
+        kwh = counter_kwh(self.hass, counter)
+        if counter and kwh:
+            usable = float(data[CONF_NOMINAL_KWH]) - float(data[CONF_RESERVE_KWH])
+            data = {
+                **data,
+                CONF_INITIAL_CYCLES: start_cycles(kwh, usable),
+                CONF_CYCLE_COUNTER: counter,
+            }
+        return data
+
     def _create(self, preset: dict[str, Any]) -> ConfigFlowResult:
         data = {
             **{k: v for k, v in DEFAULTS.items() if k != CONF_POWER_SIGN},
             **preset,
             **self._data,
         }
-        return self.async_create_entry(title=self._data[CONF_NAME], data=data)
+        return self.async_create_entry(
+            title=self._data[CONF_NAME], data=self._with_counter(data)
+        )
 
     async def async_step_specs(
         self, user_input: dict[str, Any] | None = None
@@ -381,7 +413,8 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
             errors = _validate_spec(user_input)
             if not errors:
                 return self.async_create_entry(
-                    title=self._data[CONF_NAME], data={**self._data, **user_input}
+                    title=self._data[CONF_NAME],
+                    data=self._with_counter({**self._data, **user_input}),
                 )
         values = {CONF_PURCHASE_DATE: self._data.get(CONF_PURCHASE_DATE), **(user_input or {})}
         return self.async_show_form(
@@ -420,7 +453,16 @@ class MarstekCapacityOptionsFlow(OptionsFlow):
                 # Clearing an optional field must clear it, not keep the old one
                 for key, _make in OPTIONAL_SENSORS:
                     user_input.setdefault(key, "")
-                return self.async_create_entry(data=user_input)
+                # Keep what the form does not show (counter, declined extras)
+                kept = {
+                    k: v for k, v in self.config_entry.options.items() if k in HIDDEN_OPTIONS
+                }
+                # A changed start value is the user's own, no longer the counter's
+                if float(user_input[CONF_INITIAL_CYCLES]) != float(
+                    current.get(CONF_INITIAL_CYCLES) or 0
+                ):
+                    kept[CONF_CYCLE_COUNTER] = ""
+                return self.async_create_entry(data={**kept, **user_input})
             current.update(user_input)
         schema = _spec_schema(current).extend(_cell_fields(current)).extend(
             {

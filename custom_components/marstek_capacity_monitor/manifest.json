@@ -4,7 +4,7 @@
   "after_dependencies": ["recorder"],
   "codeowners": ["@satscan1"],
   "config_flow": true,
-  "dependencies": ["frontend", "http"],
+  "dependencies": ["frontend", "http", "repairs"],
   "documentation": "https://github.com/satscan1/marstek-capacity-monitor",
   "integration_type": "device",
   "iot_class": "calculated",
