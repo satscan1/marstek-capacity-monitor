@@ -162,3 +162,12 @@ RECALC_SECONDS = 3600
 SIGNAL_UPDATE = f"{DOMAIN}_update_{{}}"
 SIGNAL_STATUS = f"{DOMAIN}_status_{{}}"
 EVENT_SESSION = f"{DOMAIN}_session"
+
+
+# Sidebar (0.5.1): the integration puts its own dashboard in the sidebar, with
+# all batteries in it. On by default; off for one battery = no menu item.
+CONF_SIDEBAR = "sidebar"
+DEFAULTS[CONF_SIDEBAR] = True
+DASHBOARD_URL = "marstek-capacity"
+DASHBOARD_ICON = "mdi:home-battery"
+DASHBOARD_TITLE = {"nl": "Batterijcapaciteit", "de": "Batteriekapazität", "en": "Battery capacity"}
