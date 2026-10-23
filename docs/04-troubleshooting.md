@@ -1,6 +1,6 @@
 # Troubleshooting
 
-*[Nederlands](04-troubleshooting.nl.md)*
+*[Nederlands](04-troubleshooting.nl.md) · [Deutsch](04-troubleshooting.de.md)*
 
 | What you see | Why | What to do |
 |---|---|---|
