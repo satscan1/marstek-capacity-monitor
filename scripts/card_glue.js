@@ -286,10 +286,22 @@ class MarstekCapacityDashboardStrategy {
   }
 }
 
-if (!customElements.get("marstek-capacity-card")) {
-  customElements.define("marstek-capacity-card", MarstekCapacityCard);
-  customElements.define("marstek-capacity-overview-card", MarstekCapacityOverviewCard);
-  customElements.define("ll-strategy-dashboard-marstek-capacity", class extends HTMLElement {
+// Define the cards and the dashboard only once Home Assistant has started.
+// This file is loaded next to the HA app, not after it. HA installs a polyfill
+// (scoped custom element registry) that replaces window.customElements in
+// browsers without that feature (Firefox, some Chrome/Android versions).
+// Anything defined before that is invisible to HA: "Timeout waiting for
+// strategy element ll-strategy-dashboard-marstek-capacity to be registered".
+// <home-assistant> is defined right after the polyfill, so wait for it.
+// Always the registry HA uses right now (the polyfill replaces it).
+const mcRegistry = () => (typeof window !== "undefined" && window.customElements) || customElements;
+
+function mcDefine() {
+  const registry = mcRegistry();
+  if (registry.get("marstek-capacity-card")) return;
+  registry.define("marstek-capacity-card", MarstekCapacityCard);
+  registry.define("marstek-capacity-overview-card", MarstekCapacityOverviewCard);
+  registry.define("ll-strategy-dashboard-marstek-capacity", class extends HTMLElement {
     static generate(config, hass) {
       return MarstekCapacityDashboardStrategy.generate(config, hass);
     }
@@ -328,4 +340,12 @@ if (!customElements.get("marstek-capacity-card")) {
     documentationURL: `${MC_DOCS}/06-dashboard-gallery.md`,
   });
   console.info(`%c MARSTEK-CAPACITY-CARD %c ${MC_VERSION} `, "background:#42a5f5;color:#000", "");
+}
+
+if (mcRegistry().get("home-assistant") || !mcRegistry().whenDefined) {
+  mcDefine();
+} else {
+  mcRegistry().whenDefined("home-assistant").then(mcDefine);
+  // Safety net: a page without <home-assistant> still gets the cards.
+  setTimeout(mcDefine, 10000);
 }

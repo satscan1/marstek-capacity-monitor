@@ -497,3 +497,21 @@ def test_edge_ratio_unknown_for_old_swings():
     """Zwaaien uit een eerdere versie (zonder stappen): geen oordeel."""
     assert calc.edge_ratio(None, "discharge") is None
     assert calc.edge_ratio([[100, 0, 0], [99, 0, 0.05]], "discharge") is None
+
+
+def test_about_half_asks_to_check_the_model():
+    """A Venus C (2.56 kWh) set up as a Venus E (5.12 kWh) measures about 50 %:
+    ask about the model instead of a red "report to Marstek"."""
+    spec = calc.BatterySpec()  # Venus E: 5.12 kWh, 0.51 reserve
+    now = datetime(2026, 10, 20)
+    def rec(kwh):
+        return {"ts": now.timestamp() - 86400, "direction": "discharge",
+                "soc_start": 100, "soc_end": 10, "delta_soc": 90,
+                "e_dc_kwh": kwh, "valid": True}
+    # 2.30 kWh over 90 SOC points on a Venus E = 50 % of new
+    assert calc.evaluate(spec, [rec(2.30)], 0, now)["status"] == "check_model"
+    assert calc.evaluate(spec, [rec(1.50)], 0, now)["status"] == "critical"
+    assert calc.evaluate(spec, [rec(3.30)], 0, now)["status"] == "critical"
+    # The same measurement with the Venus C preset is a healthy battery
+    venus_c = calc.BatterySpec(nominal_kwh=2.56, reserve_kwh=0.256)
+    assert calc.evaluate(venus_c, [rec(2.30)], 0, now)["status"] == "good"
