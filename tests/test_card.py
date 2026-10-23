@@ -187,3 +187,42 @@ def test_card_language_foot_and_cycles_note(tmp_path):
     # Cycles before monitoring: from the counter, AC side, an estimate
     assert "Waarvan 352 vóór de monitoring" in out["nl"] and "AC-kant" in out["nl"]
     assert "AC side" in out["nlen"]
+
+
+NODE_LANG = r"""
+const fs = require("fs");
+global.HTMLElement = class {};
+const defined = {};
+global.customElements = { get: (n) => defined[n], define: (n, c) => { defined[n] = c; } };
+global.window = {};
+global.console = { info() {}, log: console.log };
+eval(fs.readFileSync(process.argv[2], "utf8"));
+(async () => {
+  const S = defined["ll-strategy-dashboard-marstek-capacity"];
+  const entities = {
+    "sensor.marstek_mt1_monitor_status": { platform: "marstek_capacity_monitor", device_id: "d1" },
+    "sensor.marstek_mt1_capacity_pct": { platform: "marstek_capacity_monitor", device_id: "d1" },
+  };
+  const devices = { d1: { name: "MT1" } };
+  const hass = { entities, devices, locale: { language: "en" } };
+  const fixed = await S.generate({ lang: "nl" }, hass);
+  const free = await S.generate({}, hass);
+  const langs = (c) => c.views[0].sections[0].cards.map((x) => x.lang || null);
+  process.stdout.write(JSON.stringify({ fixed: langs(fixed), free: langs(free), title: fixed.title }));
+})();
+"""
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
+def test_dashboard_language_goes_to_the_cards(tmp_path):
+    """0.5.1: lang: nl on the dashboard also makes the cards Dutch."""
+    script = tmp_path / "lang.js"
+    script.write_text(NODE_LANG)
+    out = json.loads(
+        subprocess.run(
+            ["node", str(script), str(build_card.OUT)], capture_output=True, text=True, check=True
+        ).stdout
+    )
+    assert out["title"] == "Batterijcapaciteit"
+    assert out["fixed"] == ["nl", "nl"]
+    assert out["free"] == [None, None]
