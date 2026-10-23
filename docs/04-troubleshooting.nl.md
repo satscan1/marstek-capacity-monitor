@@ -1,6 +1,6 @@
 # Problemen oplossen
 
-*[English](04-troubleshooting.md)*
+*[English](04-troubleshooting.md) · [Deutsch](04-troubleshooting.de.md)*
 
 | Wat je ziet | Waarom | Wat te doen |
 |---|---|---|
