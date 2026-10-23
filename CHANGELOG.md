@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.5.1 — test version (not released)
+
+**Battery capacity in the sidebar by itself.**
+
+- After adding the first battery, **Battery capacity** (NL *Batterijcapaciteit*, DE *Batteriekapazität*) appears in the sidebar, with all your batteries arranged for you (1 to 6). Nothing to set up. It is read-only; for your own layout, make a dashboard from *Marstek battery capacity* under Add dashboard as before.
+- Off under **Configure → Menu item in the sidebar**. Off for one battery = no menu item. An existing dashboard of your own at `/marstek-capacity` is left alone.
+- The one-click dashboard with `lang: nl` (or `de`, `en`) now also gives that language to the cards, not only to the title.
+
 ## v0.5.0 — 2026-10-22
 
 **SOC drift and cell calibration: the monitor sees when the SOC meter drifts or the cells get out of balance, and tells you what to do. Plus three new models.**

@@ -251,12 +251,14 @@ class MarstekCapacityDashboardStrategy {
     const T = MC_DASH_TEXT[mcLang(hass, config)] || MC_DASH_TEXT.en;
     const found = mcBatteries(hass).slice(0, 6);
     const n = found.length;
+    // A fixed language for the dashboard (lang: nl/de/en) also goes to the cards
+    const lang = config && config.lang ? { lang: config.lang } : {};
     const battery = (b, columns) => ({
-      type: "custom:marstek-capacity-card", battery: b.id, name: b.name,
+      type: "custom:marstek-capacity-card", battery: b.id, name: b.name, ...lang,
       grid_options: { columns, rows: "auto" },
     });
     const overview = (columns) => ({
-      type: "custom:marstek-capacity-overview-card",
+      type: "custom:marstek-capacity-overview-card", ...lang,
       grid_options: { columns, rows: "auto" },
     });
     let cards;

@@ -107,6 +107,7 @@
           "temp_max_entity": "Hoogste celtemperatuur (optioneel, experimenteel)",
           "temp_min_entity": "Laagste celtemperatuur (optioneel, experimenteel)",
           "notify": "Seintjes",
+          "sidebar": "Menu-item in de zijbalk",
           "soc_sensitivity": "Gevoeligheid SOC-drift",
           "cell_sensitivity": "Gevoeligheid celkalibratie"
         },
@@ -125,6 +126,7 @@
           "temp_max_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen.",
           "temp_min_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen.",
           "notify": "Een bericht op je telefoon (Home Assistant-app) en onder Instellingen → Reparaties als de SOC-meter afwijkt of de cellen uit balans raken, met advies. Alleen bij een patroon: 1× wordt alleen vastgelegd, 2× in 45 dagen is \"let op\", 3× is advies. Uit = geen berichten; de kaart laat het wel zien.",
+          "sidebar": "Batterijcapaciteit in de zijbalk, met al je batterijen erin. Geldt voor het hele menu-item: uit bij één batterij = geen menu-item.",
           "soc_sensitivity": "Wanneer een afwijking van de SOC-meter meetelt. Normaal: 5 % of meer. Ruim: 8 %. Extra: 3 %. Uit: alleen op de kaart, nooit \"let op\" of advies.",
           "cell_sensitivity": "Wanneer het celverschil te hoog is. Normaal: 2× de eigen normale waarde. Ruim: 3×. Extra: 1,5×. Uit: alleen op de kaart. Alleen met celspanningssensoren."
         }

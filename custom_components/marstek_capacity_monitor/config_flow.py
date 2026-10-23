@@ -27,6 +27,7 @@ from .const import (
     CONF_CYCLE_COUNTER,
     HIDDEN_OPTIONS,
     CONF_NOTIFY,
+    CONF_SIDEBAR,
     CONF_SOC_SENSITIVITY,
     SENSITIVITIES,
     CONF_PACKS,
@@ -477,6 +478,10 @@ class MarstekCapacityOptionsFlow(OptionsFlow):
                 vol.Required(
                     CONF_NOTIFY,
                     default=bool(current.get(CONF_NOTIFY, DEFAULTS[CONF_NOTIFY])),
+                ): selector.BooleanSelector(),
+                vol.Required(
+                    CONF_SIDEBAR,
+                    default=bool(current.get(CONF_SIDEBAR, DEFAULTS[CONF_SIDEBAR])),
                 ): selector.BooleanSelector(),
                 vol.Required(
                     CONF_SOC_SENSITIVITY,

@@ -22,6 +22,7 @@ from homeassistant.helpers.typing import ConfigType
 from homeassistant.loader import async_get_integration
 
 from .const import DOMAIN, KIND_CELLS, KIND_SOC, NOTIFY_ACTION_PREFIX
+from .dashboard import async_update_sidebar
 from .monitor import BatteryMonitor
 
 PLATFORMS = [Platform.SENSOR]
@@ -113,6 +114,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MonitorConfigEntry) -> b
     entry.runtime_data = monitor
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_reload))
+    async_update_sidebar(hass)
 
     if not hass.services.has_service(DOMAIN, SERVICE_RESET):
 
@@ -137,7 +139,13 @@ async def async_unload_entry(hass: HomeAssistant, entry: MonitorConfigEntry) -> 
     unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unloaded:
         await entry.runtime_data.async_stop()
+        async_update_sidebar(hass)
     return unloaded
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Last battery removed: the menu item goes too."""
+    async_update_sidebar(hass)
 
 
 # Measurements are deliberately NOT deleted when a battery is removed: they
