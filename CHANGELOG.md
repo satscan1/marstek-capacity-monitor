@@ -14,6 +14,8 @@
 - The monitor now sees that itself: if the first or last 3 SOC points of a discharge cost 2× (or more) the energy per point of the middle (30–80 %), the measurement is shown as an open dot (○ less reliable) with the reason when you point at it. Applies to new measurements.
 - Troubleshooting (EN/NL/DE): the row *Percentage above 100 %* is rewritten. The old advice (adjust the internal reserve) was wrong: the reserve only changes the kWh, not the percentage.
 
+- Easier to find: tap or click *provisional ⓘ* (or *check the model ⓘ*) on the card and a small window explains it, also on a phone. A value above 100 % is shown in grey instead of green: not certain yet. The overview has an ⓘ after such a value.
+
 **Venus C.**
 
 - New model: **Venus C** (2.56 kWh, 90 %, more than 6,000 cycles; 80 % after 6,000 assumed, as for the Venus E). Same Modbus registers as the Venus E v1/v2. Picked by itself when its name says Venus C.
@@ -24,6 +26,14 @@
 **Dashboard in Firefox and on Android.**
 
 - Fix: *Timeout waiting for strategy element ll-strategy-dashboard-marstek-capacity to be registered* in Firefox and in Chrome or Brave on Android (#5). The card file was ready before Home Assistant itself and registered its cards and dashboard in a place Home Assistant no longer looks once it starts. The card now waits until Home Assistant has started.
+
+**Guides and smaller things.**
+
+- Installation (EN/NL/DE): the sidebar item, how to turn it off and how to bring a hidden item back. Venus C in the model lists (README, Installation, Configuration).
+- Troubleshooting (EN/NL/DE): no measurement while the battery often runs far down (charging back 3 points ends the swing; thanks to @brauwers1981 for the tip in #1), sidebar item missing, nothing under Resources is correct, and the timeout error in Firefox/Android.
+- The card texts about the colours now use your own settings (tolerance and red limit) instead of the fixed 5 points and 75 %.
+- Supported batteries: the 88 % tip only changes the kWh, not the percentage.
+- New screenshot of the standard cards.
 
 ## v0.5.0 — 2026-10-22
 

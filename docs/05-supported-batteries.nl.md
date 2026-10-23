@@ -57,7 +57,7 @@ De Venus A heeft nog geen vooraf ingevulde waarden: er is geen openbare capacite
 | Venus E Max (10,048 kWh) | 90 % | 1,00 kWh | Brochure Venus E Max |
 | Venus E Pro (2,08 kWh per pakket) | 90 % | 0,21 kWh per pakket | Brochure Venus E Pro |
 
-Tip: kijk bij een volledige ontlading tot welk percentage jouw batterij zakt. Stopt hij rond 10 %, gebruik dan 90 %; stopt hij rond 12 %, gebruik dan 88 %.
+Tip: kijk bij een volledige ontlading tot welk percentage jouw batterij zakt. Stopt hij rond 10 %, gebruik dan 90 %; stopt hij rond 12 %, gebruik dan 88 %. Dit verandert alleen de **kWh** (bruikbaar en gemeten), niet het **percentage nog beschikbaar**: dat volgt uit de opgegeven capaciteit. Een percentage boven 100 % los je hier dus niet mee op; zie [Problemen oplossen](04-troubleshooting.nl.md).
 
 ## Bronnen voor de specificaties van de fabrikant
 

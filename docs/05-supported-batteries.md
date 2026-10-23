@@ -57,7 +57,7 @@ The Venus A has no preset yet: no public capacity figure was found. Choose *Othe
 | Venus E Max (10.048 kWh) | 90 % | 1.00 kWh | Venus E Max brochure |
 | Venus E Pro (2.08 kWh per pack) | 90 % | 0.21 kWh per pack | Venus E Pro brochure |
 
-Tip: check down to which percentage your battery goes during a full discharge. If it stops around 10 %, use 90 %; if it stops around 12 %, use 88 %.
+Tip: check down to which percentage your battery goes during a full discharge. If it stops around 10 %, use 90 %; if it stops around 12 %, use 88 %. This only changes the **kWh** (usable and measured), not the **percentage remaining**: that follows from the rated capacity. So it does not fix a percentage above 100 %; see [Troubleshooting](04-troubleshooting.md).
 
 ## Sources for the manufacturer specs
 

@@ -8,7 +8,7 @@ All values are set when you add a battery. Change them later under **Settings �
 |---|---|---|
 | Rated capacity | 5.12 kWh | Total in the cells per manufacturer |
 | Internal reserve | 0.51 kWh | Part the battery never releases; rated capacity × (100 % − depth of discharge). 0.51 = 90 %, 0.61 = 88 % |
-| Model | – | Venus E v1/v2, Venus E v3, Venus E 4.0, Venus E Max, Venus E Pro, Venus D or other. Fills in the factory data when adding; see [Supported batteries](05-supported-batteries.md#factory-data-per-model) |
+| Model | – | Venus E v1/v2, Venus E v3, Venus E 4.0, Venus E Max, Venus E Pro, Venus C, Venus D or other. A Venus C can report itself as a Venus E v1/v2: then pick Venus C yourself. Fills in the factory data when adding; see [Supported batteries](05-supported-batteries.md#factory-data-per-model) |
 | Installation date | – | For age and the end of the warranty period |
 | Warranty period | 10 years | Shown on the card for information only |
 | Rated cycle life | 6,000 | Manufacturer spec |
@@ -21,6 +21,7 @@ All values are set when you add a battery. Change them later under **Settings �
 | Highest / lowest cell voltage | empty | Optional, for the cell balance check. Fill in both or neither. Only cell **voltages**: some connections report MOSFET temperatures as "cell temperature" |
 | Sensitivity SOC drift / cell calibration | Normal | Off (only on the card), Relaxed (SOC 8 %, cells 3× normal), Normal (5 %, 2×) or Strict (3 %, 1.5×). See [How it works](03-how-it-works.md#messages-and-dismissing-from-05) |
 | Notifications | on | Message on your phone and under Repairs for SOC drift or cell calibration, only for a pattern. Off = no messages; the card still shows it. See [How it works](03-how-it-works.md#messages-and-dismissing-from-05) |
+| Menu item in the sidebar | on | From 0.5.1: **Battery capacity** in the sidebar, with all your batteries. Applies to the whole menu item: off for one battery = no menu item. See [Installation](01-installation.md#in-the-sidebar-by-itself-from-051) |
 
 ## Sensors
 

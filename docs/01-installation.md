@@ -32,7 +32,8 @@ Go to **Settings → Devices & services → Add integration → Marstek Capacity
 
 1. Pick a battery that was found, or choose the sensors yourself.
 2. Check the short id (`mt1` … `mt6`), the name and the two sensors. Optional: the highest and lowest cell voltage, for the [cell balance check](03-how-it-works.md#cell-balance). These are filled in when the scan finds them.
-3. Choose the model and fill in the installation date. For a Venus E v1/v2, Venus E v3 or Venus D the factory data are filled in for you (Venus D: also the number of packs). For another model you enter the factory data yourself.
+3. Choose the model and fill in the installation date. For a known model (Venus E v1/v2, v3, 4.0, Max or Pro, Venus C or Venus D) the factory data are filled in for you (Venus D and Venus E Pro: also the number of packs). For another model you enter the factory data yourself.
+   A **Venus C** can report the same code as a Venus E v1/v2. Then pick **Venus C** yourself, also when Venus E v1 / v2 is already selected.
 
 You can change all factory data later under **Configure**.
 
@@ -41,6 +42,14 @@ When you add a battery, the tool looks in the Home Assistant history (usually th
 ## Add the cards
 
 From version 0.4.0 the integration has its own cards. You do not need to install anything else: no button-card and no templates. Add at least one battery first. Then restart Home Assistant and refresh the page in your browser (Ctrl+F5, on a Mac Cmd+Shift+R); do the same after every update.
+
+### In the sidebar by itself (from 0.5.1)
+
+After adding the first battery and a restart, **Battery capacity** appears in the sidebar by itself, with all your batteries in it (1 to 6, in the [layout](06-dashboard-gallery.md#layout) of the gallery). Nothing to set up. You cannot change this dashboard; for a layout of your own, make a dashboard yourself as described below.
+
+- **Turn it off:** Settings → Devices & services → Marstek Capacity Monitor → **Configure** → **Menu item in the sidebar**. Off for one battery means the whole menu item disappears.
+- **Hidden or in the wrong place?** Long-press **Home Assistant** at the top of the sidebar (or go to your profile → change the sidebar). There you bring items back, hide them or move them. This is per device: set it separately on your phone.
+- If you already have a dashboard of your own at `/marstek-capacity`, the monitor leaves it alone.
 
 ### Quickest way: dashboard in one click
 
