@@ -38,7 +38,7 @@ Starte Home Assistant danach neu und gehe zu **Einstellungen → Dashboards → 
 | [06 – Dashboard und Galerie](docs/06-dashboard-gallery.de.md) | Aufteilung für 1 bis 6 Batterien, die Karte mit Nummern erklärt, Galerie |
 | [02 – Configuration](docs/02-configuration.md) (Englisch) | Einstellungen, Sensoren, Messungen löschen |
 | [03 – How it works](docs/03-how-it-works.md) (Englisch) | Drei Kapazitäten, Messung, Umrechnung auf 100 %, Herstellerangabe und Farben |
-| [04 – Troubleshooting](docs/04-troubleshooting.md) (Englisch) | Häufige Meldungen und was zu tun ist |
+| [04 – Fehlerbehebung](docs/04-troubleshooting.de.md) | Häufige Meldungen und Fragen, und was zu tun ist |
 | [05 – Supported batteries](docs/05-supported-batteries.md) (Englisch) | Modelle, Entladetiefe pro Modell, **Quellen der Herstellerangaben** |
 
 Änderungen pro Version: [CHANGELOG](CHANGELOG.md) (Englisch).
