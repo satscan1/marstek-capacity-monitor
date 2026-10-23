@@ -8,6 +8,12 @@
 - Off under **Configure → Menu item in the sidebar**. Off for one battery = no menu item. An existing dashboard of your own at `/marstek-capacity` is left alone.
 - The one-click dashboard with `lang: nl` (or `de`, `en`) now also gives that language to the cards, not only to the title.
 
+**Above 100 %: explained instead of a surprise.**
+
+- A measured value above 100 % now reads *provisional* on the card (after 3 measurements: *check*), with the explanation when you point at it. Higher than new is hardly possible; it usually comes from the battery's SOC meter standing still at the top or bottom while energy keeps flowing.
+- The monitor now sees that itself: if the first or last 3 SOC points of a discharge cost 2× (or more) the energy per point of the middle (30–80 %), the measurement is shown as an open dot (○ less reliable) with the reason when you point at it. Applies to new measurements.
+- Troubleshooting (EN/NL/DE): the row *Percentage above 100 %* is rewritten. The old advice (adjust the internal reserve) was wrong: the reserve only changes the kWh, not the percentage.
+
 ## v0.5.0 — 2026-10-22
 
 **SOC drift and cell calibration: the monitor sees when the SOC meter drifts or the cells get out of balance, and tells you what to do. Plus three new models.**

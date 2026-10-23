@@ -275,3 +275,13 @@ def test_sensitivity_cells():
     strict = health.evaluate_cell_health(base + late, [], now, factor=1.5)
     assert strict["level"] == "advies" and strict["limit_mv"] == 90
     assert health.evaluate_cell_health(base + late, [], now, factor=1.5, enabled=False)["level"] == "ok"
+
+
+def test_reliability_soc_edge_and_reasons_combined():
+    since = T0
+    rec = {"ts": T0 + 30 * 86400, "start_ts": T0 + 29.8 * 86400, "edge_ratio": 2.4}
+    r = health.reliability(rec, [T0 + 29 * 86400], since)
+    assert not r["reliable"] and r["why"] == "soc_edge" and r["edge_ratio"] == 2.4
+    r = health.reliability({**rec, "temp_c": 3.0}, [T0 + 5 * 86400], since)
+    assert r["why"] == "no_calibration,cold,soc_edge"
+    assert health.reliability({**rec, "edge_ratio": 1.1}, [T0 + 29 * 86400], since)["reliable"]

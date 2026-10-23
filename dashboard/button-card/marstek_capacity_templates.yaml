@@ -87,7 +87,8 @@ button_card_templates:
             },
             chart: 'Diagramm', win3: 'jüngste 3 Jahre der Garantiezeit', chartTitle: 'Noch verfügbar pro Monat (%)', noData: 'Noch keine Messungen in diesem Zeitraum. Das Diagramm füllt sich nach der ersten vollständigen Entladung.',
             legCap: 'gemessen, kalibriert', legOpen: 'weniger zuverlässig', legSpec: 'erwartet laut Herstellerangabe', legRed: 'an Marstek melden',
-            less: 'weniger zuverlässig', why: {no_calibration: 'in den 14 Tagen vor der Messung nicht ganz voll', cold: 'Zellen kälter als 5 °C'}, refAge: d => `zuletzt ganz voll ${d} Tage vor der Messung`,
+            less: 'weniger zuverlässig', why: {no_calibration: 'in den 14 Tagen vor der Messung nicht ganz voll', cold: 'Zellen kälter als 5 °C', soc_edge: 'die SOC-Anzeige lief am Anfang oder Ende der Entladung nicht mit'},
+            high: n => n < 3 ? 'vorläufig' : 'prüfen', highTip: 'Höher als neu ist bei einer Batterie kaum möglich. Meist liegt es an der SOC-Anzeige der Batterie: oben oder unten blieb der Prozentwert stehen, während noch Energie floss. Nach 3 Messungen zeigt die Karte den Mittelwert; bleibt er über 100 %, siehe die Fehlerbehebung in der Anleitung.', refAge: d => `zuletzt ganz voll ${d} Tage vor der Messung`,
             setup: 'Einstellungen', close: 'Schließen', offH: '<b>Hinweise aus</b> · nur zur Info (Einstellung)', dismiss: 'Ausblenden', gone: 'Ausgeblendet · kommt bei einer neuen Reihe zurück.',
             soc: {pill: 'SOC', q: 'Stimmt meine SOC-Anzeige noch?',
               days: n => n === null ? 'noch nicht gesehen' : n === 0 ? 'heute' : n === 1 ? 'gestern' : `vor ${n} Tagen`,
@@ -138,7 +139,8 @@ button_card_templates:
             },
             chart: 'Grafiek', win3: 'recente 3 jaar van garantieperiode', chartTitle: 'Nog beschikbaar per maand (%)', noData: 'Nog geen metingen in deze periode. De grafiek vult zich na de eerste volledige ontlading.',
             legCap: 'gemeten, geijkt', legOpen: 'minder betrouwbaar', legSpec: 'verwacht volgens specificatie', legRed: 'melden bij Marstek',
-            less: 'minder betrouwbaar', why: {no_calibration: 'in de 14 dagen vóór de meting niet helemaal vol', cold: 'cellen kouder dan 5 °C'}, refAge: d => `laatst helemaal vol ${d} dagen vóór de meting`,
+            less: 'minder betrouwbaar', why: {no_calibration: 'in de 14 dagen vóór de meting niet helemaal vol', cold: 'cellen kouder dan 5 °C', soc_edge: 'de SOC-meter liep aan het begin of eind van de ontlading niet gelijk op'},
+            high: n => n < 3 ? 'voorlopig' : 'nakijken', highTip: 'Hoger dan nieuw kan bij een batterij eigenlijk niet. Meestal komt het door de SOC-meter van de batterij: bovenin of onderin bleef het percentage staan terwijl er nog energie bij kwam of uit ging. Na 3 metingen toont de kaart het midden; blijft dat boven de 100 %, kijk dan bij Problemen oplossen in de handleiding.', refAge: d => `laatst helemaal vol ${d} dagen vóór de meting`,
             setup: 'Instellingen', close: 'Sluiten', offH: '<b>Meldingen uit</b> · alleen ter info (instelling)', dismiss: 'Wegklikken', gone: 'Weggeklikt · komt terug bij een nieuwe reeks.',
             soc: {pill: 'SOC', q: 'Klopt mijn SOC-meter nog?',
               days: n => n === null ? 'nog niet gezien' : n === 0 ? 'vandaag' : n === 1 ? 'gisteren' : `${n} dagen geleden`,
@@ -189,7 +191,8 @@ button_card_templates:
             },
             chart: 'Chart', win3: 'recent 3 years of warranty', chartTitle: 'Remaining per month (%)', noData: 'No measurements in this period yet. The chart fills after the first full discharge.',
             legCap: 'measured, calibrated', legOpen: 'less reliable', legSpec: 'expected per spec', legRed: 'report to Marstek',
-            less: 'less reliable', why: {no_calibration: 'not completely full in the 14 days before the measurement', cold: 'cells colder than 5 °C'}, refAge: d => `last completely full ${d} days before the measurement`,
+            less: 'less reliable', why: {no_calibration: 'not completely full in the 14 days before the measurement', cold: 'cells colder than 5 °C', soc_edge: 'the SOC meter did not keep pace at the start or end of the discharge'},
+            high: n => n < 3 ? 'provisional' : 'check', highTip: 'Higher than new is hardly possible for a battery. Usually it comes from the battery\'s SOC meter: at the top or the bottom the percentage stood still while energy was still going in or out. After 3 measurements the card shows the middle value; if that stays above 100 %, see Troubleshooting in the guide.', refAge: d => `last completely full ${d} days before the measurement`,
             setup: 'Settings', close: 'Close', offH: '<b>Messages off</b> · for information only (setting)', dismiss: 'Dismiss', gone: 'Dismissed · comes back with a new series.',
             soc: {pill: 'SOC', q: 'Is my SOC meter still right?',
               days: n => n === null ? 'not seen yet' : n === 0 ? 'today' : n === 1 ? 'yesterday' : `${n} days ago`,
@@ -245,7 +248,8 @@ button_card_templates:
           const boxes = `<div style="display:flex;gap:8px;margin:4px 0 10px">
             ${box(T.nominal, f(a.nominal_kwh) + ' kWh', '100 %', P.text)}
             ${box(T.usable, f(a.usable_kwh) + ' kWh', '− ' + f(a.reserve_kwh) + ' kWh', P.blue)}
-            ${box(T.measured, isNaN(meas) ? `<span style="font-size:13px;font-weight:400;${muted}">${T.collecting}</span>` : f(meas) + ' kWh', isNaN(pct) ? '' : f(pct, 1) + ' % ' + T.ofnew, col(pct))}
+            ${box(T.measured, isNaN(meas) ? `<span style="font-size:13px;font-weight:400;${muted}">${T.collecting}</span>` : f(meas) + ' kWh', isNaN(pct) ? '' : pct > 100
+              ? `<span title="${T.highTip}" style="cursor:help">${f(pct, 1)} % · ${T.high(a.measurement_count ?? 1)} ⓘ</span>` : f(pct, 1) + ' % ' + T.ofnew, col(pct))}
           </div>`;
 
           // Bar: measured vs expected vs warranty floor (0-100 % of usable)
@@ -404,7 +408,7 @@ button_card_templates:
             if (!isNaN(exp) && (!sp.length || sp[sp.length - 1][0] < nowI)) sp.push([nowI, exp]);
             if (sp.length > 1) svg += `<polyline points="${sp.map(([i, v]) => `${X(i)},${Y(v)}`).join(' ')}" fill="none" stroke="${P.muted}" stroke-opacity="0.7" stroke-width="1" stroke-dasharray="4 3"/>`;
             if (pts.length > 1) svg += `<polyline points="${pts.map(t => `${X(km(t.month))},${Y(t.pct)}`).join(' ')}" fill="none" stroke="${P.green}" stroke-opacity="0.45" stroke-width="1.2"/>`;
-            const why = t => t.why === 'both' ? `${T.why.no_calibration}, ${T.why.cold}` : (T.why[t.why] || '');
+            const why = t => (t.why === 'both' ? 'no_calibration,cold' : String(t.why || '')).split(',').map(k => T.why[k]).filter(Boolean).join(', ');
             const tip = t => `${monL(t.month)}: ${f(t.pct, 1)} % (${T.legSpec} ${f(t.expected_pct, 0)} %${t.temp_c != null ? `, ${f(t.temp_c, 0)} °C` : ''})`
               + (t.reliable === false ? `\n${T.less}: ${why(t)}` : '') + (t.ref_age_d != null ? `\n${T.refAge(f(t.ref_age_d, 0))}` : '');
             svg += pts.map(t => { const c = col(t.pct, t.expected_pct);
