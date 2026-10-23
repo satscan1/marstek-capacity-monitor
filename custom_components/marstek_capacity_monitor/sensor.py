@@ -29,7 +29,7 @@ from .const import CONF_BATTERY_ID, DOMAIN, KIND_CELLS, KIND_SOC, MONITOR_STATUS
 from .health import LEVELS
 from .monitor import BatteryMonitor
 
-STATUS_OPTIONS = ["good", "attention", "critical", "no_measurement"]
+STATUS_OPTIONS = ["good", "attention", "critical", "no_measurement", "check_model"]
 
 
 @dataclass(frozen=True, kw_only=True)

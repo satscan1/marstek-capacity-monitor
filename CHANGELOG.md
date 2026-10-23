@@ -14,6 +14,17 @@
 - The monitor now sees that itself: if the first or last 3 SOC points of a discharge cost 2× (or more) the energy per point of the middle (30–80 %), the measurement is shown as an open dot (○ less reliable) with the reason when you point at it. Applies to new measurements.
 - Troubleshooting (EN/NL/DE): the row *Percentage above 100 %* is rewritten. The old advice (adjust the internal reserve) was wrong: the reserve only changes the kWh, not the percentage.
 
+**Venus C.**
+
+- New model: **Venus C** (2.56 kWh, 90 %, more than 6,000 cycles; 80 % after 6,000 assumed, as for the Venus E). Same Modbus registers as the Venus E v1/v2. Picked by itself when its name says Venus C.
+- A Venus C can report the same model code as a Venus E v1/v2 (HMG). The model step now says: Venus C? Pick Venus C, also when Venus E v1 / v2 is already selected.
+- Safety net: a measurement of about half (40–60 %) is no longer red *report to Marstek* but orange **Check the model**, with a message under Settings → Repairs on how to change it. A Venus C set up as a Venus E measures about 50 %.
+- Supported batteries (EN/NL) and Troubleshooting (EN/NL/DE) updated.
+
+**Dashboard in Firefox and on Android.**
+
+- Fix: *Timeout waiting for strategy element ll-strategy-dashboard-marstek-capacity to be registered* in Firefox and in Chrome or Brave on Android (#5). The card file was ready before Home Assistant itself and registered its cards and dashboard in a place Home Assistant no longer looks once it starts. The card now waits until Home Assistant has started.
+
 ## v0.5.0 — 2026-10-22
 
 **SOC drift and cell calibration: the monitor sees when the SOC meter drifts or the cells get out of balance, and tells you what to do. Plus three new models.**

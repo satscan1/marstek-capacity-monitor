@@ -58,7 +58,7 @@
       },
       "model": {
         "title": "Which Marstek is {name}?",
-        "description": "Pick your model and the date it was installed. The factory data (capacity, depth of discharge, cycles) are filled in for you. You can change them later under Configure.{counter}",
+        "description": "Pick your model and the date it was installed. The factory data (capacity, depth of discharge, cycles) are filled in for you. You can change them later under Configure.\n\nVenus C? It has 2.56 kWh, half a Venus E: pick Venus C, also when Venus E v1 / v2 is already selected.{counter}",
         "data": {
           "model": "Model",
           "purchase_date": "Installation date"
@@ -173,7 +173,8 @@
           "good": "Good",
           "attention": "Below spec",
           "critical": "Report to Marstek",
-          "no_measurement": "No full discharge measured yet"
+          "no_measurement": "No full discharge measured yet",
+          "check_model": "Check the model"
         }
       },
       "red_threshold": {
@@ -256,6 +257,7 @@
     "model": {
       "options": {
         "venus_e_v12": "Venus E v1 / v2 (5.12 kWh)",
+        "venus_c": "Venus C (2.56 kWh)",
         "venus_e_v3": "Venus E v3 (5.12 kWh)",
         "venus_e_v4": "Venus E 4.0 (5.02 kWh)",
         "venus_e_max": "Venus E Max (10.05 kWh)",
@@ -313,6 +315,10 @@
           "battery_gone": "This battery no longer exists."
         }
       }
+    },
+    "check_model": {
+      "title": "{name}: is the model right?",
+      "description": "The measured capacity is {pct} % of new: about half of the {kwh} kWh that is set. That usually means a wrong model, not a worn battery. A Venus C has 2.56 kWh, half a Venus E.\n\nIs it a Venus C? Under Settings → Devices & services → Marstek Capacity Monitor → Configure, set the rated capacity to 2.56 kWh and the reserve to 0.26 kWh. The measurements are then recalculated.\n\nIs the model right? Then report it via the Marstek app.\n\nThis message disappears by itself when the measurement is no longer about half."
     }
   }
 }

@@ -125,6 +125,12 @@ def expected_pct(spec: BatterySpec, on: date, cycles: float) -> float:
     return cycle_expected_pct(spec, cycles)
 
 
+# About half of the usable capacity: more likely a wrong model than a battery
+# that lost half its capacity (a Venus C, 2.56 kWh, set up as a Venus E,
+# 5.12 kWh, measures about 50 %). Shown as "check the model", not red.
+CHECK_MODEL_PCT = (40.0, 60.0)
+
+
 def classify(spec: BatterySpec, pct: float | None, expected: float) -> str:
     """good   : at or at most `tolerance` points below expected
     attention : further below expected, but above the red threshold
@@ -646,6 +652,8 @@ def evaluate(
     w_end = spec.warranty_end
 
     status = classify(spec, measured_pct, exp)
+    if measured_pct is not None and CHECK_MODEL_PCT[0] <= measured_pct <= CHECK_MODEL_PCT[1]:
+        status = "check_model"
 
     # Monthly trend, newest month first
     by_month: dict[str, list[dict[str, Any]]] = {}

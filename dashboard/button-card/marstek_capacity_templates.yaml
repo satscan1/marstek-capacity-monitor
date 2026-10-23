@@ -73,7 +73,8 @@ button_card_templates:
             until: 'Garantie bis', n: 'Messungen', lastDis: 'letzte vollständige Entladung', lastChg: 'letzte vollständige Ladung', loc: 'de-DE',
             none: 'Noch keine vollständige Entladung gemessen (≥ 95 % → ≤ 15 %). Das kann im Winter eine Weile dauern.',
             missing: 'Sensor nicht gefunden:',
-            status: {good: 'Gut', attention: 'Unter Herstellerangabe', critical: 'An Marstek melden (App)', no_measurement: 'Sammelt Daten'},
+            status: {good: 'Gut', attention: 'Unter Herstellerangabe', critical: 'An Marstek melden (App)', no_measurement: 'Sammelt Daten', check_model: 'Modell prüfen'},
+            chk: 'Modell?', chkTip: 'Etwa die Hälfte der eingestellten Kapazität: meist ein falsch gewähltes Modell, keine verschlissene Batterie. Eine Venus C hat 2,56 kWh, halb so viel wie eine Venus E. Siehe Einstellungen → Reparaturen.',
             collecting: 'sammelt Daten',
             mon: {
               measuring: n => `Messung läuft · ${n} vollständige Entladung${n === 1 ? '' : 'en'} gemessen`,
@@ -125,7 +126,8 @@ button_card_templates:
             until: 'garantie t/m', n: 'metingen', lastDis: 'laatste volle ontlading', lastChg: 'laatste volle lading', loc: 'nl-NL',
             none: 'Nog geen volledige ontlading gemeten (≥95% → ≤15%). Dat kan in de winter even duren.',
             missing: 'Sensor niet gevonden:',
-            status: {good: 'Goed', attention: 'Onder specificatie', critical: 'Melden bij Marstek (app)', no_measurement: 'Verzamelt data'},
+            status: {good: 'Goed', attention: 'Onder specificatie', critical: 'Melden bij Marstek (app)', no_measurement: 'Verzamelt data', check_model: 'Klopt het model?'},
+            chk: 'model?', chkTip: 'Ongeveer de helft van de ingestelde capaciteit: meestal een verkeerd gekozen model, geen versleten batterij. Een Venus C heeft 2,56 kWh, de helft van een Venus E. Zie Instellingen → Reparaties.',
             collecting: 'verzamelt data',
             mon: {
               measuring: n => `Meting werkt · ${n} volledige ontlading${n === 1 ? '' : 'en'} gemeten`,
@@ -177,7 +179,8 @@ button_card_templates:
             until: 'warranty until', n: 'measurements', lastDis: 'last full discharge', lastChg: 'last full charge', loc: 'en-GB',
             none: 'No full discharge measured yet (≥95% → ≤15%). This can take a while in winter.',
             missing: 'Sensor not found:',
-            status: {good: 'Good', attention: 'Below spec', critical: 'Report to Marstek (app)', no_measurement: 'Collecting data'},
+            status: {good: 'Good', attention: 'Below spec', critical: 'Report to Marstek (app)', no_measurement: 'Collecting data', check_model: 'Check the model'},
+            chk: 'model?', chkTip: 'About half of the set capacity: usually a wrong model, not a worn battery. A Venus C has 2.56 kWh, half a Venus E. See Settings → Repairs.',
             collecting: 'collecting data',
             mon: {
               measuring: n => `Monitor working · ${n} full discharge${n === 1 ? '' : 's'} measured`,
@@ -234,7 +237,9 @@ button_card_templates:
           const a = m.attributes, ea = e.attributes;
           const meas = parseFloat(m.state), pct = parseFloat(p.state), exp = parseFloat(e.state);
           const floor = p.attributes.red_pct ?? 75, tol = p.attributes.tolerance_pct ?? 5;
-          const col = (v, x = exp) => isNaN(v) ? P.muted : v <= floor ? P.red : v >= x - tol ? P.green : P.orange;
+          // About half of the set capacity: ask about the model (orange), not red
+          const chk = !!st && st.state === 'check_model';
+          const col = (v, x = exp) => isNaN(v) ? P.muted : v <= floor ? (chk ? P.orange : P.red) : v >= x - tol ? P.green : P.orange;
           const name = variables.name || id.toUpperCase();
           const status = st ? (T.status[st.state] || st.state) : '';
           const muted = `color:${P.muted}`;
@@ -249,7 +254,8 @@ button_card_templates:
             ${box(T.nominal, f(a.nominal_kwh) + ' kWh', '100 %', P.text)}
             ${box(T.usable, f(a.usable_kwh) + ' kWh', '− ' + f(a.reserve_kwh) + ' kWh', P.blue)}
             ${box(T.measured, isNaN(meas) ? `<span style="font-size:13px;font-weight:400;${muted}">${T.collecting}</span>` : f(meas) + ' kWh', isNaN(pct) ? '' : pct > 100
-              ? `<span title="${T.highTip}" style="cursor:help">${f(pct, 1)} % · ${T.high(a.measurement_count ?? 1)} ⓘ</span>` : f(pct, 1) + ' % ' + T.ofnew, col(pct))}
+              ? `<span title="${T.highTip}" style="cursor:help">${f(pct, 1)} % · ${T.high(a.measurement_count ?? 1)} ⓘ</span>` : chk
+              ? `<span title="${T.chkTip}" style="cursor:help">${f(pct, 1)} % · ${T.chk} ⓘ</span>` : f(pct, 1) + ' % ' + T.ofnew, col(pct))}
           </div>`;
 
           // Bar: measured vs expected vs warranty floor (0-100 % of usable)
@@ -436,7 +442,7 @@ button_card_templates:
           return `<div style="display:flex;flex-direction:column;height:100%">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
               <span style="font-size:15px;font-weight:600">${name} · ${T.title}</span>
-              <div style="text-align:right;flex-shrink:0;font-size:12px;color:${col(pct)}">${status}</div></div>
+              <div style="text-align:right;flex-shrink:0;font-size:12px;color:${col(pct)}"${chk ? ` title="${T.chkTip}"` : ''}>${status}</div></div>
             ${monLine}${pills}${stack}${none}<div style="margin-top:auto">${foot}</div>${pop}</div>`;
         ]]]
 
@@ -460,10 +466,10 @@ button_card_templates:
           const lang = variables.lang || (((typeof hass !== 'undefined' && hass && ((hass.locale && hass.locale.language) || hass.language)) || 'en').slice(0, 2));
           const nl = lang === 'nl';
           const T = lang === 'de'
-            ? {title: 'Kapazität Heimspeicher — % noch verfügbar pro Monat', bat: 'Batterie', trend: 'Trend', now: 'Jetzt', exp: 'Herstellerangabe', loc: 'de-DE', none: 'sammelt Daten', mon: {measuring: 'Messung läuft', collecting: 'sammelt Daten', no_recent_data: 'keine aktuellen Daten', sensor_missing: 'Sensor nicht verfügbar'}, legend: 'Grün: im Rahmen der Herstellerangabe (bis 5 Punkte darunter) · orange: unter Herstellerangabe · rot: 75 % oder weniger, über die Marstek-App melden. Kleine Zahl = Herstellerangabe für diesen Monat. ✓ Messung läuft · ⏳ sammelt Daten · ⚠ Verbindung prüfen oder Achtung · 🔧 Empfehlung (SOC-Drift oder Zellkalibrierung, siehe die Karte dieser Batterie).', adv: 'SOC-Drift oder Zellkalibrierung: siehe die Karte dieser Batterie'}
+            ? {title: 'Kapazität Heimspeicher — % noch verfügbar pro Monat', bat: 'Batterie', chk: 'Modell prüfen: etwa die Hälfte der eingestellten Kapazität (Venus C = 2,56 kWh)', trend: 'Trend', now: 'Jetzt', exp: 'Herstellerangabe', loc: 'de-DE', none: 'sammelt Daten', mon: {measuring: 'Messung läuft', collecting: 'sammelt Daten', no_recent_data: 'keine aktuellen Daten', sensor_missing: 'Sensor nicht verfügbar'}, legend: 'Grün: im Rahmen der Herstellerangabe (bis 5 Punkte darunter) · orange: unter Herstellerangabe · rot: 75 % oder weniger, über die Marstek-App melden. Kleine Zahl = Herstellerangabe für diesen Monat. ✓ Messung läuft · ⏳ sammelt Daten · ⚠ Verbindung prüfen oder Achtung · 🔧 Empfehlung (SOC-Drift oder Zellkalibrierung, siehe die Karte dieser Batterie).', adv: 'SOC-Drift oder Zellkalibrierung: siehe die Karte dieser Batterie'}
             : nl
-            ? {title: 'Capaciteit thuisbatterijen — % nog beschikbaar per maand', bat: 'Batterij', trend: 'Trend', now: 'Nu', exp: 'Specificatie', loc: 'nl-NL', none: 'verzamelt data', mon: {measuring: 'meting werkt', collecting: 'verzamelt data', no_recent_data: 'geen recente data', sensor_missing: 'sensor niet beschikbaar'}, legend: 'Groen: volgens specificatie fabrikant (tot 5 punten eronder) · oranje: onder specificatie · rood: 75 % of lager, melden via de Marstek-app. Klein getal = specificatie voor die maand. ✓ meting werkt · ⏳ verzamelt data · ⚠ controleer de koppeling of let op · 🔧 advies (SOC-drift of celkalibratie, zie de kaart van die batterij).', adv: 'SOC-drift of celkalibratie: zie de kaart van deze batterij'}
-            : {title: 'Home battery capacity — % remaining per month', bat: 'Battery', trend: 'Trend', now: 'Now', exp: 'Spec', loc: 'en-GB', none: 'collecting data', mon: {measuring: 'monitor working', collecting: 'collecting data', no_recent_data: 'no recent data', sensor_missing: 'sensor unavailable'}, legend: 'Green: within manufacturer spec (up to 5 points below) · orange: below spec · red: 75 % or lower, report via the Marstek app. Small number = spec for that month. ✓ monitor working · ⏳ collecting data · ⚠ check the connection or attention · 🔧 advice (SOC drift or cell calibration, see the card of that battery).', adv: 'SOC drift or cell calibration: see the card of this battery'};
+            ? {title: 'Capaciteit thuisbatterijen — % nog beschikbaar per maand', bat: 'Batterij', chk: 'Klopt het model? Ongeveer de helft van de ingestelde capaciteit (Venus C = 2,56 kWh)', trend: 'Trend', now: 'Nu', exp: 'Specificatie', loc: 'nl-NL', none: 'verzamelt data', mon: {measuring: 'meting werkt', collecting: 'verzamelt data', no_recent_data: 'geen recente data', sensor_missing: 'sensor niet beschikbaar'}, legend: 'Groen: volgens specificatie fabrikant (tot 5 punten eronder) · oranje: onder specificatie · rood: 75 % of lager, melden via de Marstek-app. Klein getal = specificatie voor die maand. ✓ meting werkt · ⏳ verzamelt data · ⚠ controleer de koppeling of let op · 🔧 advies (SOC-drift of celkalibratie, zie de kaart van die batterij).', adv: 'SOC-drift of celkalibratie: zie de kaart van deze batterij'}
+            : {title: 'Home battery capacity — % remaining per month', bat: 'Battery', chk: 'Check the model: about half of the set capacity (Venus C = 2.56 kWh)', trend: 'Trend', now: 'Now', exp: 'Spec', loc: 'en-GB', none: 'collecting data', mon: {measuring: 'monitor working', collecting: 'collecting data', no_recent_data: 'no recent data', sensor_missing: 'sensor unavailable'}, legend: 'Green: within manufacturer spec (up to 5 points below) · orange: below spec · red: 75 % or lower, report via the Marstek app. Small number = spec for that month. ✓ monitor working · ⏳ collecting data · ⚠ check the connection or attention · 🔧 advice (SOC drift or cell calibration, see the card of that battery).', adv: 'SOC drift or cell calibration: see the card of this battery'};
           const f = (v, d = 0) => (v === null || v === undefined || isNaN(v)) ? '–'
             : Number(v).toLocaleString(T.loc, {minimumFractionDigits: d, maximumFractionDigits: d});
           const muted = `color:${P.muted}`;
@@ -474,10 +480,11 @@ button_card_templates:
             const p = S[`sensor.marstek_${b.id}_capacity_pct`];
             const e = S[`sensor.marstek_${b.id}_expected_capacity`];
             const s = S[`sensor.marstek_${b.id}_monitor_status`];
+            const w = S[`sensor.marstek_${b.id}_warranty_status`];
             // SOC drift / cell calibration that has not been clicked away
             const adv = ['soc_health', 'cell_health'].map(k => S[`sensor.marstek_${b.id}_${k}`])
               .filter(h => h && ['letop', 'advies'].includes(h.state) && !h.attributes.dismissed);
-            return {b, m, p, e, s, adv, trend: m ? (m.attributes.trend || []) : []};
+            return {b, m, p, e, s, adv, chk: !!w && w.state === 'check_model', trend: m ? (m.attributes.trend || []) : []};
           });
           const months = [...new Set(rows.flatMap(r => r.trend.map(t => t.month)))]
             .sort().reverse().slice(0, variables.months || 6);
@@ -489,7 +496,7 @@ button_card_templates:
             const floor = r.p ? (r.p.attributes.red_pct ?? 75) : 75;
             const tol = r.p ? (r.p.attributes.tolerance_pct ?? 5) : 5;
             const expNow = r.e ? parseFloat(r.e.state) : NaN;
-            const col = (v, x = expNow) => isNaN(v) ? P.muted : v <= floor ? P.red : v >= x - tol ? P.green : P.orange;
+            const col = (v, x = expNow) => isNaN(v) ? P.muted : v <= floor ? (r.chk ? P.orange : P.red) : v >= x - tol ? P.green : P.orange;
             const name = r.b.name || r.b.id.toUpperCase();
             if (!r.m) return `<tr><td colspan="${months.length + 4}" style="color:${P.red}">sensor.marstek_${r.b.id}_… ?</td></tr>`;
             const t = r.trend.filter(x => months.includes(x.month));
@@ -508,7 +515,7 @@ button_card_templates:
                   const big = r.adv.some(h => h.state === 'advies');
                   return ` <span title="${T.adv}" style="font-size:11px;color:${big ? P.red : P.orange}">${big ? '🔧' : '⚠'}</span>`; })() : ''}</td>
                 <td style="padding:4px 10px;text-align:right;color:${d < -1 ? col(now) : P.muted}">${arrow}</td>
-                <td style="padding:4px 10px;text-align:right;font-weight:600;color:${col(now)}">${isNaN(now) ? `<span style="font-weight:400;font-size:11px;${muted}">${T.none}</span>` : f(now, 1) + '%'}</td>
+                <td style="padding:4px 10px;text-align:right;font-weight:600;color:${col(now)}"${r.chk ? ` title="${T.chk}"` : ''}>${isNaN(now) ? `<span style="font-weight:400;font-size:11px;${muted}">${T.none}</span>` : f(now, 1) + '%'}</td>
                 ${cells}
                 <td style="padding:4px 10px;text-align:right;${muted}">${f(parseFloat(r.e.state), 1)}%</td></tr>`;
           }).join('');

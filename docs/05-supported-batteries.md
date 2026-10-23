@@ -4,7 +4,7 @@
 
 | Marstek | Usually connected via | State of charge | DC power |
 |---|---|---|---|
-| Venus E v1 / v2 | RS485, through ESPHome (LilyGo, M5Stack) or an RS485 network bridge (Elfin EW11) with a Modbus integration | register 32104 | register 32102 |
+| Venus E v1 / v2, Venus C | RS485, through ESPHome (LilyGo, M5Stack) or an RS485 network bridge (Elfin EW11) with a Modbus integration | register 32104 | register 32102 |
 | Venus E v3, Venus A, Venus D | Built-in LAN port with Modbus TCP | register 34002 | register 30001 |
 
 **Modbus is not required.** Any connection works as long as it provides the state of charge and the **DC** battery power as Home Assistant sensors: ESPHome, Modbus (RS485 or LAN) or another integration. The table lists the verified models and Modbus routes; only the registers differ, the data is the same.
@@ -25,6 +25,7 @@ When adding a battery you pick the model; these values are filled in. You can ch
 |---|---|---|---|---|
 | Venus E v1 / v2 | 5.12 kWh | 0.51 kWh (90 %) | 6,000 · 80 % | 10 years |
 | Venus E v3 | 5.12 kWh | 0.51 kWh (90 %) | 6,000 · 80 % | 10 years |
+| Venus C | 2.56 kWh | 0.26 kWh (90 %) | 6,000 · 80 % ⁴ | 10 years |
 | Venus D | 2.56 kWh per pack (1–6 packs) | 10 % of rated (90 %) | 6,000 · 80 % ¹ | 10 years ² |
 | Venus E 4.0 | 5.024 kWh | 0.60 kWh (88 %) | 10,000 · 80 % ³ | 10 years ² |
 | Venus E Max | 10.048 kWh | 1.00 kWh (90 %) | 10,000 · 80 % ³ | 10 years ² |
@@ -34,6 +35,9 @@ When adding a battery you pick the model; these values are filled in. You can ch
 ¹ Marstek lists more than 10,000 cycles for the Venus D but no capacity percentage; the monitor uses the more cautious Venus E line.
 ² Not listed for this model; check your own terms.
 ³ Marstek lists more than 10,000 cycles (25 °C) but no capacity percentage; the monitor assumes 80 % after 10,000 cycles. The line is flatter than that of the older models.
+⁴ Marstek lists more than 6,000 cycles for the Venus C but no capacity percentage; the monitor uses the same line as for the Venus E.
+
+The Venus C is half a Venus E (2.56 kWh) with the same Modbus registers as the Venus E v1/v2. It can also report the same model code (HMG). So when you add it, pick *Venus C* yourself, also when *Venus E v1 / v2* is already selected. If the Venus E was picked anyway, the measurement comes out at about half. The card then shows *Check the model* instead of red, and Repairs says how to change it.
 
 The Venus E Mini is not in the list: it only connects via Bluetooth and Wi-Fi, so there is no local DC power sensor. If you do have state of charge and DC power locally, choose *Other model*. The Venus D AC version follows once its specs are clear. Venus E v1 and v2 stay one choice: same firmware, registers and model code.
 
@@ -47,6 +51,7 @@ The Venus A has no preset yet: no public capacity figure was found. Choose *Othe
 |---|---|---|---|
 | Venus E v1 / v2 | 90 % per datasheet; in practice some units stop around 11–12 %, i.e. 88 % | 0.51 kWh (or 0.61 kWh at 88 %) | Venus E datasheet / own measurement |
 | Venus E v3 | 90 % | 0.51 kWh | Venus E 3.0 manual |
+| Venus C (2.56 kWh) | 90 % per a reseller; Marstek does not state it | 0.26 kWh | Reseller product page (sun.store) |
 | Venus D (2.56 kWh) | Not listed as a spec; Marstek's product page calculates with 90 % | 0.26 kWh | Venus D product page |
 | Venus E 4.0 (5.024 kWh) | 88 % | 0.60 kWh | Venus E 4.0 brochure |
 | Venus E Max (10.048 kWh) | 90 % | 1.00 kWh | Venus E Max brochure |
@@ -65,6 +70,9 @@ Checked on 20 October 2026 (new models on 22 October 2026). Where sources disagr
 | Rated capacity Venus E, cycles, warranty | 5,120 Wh · more than 6,000 cycles · 10-year warranty | [Marstek – Venus C/E](https://marstekenergy.com/en-us/pages/marstek-venus-c-e) |
 | Depth of discharge Venus E 3.0 | 90 % · 5,120 Wh · more than 6,000 cycles (25 °C) | [Marstek – Download Center, Venus E 3.0 user manual](https://marstekenergy.com/en-us/pages/download-center) |
 | Depth of discharge Venus E (earlier version) | 90 % · 5,120 Wh · more than 6,000 cycles (25 °C) | Venus E "plug-in battery" spec sheet as distributed by resellers (no public link at Marstek) |
+| Venus C | 2,560 Wh (51.2 V, LiFePO4 16S) · more than 6,000 cycles · 10-year warranty · RS485 | [Marstek – Venus C/E](https://marstekenergy.com/en-us/pages/marstek-venus-c-e), [Marstek.de – Venus C](https://marstek.de/en/products/venus-c) |
+| Depth of discharge Venus C | 90 % | [sun.store – Venus C](https://sun.store/en/product/marstek-venus-c-47353) |
+| Registers Venus C | same generation as Venus E and Venus E Gen 2.0 | [evcc – Marstek Venus C](https://docs.evcc.io/en/meters/marstek-venus-c) |
 | Venus D | 2.56 kWh per unit · more than 10,000 cycles · examples calculated with 90 % DoD | [Marstek – Venus D](https://marstekenergy.com/en-us/products/marstek-venus-d-ac-version) |
 | Venus E 4.0 | 5,024 Wh (314 Ah, 16 V) · 88 % DoD · more than 10,000 cycles (25 °C) | [Marstek – Venus E 4.0 brochure (PDF)](https://cdn.shopify.com/s/files/1/0746/1575/0952/files/MARSTEK_VENUS-4.0.pdf) |
 | Venus E Max | 10,048 Wh (314 Ah, 32 V) · 90 % DoD · more than 10,000 cycles (25 °C) | [Marstek – Venus E Max brochure (PDF)](https://cdn.shopify.com/s/files/1/0746/1575/0952/files/VENUS_E_MAX.pdf) |
