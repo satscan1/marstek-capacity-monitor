@@ -465,3 +465,35 @@ def test_adopt_sign_from_history():
     live.update_power(500.0, T0)  # raw value from the same sensor (discharging)
     assert live.adopt_sign(hist) is True
     assert live.s["sign"] == -1 and live.s["power_w"] == -500.0
+
+
+def test_edge_ratio_normal_discharge_keeps_pace():
+    """MT1 22-10-2026: evenveel energie per procent van boven tot onder."""
+    tr = calc.SwingTracker()
+    tr.update_soc(100, T0)
+    _, t = simulate(tr, 100, 11, 4.37, T0)
+    recs, _ = simulate(tr, 11, 30, 1.0, t)
+    assert recs[0]["edge_ratio"] == pytest.approx(1.0, abs=0.05)
+
+
+def test_edge_ratio_soc_stands_still_at_the_bottom():
+    """MT2 22-10-2026: midden gelijk aan MT1, maar van 12 naar 11 % kwam er
+    nog ~0,22 kWh uit (5 procent aan energie voor 1 punt) -> meting te hoog."""
+    tr = calc.SwingTracker()
+    tr.update_soc(99, T0)
+    _, t = simulate(tr, 99, 12, 87 * 0.0491, T0)
+    _, t = simulate(tr, 12, 11, 0.26, t)  # SOC hangt onderin
+    recs, _ = simulate(tr, 11, 30, 1.0, t)
+    r = recs[0]
+    assert r["soc_start"] == 99 and r["soc_end"] == 11
+    assert r["edge_ratio"] >= calc.EDGE_RATIO
+    spec = calc.BatterySpec(reserve_kwh=0.61)
+    assert calc.capacity_from_record(spec, r) / spec.usable_kwh > 1.0  # boven 100 %
+    rel = calc.reliability(r, [], None)
+    assert not rel["reliable"] and rel["why"] == "soc_edge"
+
+
+def test_edge_ratio_unknown_for_old_swings():
+    """Zwaaien uit een eerdere versie (zonder stappen): geen oordeel."""
+    assert calc.edge_ratio(None, "discharge") is None
+    assert calc.edge_ratio([[100, 0, 0], [99, 0, 0.05]], "discharge") is None
