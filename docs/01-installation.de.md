@@ -32,7 +32,8 @@ Gehe zu **Einstellungen → Geräte & Dienste → Integration hinzufügen → Ma
 
 1. Wähle eine gefundene Batterie oder wähle die Sensoren selbst („✎ Sensoren selbst wählen“).
 2. Prüfe den kurzen Code (`mt1` … `mt6`), den Namen und die beiden Sensoren. Optional: höchste und niedrigste Zellspannung für die [Zellbalance](03-how-it-works.md#cell-balance) (Englisch). Sie werden ausgefüllt, wenn die Suche sie findet.
-3. Wähle das Modell und gib das Datum der Inbetriebnahme ein. Bei einer Venus E v1/v2, Venus E v3 oder Venus D werden die Herstellerdaten für dich ausgefüllt (Venus D: auch die Anzahl der Packs). Bei einem anderen Modell gibst du die Herstellerdaten selbst ein.
+3. Wähle das Modell und gib das Datum der Inbetriebnahme ein. Bei einem bekannten Modell (Venus E v1/v2, v3, 4.0, Max oder Pro, Venus C oder Venus D) werden die Herstellerdaten für dich ausgefüllt (Venus D und Venus E Pro: auch die Anzahl der Packs). Bei einem anderen Modell gibst du die Herstellerdaten selbst ein.
+   Eine **Venus C** kann sich mit demselben Code melden wie eine Venus E v1/v2. Wähle dann selbst **Venus C**, auch wenn Venus E v1 / v2 schon ausgewählt ist.
 
 Alle Herstellerdaten kannst du später unter **Konfigurieren** ändern.
 
@@ -41,6 +42,14 @@ Beim Hinzufügen schaut die Integration im Verlauf von Home Assistant (meist die
 ## Karten hinzufügen
 
 Ab Version 0.4.0 bringt die Integration ihre eigenen Karten mit. Du musst nichts zusätzlich installieren: kein button-card und keine Vorlagen. Füge zuerst mindestens eine Batterie hinzu. Starte danach Home Assistant neu und lade die Seite im Browser neu (Strg+F5, auf dem Mac Cmd+Shift+R); das gilt auch nach jedem Update.
+
+### Von selbst in der Seitenleiste (ab 0.5.1)
+
+Nach dem Hinzufügen der ersten Batterie und einem Neustart steht **Batteriekapazität** von selbst in der Seitenleiste, mit allen deinen Batterien (1 bis 6, in der [Aufteilung](06-dashboard-gallery.de.md) der Galerie). Du musst nichts einstellen. Dieses Dashboard änderst du nicht; für eine eigene Aufteilung erstellst du selbst ein Dashboard wie unten beschrieben.
+
+- **Ausschalten:** Einstellungen → Geräte & Dienste → Marstek Capacity Monitor → **Konfigurieren** → **Menüeintrag in der Seitenleiste**. Ist er bei einer Batterie aus, verschwindet der ganze Menüeintrag.
+- **Ausgeblendet oder an der falschen Stelle?** Halte **Home Assistant** oben in der Seitenleiste gedrückt (oder gehe in dein Profil → Seitenleiste anpassen). Dort blendest du Einträge wieder ein, aus oder verschiebst sie. Das gilt pro Gerät: auf dem Handy stellst du es separat ein.
+- Hast du schon ein eigenes Dashboard unter `/marstek-capacity`, lässt der Monitor es in Ruhe.
 
 ### Am schnellsten: Dashboard mit einem Klick
 
