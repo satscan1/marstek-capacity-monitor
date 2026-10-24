@@ -36,7 +36,7 @@
 - New screenshot of the standard cards.
 - Gear on the card: the back arrow on the settings page now takes you back to the dashboard you came from, instead of the integrations overview.
 - Supported batteries: a Venus C that stops around 11 % gets a reserve of 0.28 kWh (thanks to Flori on simon42).
-- README (EN/NL/DE): a *Support this project* section. Find the tool useful? A ⭐ on GitHub helps others find it, and there is a Buy me a coffee button.
+- README (EN/NL/DE): a *Support this project* section. Find the tool useful? A ⭐ on GitHub helps others find it, and there is a Ko-fi button.
 
 ## v0.5.0 — 2026-10-22
 
