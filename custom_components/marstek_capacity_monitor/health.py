@@ -52,6 +52,7 @@ NO_FULL_DAYS = 14  # 14 days without a full charge while HA ran = occurrence
 
 REF_MAX_AGE_D = 14.0  # a measurement is calibrated when the last top was <= 14 days before
 COLD_C = 5.0  # cells colder than this during a measurement = less reliable
+EDGE_RATIO = 2.0  # first/last 3 SOC points cost >= 2x the energy of the middle = less reliable
 
 CELL_BASE_DAYS = 90  # baseline = median of the first 3 months of samples
 CELL_BASE_MIN = 3
@@ -533,26 +534,34 @@ def reliability(
     record: dict[str, Any], tops: list[float], soc_since: float | None
 ) -> dict[str, Any]:
     """Calibrated = the SOC meter had a calibration point at most 14 days
-    before the discharge started, and the cells were not colder than 5 °C.
+    before the discharge started, the cells were not colder than 5 °C, and
+    the SOC meter kept pace at the start and end of the discharge (0.5.1).
 
     Measurements from before SOC monitoring started (older versions) are
-    unknown and shown as calibrated."""
+    unknown and shown as calibrated. why = the reasons, comma separated:
+    no_calibration, cold, soc_edge."""
     start = record.get("start_ts", record["ts"])
     out: dict[str, Any] = {"reliable": True}
+    whys: list[str] = []
     if soc_since is not None and start >= soc_since:
         before = [t for t in tops if t <= start + TOP_S]
         if before:
             age = (start - before[-1]) / 86400
             out["ref_age_d"] = round(max(age, 0.0), 1)
             if age > REF_MAX_AGE_D:
-                out["reliable"] = False
-                out["why"] = "no_calibration"
+                whys.append("no_calibration")
         elif start - soc_since > REF_MAX_AGE_D * 86400:
             # monitored for more than 14 days and never a calibration point
-            out["reliable"] = False
-            out["why"] = "no_calibration"
+            whys.append("no_calibration")
     temp = record.get("temp_c")
     if temp is not None and temp < COLD_C:
+        whys.append("cold")
+    edge = record.get("edge_ratio")
+    if edge is not None:
+        out["edge_ratio"] = edge
+        if edge >= EDGE_RATIO:
+            whys.append("soc_edge")
+    if whys:
         out["reliable"] = False
-        out["why"] = "cold" if "why" not in out else "both"
+        out["why"] = ",".join(whys)
     return out

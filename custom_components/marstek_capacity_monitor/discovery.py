@@ -232,7 +232,7 @@ def find_cell_sensors(hass: HomeAssistant, soc_entity: str) -> dict[str, str]:
 
 def guess_model(hass: HomeAssistant, soc_entity: str) -> str | None:
     """Best guess of the Marstek model from the device registry; None if unsure."""
-    from .const import MODEL_D, MODEL_E_V12, MODEL_E_V3
+    from .const import MODEL_C, MODEL_D, MODEL_E_V12, MODEL_E_V3
 
     entry = er.async_get(hass).async_get(soc_entity)
     device = (
@@ -248,6 +248,10 @@ def guess_model(hass: HomeAssistant, soc_entity: str) -> str | None:
         return MODEL_E_V3
     if re.search(r"vnsd|venus_?d($|_)", text):
         return MODEL_D
+    # A Venus C can report the same device type (HMG-50) as a Venus E v1/v2:
+    # only its name gives it away. The model step says to pick Venus C.
+    if re.search(r"venus_?c($|_)", text):
+        return MODEL_C
     if re.search(r"(^|_)hmg($|_)|venus_?e_?(v_?[12]|2_0)", text):
         return MODEL_E_V12
     return None

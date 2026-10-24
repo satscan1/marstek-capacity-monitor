@@ -13,7 +13,7 @@ Behalte in Home Assistant im Blick, ob dein Marstek-Heimspeicher seine Kapazitä
 - **Zwei Sensoren, die du schon hast:** Ladezustand und DC-Leistung der Batterie. Die Integration findet sie selbst.
 - **Gemessen bei einer vollständigen Entladung** (≥ 95 % → ≤ 15 %) und verglichen mit der nutzbaren Kapazität im Neuzustand.
 - **Herstellerangabe** als Maßstab: 80 % nach 6000 Zyklen. Grün im Rahmen der Herstellerangabe, orange darunter, rot bei 75 % oder weniger: über die Marstek-App melden.
-- **Jede Anbindung, die Ladezustand und DC-Leistung liefert:** ESPHome, Modbus (RS485 oder LAN) oder eine andere Integration. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus D.
+- **Jede Anbindung, die Ladezustand und DC-Leistung liefert:** ESPHome, Modbus (RS485 oder LAN) oder eine andere Integration. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus C, Venus D.
 - **Plug & Play:** Modell und Datum der Inbetriebnahme wählen; die Herstellerdaten werden für dich ausgefüllt. Die Zyklen vor dem Monitor kommen aus dem Zähler der Batterie, wenn es einen gibt (AC-Seite, eine Schätzung). Später gefundene Sensoren stehen unter Reparaturen bereit.
 - **Eigene Karten und ein Dashboard mit einem Klick:** kein button-card nötig.
 - **Zeigt, ob es funktioniert:** ein Status pro Batterie und „sammelt Daten“ bis zur ersten vollständigen Entladung. Gab es in den letzten Tagen schon eine, gibt es sofort eine erste Messung.
@@ -48,6 +48,14 @@ Starte Home Assistant danach neu und gehe zu **Einstellungen → Dashboards → 
 Die Screenshots verwenden **Demodaten**: erfundene Batterien, die zeigen, wie die Karten aussehen, nicht wie eine echte Batterie altert. Mehr Beispiele, von 1 bis 6 Batterien: [Galerie](docs/06-dashboard-gallery.de.md).
 
 ![Dashboard](screenshots/gallery/de/3-batterien-diagramm.png)
+
+## Projekt unterstützen
+
+Findest du das Tool nützlich? Gib ihm einen ⭐ auf GitHub, damit andere es auch finden.
+
+Möchtest du noch etwas mehr tun? Unterstütze mich über Ko-fi:
+
+<a href="https://ko-fi.com/satscan"><img src="https://img.shields.io/badge/Ko--fi-satscan-FF5E5B?logo=kofi&logoColor=white" alt="Support me on Ko-fi"></a>
 
 ## Lizenz
 

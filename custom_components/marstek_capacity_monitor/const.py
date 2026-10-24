@@ -48,6 +48,7 @@ DEFAULTS = {
 CONF_MODEL = "model"
 CONF_PACKS = "packs"
 MODEL_E_V12 = "venus_e_v12"
+MODEL_C = "venus_c"
 MODEL_E_V3 = "venus_e_v3"
 MODEL_E_V4 = "venus_e_v4"
 MODEL_E_MAX = "venus_e_max"
@@ -56,6 +57,7 @@ MODEL_D = "venus_d"
 MODEL_OTHER = "other"
 MODELS = [
     MODEL_E_V12,
+    MODEL_C,
     MODEL_E_V3,
     MODEL_E_V4,
     MODEL_E_MAX,
@@ -74,6 +76,11 @@ _SPEC_LINE_10K = {CONF_CYCLE_LIFE: 10000.0, CONF_CYCLE_EOL: 80.0, CONF_WARRANTY_
 MODEL_PRESETS: dict[str, dict[str, float]] = {
     # Venus E datasheet: 5.12 kWh, 90 % DoD, > 6000 cycles
     MODEL_E_V12: {CONF_NOMINAL_KWH: 5.12, CONF_RESERVE_KWH: 0.51, **_SPEC_LINE},
+    # Venus C: half a Venus E. Marstek (Venus C/E page): 2.56 kWh, > 6000 cycles,
+    # 10 years; 90 % DoD from a seller's datasheet (sun.store). Same Modbus
+    # registers as the Venus E v1/v2 ("generation 2", evcc). 80 % after 6000
+    # cycles assumed, as for the Venus E.
+    MODEL_C: {CONF_NOMINAL_KWH: 2.56, CONF_RESERVE_KWH: 0.256, **_SPEC_LINE},
     # Venus E 3.0 manual: 5.12 kWh, 90 % DoD, > 6000 cycles
     MODEL_E_V3: {CONF_NOMINAL_KWH: 5.12, CONF_RESERVE_KWH: 0.51, **_SPEC_LINE},
     # Venus D product page: 2.56 kWh per unit, calculated with 90 % DoD.
@@ -162,3 +169,12 @@ RECALC_SECONDS = 3600
 SIGNAL_UPDATE = f"{DOMAIN}_update_{{}}"
 SIGNAL_STATUS = f"{DOMAIN}_status_{{}}"
 EVENT_SESSION = f"{DOMAIN}_session"
+
+
+# Sidebar (0.5.1): the integration puts its own dashboard in the sidebar, with
+# all batteries in it. On by default; off for one battery = no menu item.
+CONF_SIDEBAR = "sidebar"
+DEFAULTS[CONF_SIDEBAR] = True
+DASHBOARD_URL = "marstek-capacity"
+DASHBOARD_ICON = "mdi:home-battery"
+DASHBOARD_TITLE = {"nl": "Batterijcapaciteit", "de": "Batteriekapazität", "en": "Battery capacity"}

@@ -32,7 +32,8 @@ Ga naar **Instellingen → Apparaten en diensten → Voeg integratie toe → Mar
 
 1. Kies een gevonden batterij, of kies zelf de sensoren.
 2. Controleer de korte code (`mt1` … `mt6`), de naam en de twee sensoren. Optioneel: de hoogste en laagste celspanning, voor de [celbalans](03-how-it-works.nl.md#celbalans). Die worden ingevuld als de scan ze vindt.
-3. Kies het model en vul de installatiedatum in. Bij een Venus E v1/v2, Venus E v3 of Venus D worden de fabrieksgegevens voor je ingevuld (Venus D: ook het aantal pakketten). Bij een ander model vul je de fabrieksgegevens zelf in.
+3. Kies het model en vul de installatiedatum in. Bij een bekend model (Venus E v1/v2, v3, 4.0, Max of Pro, Venus C of Venus D) worden de fabrieksgegevens voor je ingevuld (Venus D en Venus E Pro: ook het aantal pakketten). Bij een ander model vul je de fabrieksgegevens zelf in.
+   Een **Venus C** kan zich melden met dezelfde code als een Venus E v1/v2. Kies dan zelf **Venus C**, ook als Venus E v1 / v2 al is aangevinkt.
 
 Alle fabrieksgegevens kun je later aanpassen via **Configureer**.
 
@@ -41,6 +42,14 @@ Bij het toevoegen kijkt de tool in de geschiedenis van Home Assistant (meestal d
 ## Kaarten toevoegen
 
 Vanaf versie 0.4.0 heeft de integratie zijn eigen kaarten. Je hoeft niets extra's te installeren: geen button-card en geen sjablonen. Voeg eerst minstens één batterij toe. Herstart daarna Home Assistant en vernieuw de pagina in je browser (Ctrl+F5, op een Mac Cmd+Shift+R); dat geldt ook na elke update.
+
+### Vanzelf in de zijbalk (vanaf 0.5.1)
+
+Na het toevoegen van de eerste batterij en een herstart staat **Batterijcapaciteit** vanzelf in de zijbalk, met al je batterijen erin (1 tot 6, in de [indeling](06-dashboard-gallery.nl.md#indeling) van de galerij). Je hoeft niets in te stellen. Dit dashboard pas je niet aan; wil je een eigen indeling, maak dan zelf een dashboard zoals hieronder.
+
+- **Uitzetten:** Instellingen → Apparaten en diensten → Marstek Capacity Monitor → **Configureren** → **Menu-item in de zijbalk**. Staat het bij één batterij uit, dan verdwijnt het hele menu-item.
+- **Verborgen of op de verkeerde plek?** Houd **Home Assistant** bovenaan de zijbalk ingedrukt (of ga naar je profiel → zijbalk aanpassen). Daar zet je items terug, verberg je ze of verschuif je ze. Dat geldt per apparaat: op je telefoon stel je het apart in.
+- Heb je zelf al een dashboard op het adres `/marstek-capacity`, dan laat de monitor dat met rust.
 
 ### Snelste manier: dashboard met één klik
 

@@ -465,3 +465,53 @@ def test_adopt_sign_from_history():
     live.update_power(500.0, T0)  # raw value from the same sensor (discharging)
     assert live.adopt_sign(hist) is True
     assert live.s["sign"] == -1 and live.s["power_w"] == -500.0
+
+
+def test_edge_ratio_normal_discharge_keeps_pace():
+    """MT1 22-10-2026: evenveel energie per procent van boven tot onder."""
+    tr = calc.SwingTracker()
+    tr.update_soc(100, T0)
+    _, t = simulate(tr, 100, 11, 4.37, T0)
+    recs, _ = simulate(tr, 11, 30, 1.0, t)
+    assert recs[0]["edge_ratio"] == pytest.approx(1.0, abs=0.05)
+
+
+def test_edge_ratio_soc_stands_still_at_the_bottom():
+    """MT2 22-10-2026: midden gelijk aan MT1, maar van 12 naar 11 % kwam er
+    nog ~0,22 kWh uit (5 procent aan energie voor 1 punt) -> meting te hoog."""
+    tr = calc.SwingTracker()
+    tr.update_soc(99, T0)
+    _, t = simulate(tr, 99, 12, 87 * 0.0491, T0)
+    _, t = simulate(tr, 12, 11, 0.26, t)  # SOC hangt onderin
+    recs, _ = simulate(tr, 11, 30, 1.0, t)
+    r = recs[0]
+    assert r["soc_start"] == 99 and r["soc_end"] == 11
+    assert r["edge_ratio"] >= calc.EDGE_RATIO
+    spec = calc.BatterySpec(reserve_kwh=0.61)
+    assert calc.capacity_from_record(spec, r) / spec.usable_kwh > 1.0  # boven 100 %
+    rel = calc.reliability(r, [], None)
+    assert not rel["reliable"] and rel["why"] == "soc_edge"
+
+
+def test_edge_ratio_unknown_for_old_swings():
+    """Zwaaien uit een eerdere versie (zonder stappen): geen oordeel."""
+    assert calc.edge_ratio(None, "discharge") is None
+    assert calc.edge_ratio([[100, 0, 0], [99, 0, 0.05]], "discharge") is None
+
+
+def test_about_half_asks_to_check_the_model():
+    """A Venus C (2.56 kWh) set up as a Venus E (5.12 kWh) measures about 50 %:
+    ask about the model instead of a red "report to Marstek"."""
+    spec = calc.BatterySpec()  # Venus E: 5.12 kWh, 0.51 reserve
+    now = datetime(2026, 10, 20)
+    def rec(kwh):
+        return {"ts": now.timestamp() - 86400, "direction": "discharge",
+                "soc_start": 100, "soc_end": 10, "delta_soc": 90,
+                "e_dc_kwh": kwh, "valid": True}
+    # 2.30 kWh over 90 SOC points on a Venus E = 50 % of new
+    assert calc.evaluate(spec, [rec(2.30)], 0, now)["status"] == "check_model"
+    assert calc.evaluate(spec, [rec(1.50)], 0, now)["status"] == "critical"
+    assert calc.evaluate(spec, [rec(3.30)], 0, now)["status"] == "critical"
+    # The same measurement with the Venus C preset is a healthy battery
+    venus_c = calc.BatterySpec(nominal_kwh=2.56, reserve_kwh=0.256)
+    assert calc.evaluate(venus_c, [rec(2.30)], 0, now)["status"] == "good"
