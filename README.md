@@ -44,7 +44,7 @@ Changes per version: [CHANGELOG](CHANGELOG.md).
 
 ## Screenshots
 
-> The screenshots use **demo data**: four example batteries (Venus E v1 via ESPHome, Venus E v2 via LilyGo RS485, Venus E v3 and Venus D via Modbus TCP) with made-up measurements (about 2 % capacity loss per year). They show what the screens look like, not how these models actually age.
+> The screenshots use **demo data**: five example batteries (Venus C, Venus E v1, v2, v3 and Venus D) with made-up measurements (about 2 % capacity loss per year). They show what the screens look like, not how these models actually age.
 
 **1. Adding a battery: the scan finds the sensors you already have**
 
