@@ -10,7 +10,7 @@ Track in Home Assistant whether your Marstek home battery keeps its capacity, me
 
 ## In short
 
-- **Two sensors you already have:** state of charge and DC battery power. The integration finds them itself.
+- **Two sensors you already have:** state of charge and DC battery power. The integration finds them itself. 
 - **Measured on a full discharge** (≥ 95 % → ≤ 15 %) and compared with the usable capacity of a new battery.
 - **Manufacturer spec** as reference: 80 % after 6,000 cycles. Green within spec, orange below, red at 75 % or lower: report via the Marstek app.
 - **Any connection that gives the state of charge and DC power:** ESPHome, Modbus (RS485 or LAN) or another integration. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus C, Venus D.
