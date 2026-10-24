@@ -58,7 +58,7 @@
       },
       "model": {
         "title": "Which Marstek is {name}?",
-        "description": "Pick your model and the date it was installed. The factory data (capacity, depth of discharge, cycles) are filled in for you. You can change them later under Configure.{counter}",
+        "description": "Pick your model and the date it was installed. The factory data (capacity, depth of discharge, cycles) are filled in for you. You can change them later under Configure.\n\nVenus C? It has 2.56 kWh, half a Venus E: pick Venus C, also when Venus E v1 / v2 is already selected.{counter}",
         "data": {
           "model": "Model",
           "purchase_date": "Installation date"
@@ -107,6 +107,7 @@
           "temp_max_entity": "Highest cell temperature (optional, experimental)",
           "temp_min_entity": "Lowest cell temperature (optional, experimental)",
           "notify": "Notifications",
+          "sidebar": "Menu item in the sidebar",
           "soc_sensitivity": "Sensitivity SOC drift",
           "cell_sensitivity": "Sensitivity cell calibration"
         },
@@ -125,6 +126,7 @@
           "temp_max_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures.",
           "temp_min_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures.",
           "notify": "A message on your phone (Home Assistant app) and under Settings → Repairs when the SOC meter drifts or the cells get out of balance, with advice. Only for a pattern: once is only recorded, 2× in 45 days is \"attention\", 3× is advice. Off = no messages; the card still shows it.",
+          "sidebar": "Battery capacity in the sidebar, with all your batteries in it. Applies to the whole menu item: off for one battery = no menu item.",
           "soc_sensitivity": "When a deviation of the SOC meter counts. Normal: 5 % or more. Relaxed: 8 %. Strict: 3 %. Off: only shown on the card, never \"attention\" or advice.",
           "cell_sensitivity": "When the cell spread counts as too high. Normal: 2× the own normal value. Relaxed: 3×. Strict: 1.5×. Off: only shown on the card. Only with cell voltage sensors."
         }
@@ -171,7 +173,8 @@
           "good": "Good",
           "attention": "Below spec",
           "critical": "Report to Marstek",
-          "no_measurement": "No full discharge measured yet"
+          "no_measurement": "No full discharge measured yet",
+          "check_model": "Check the model"
         }
       },
       "red_threshold": {
@@ -254,6 +257,7 @@
     "model": {
       "options": {
         "venus_e_v12": "Venus E v1 / v2 (5.12 kWh)",
+        "venus_c": "Venus C (2.56 kWh)",
         "venus_e_v3": "Venus E v3 (5.12 kWh)",
         "venus_e_v4": "Venus E 4.0 (5.02 kWh)",
         "venus_e_max": "Venus E Max (10.05 kWh)",
@@ -311,6 +315,10 @@
           "battery_gone": "This battery no longer exists."
         }
       }
+    },
+    "check_model": {
+      "title": "{name}: is the model right?",
+      "description": "The measured capacity is {pct} % of new: about half of the {kwh} kWh that is set. That usually means a wrong model, not a worn battery. A Venus C has 2.56 kWh, half a Venus E.\n\nIs it a Venus C? Under Settings → Devices & services → Marstek Capacity Monitor → Configure, set the rated capacity to 2.56 kWh and the reserve to 0.26 kWh. The measurements are then recalculated.\n\nIs the model right? Then report it via the Marstek app.\n\nThis message disappears by itself when the measurement is no longer about half."
     }
   }
 }

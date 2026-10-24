@@ -58,7 +58,7 @@
       },
       "model": {
         "title": "Welches Marstek-Modell ist {name}?",
-        "description": "Wähle dein Modell und das Datum der Inbetriebnahme. Die Herstellerdaten (Kapazität, Entladetiefe, Zyklen) werden für dich ausgefüllt. Du kannst sie später unter Konfigurieren ändern.{counter}",
+        "description": "Wähle dein Modell und das Datum der Inbetriebnahme. Die Herstellerdaten (Kapazität, Entladetiefe, Zyklen) werden für dich ausgefüllt. Du kannst sie später unter Konfigurieren ändern.\n\nVenus C? Sie hat 2,56 kWh, halb so viel wie eine Venus E: wähle dann Venus C, auch wenn Venus E v1 / v2 schon ausgewählt ist.{counter}",
         "data": {
           "model": "Modell",
           "purchase_date": "Datum der Inbetriebnahme"
@@ -107,6 +107,7 @@
           "temp_max_entity": "Höchste Zelltemperatur (optional, experimentell)",
           "temp_min_entity": "Niedrigste Zelltemperatur (optional, experimentell)",
           "notify": "Hinweise",
+          "sidebar": "Menüeintrag in der Seitenleiste",
           "soc_sensitivity": "Empfindlichkeit SOC-Drift",
           "cell_sensitivity": "Empfindlichkeit Zellkalibrierung"
         },
@@ -125,6 +126,7 @@
           "temp_max_entity": "Wird bei jeder Messung gespeichert: eine kalte Batterie gibt weniger ab. Nur Zelltemperaturen, keine MOS- oder Platinentemperaturen.",
           "temp_min_entity": "Wird bei jeder Messung gespeichert: eine kalte Batterie gibt weniger ab. Nur Zelltemperaturen, keine MOS- oder Platinentemperaturen.",
           "notify": "Eine Nachricht auf dem Handy (Home-Assistant-App) und unter Einstellungen → Reparaturen, wenn die SOC-Anzeige abweicht oder die Zellen aus dem Gleichgewicht geraten, mit Empfehlung. Nur bei einem Muster: 1× wird nur festgehalten, 2× in 45 Tagen ist \"Achtung\", 3× ist eine Empfehlung. Aus = keine Nachrichten; die Karte zeigt es trotzdem.",
+          "sidebar": "Batteriekapazität in der Seitenleiste, mit allen deinen Batterien. Gilt für den ganzen Menüeintrag: aus bei einer Batterie = kein Menüeintrag.",
           "soc_sensitivity": "Ab wann eine Abweichung der SOC-Anzeige zählt. Normal: 5 % oder mehr. Großzügig: 8 %. Streng: 3 %. Aus: nur auf der Karte, nie \"Achtung\" oder Empfehlung.",
           "cell_sensitivity": "Ab wann die Zellspannungsdifferenz zu hoch ist. Normal: 2× der eigene Normalwert. Großzügig: 3×. Streng: 1,5×. Aus: nur auf der Karte. Nur mit Zellspannungssensoren."
         }
@@ -171,7 +173,8 @@
           "good": "Gut",
           "attention": "Unter Herstellerangabe",
           "critical": "An Marstek melden",
-          "no_measurement": "Noch keine vollständige Entladung gemessen"
+          "no_measurement": "Noch keine vollständige Entladung gemessen",
+          "check_model": "Modell prüfen"
         }
       },
       "red_threshold": {
@@ -254,6 +257,7 @@
     "model": {
       "options": {
         "venus_e_v12": "Venus E v1 / v2 (5,12 kWh)",
+        "venus_c": "Venus C (2,56 kWh)",
         "venus_e_v3": "Venus E v3 (5,12 kWh)",
         "venus_e_v4": "Venus E 4.0 (5,02 kWh)",
         "venus_e_max": "Venus E Max (10,05 kWh)",
@@ -311,6 +315,10 @@
           "battery_gone": "Diese Batterie gibt es nicht mehr."
         }
       }
+    },
+    "check_model": {
+      "title": "{name}: stimmt das Modell?",
+      "description": "Die gemessene Kapazität ist {pct} % vom Neuzustand: etwa die Hälfte der eingestellten {kwh} kWh. Meist ist dann das Modell falsch gewählt, nicht die Batterie verschlissen. Eine Venus C hat 2,56 kWh, halb so viel wie eine Venus E.\n\nIst es eine Venus C? Stelle unter Einstellungen → Geräte & Dienste → Marstek Capacity Monitor → Konfigurieren die Nennkapazität auf 2,56 kWh und die Reserve auf 0,26 kWh. Die Messungen werden dann neu berechnet.\n\nStimmt das Modell? Dann melde es über die Marstek-App.\n\nDiese Meldung verschwindet von selbst, wenn die Messung nicht mehr etwa die Hälfte ist."
     }
   }
 }

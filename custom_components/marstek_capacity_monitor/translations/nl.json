@@ -58,7 +58,7 @@
       },
       "model": {
         "title": "Welke Marstek is {name}?",
-        "description": "Kies je model en de datum waarop de batterij is geïnstalleerd. De fabrieksgegevens (capaciteit, ontlaaddiepte, cycli) worden voor je ingevuld. Je kunt ze later aanpassen via Configureren.{counter}",
+        "description": "Kies je model en de datum waarop de batterij is geïnstalleerd. De fabrieksgegevens (capaciteit, ontlaaddiepte, cycli) worden voor je ingevuld. Je kunt ze later aanpassen via Configureren.\n\nVenus C? Die heeft 2,56 kWh, de helft van een Venus E: kies dan Venus C, ook als Venus E v1 / v2 al is aangevinkt.{counter}",
         "data": {
           "model": "Model",
           "purchase_date": "Installatiedatum"
@@ -107,6 +107,7 @@
           "temp_max_entity": "Hoogste celtemperatuur (optioneel, experimenteel)",
           "temp_min_entity": "Laagste celtemperatuur (optioneel, experimenteel)",
           "notify": "Seintjes",
+          "sidebar": "Menu-item in de zijbalk",
           "soc_sensitivity": "Gevoeligheid SOC-drift",
           "cell_sensitivity": "Gevoeligheid celkalibratie"
         },
@@ -125,6 +126,7 @@
           "temp_max_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen.",
           "temp_min_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen.",
           "notify": "Een bericht op je telefoon (Home Assistant-app) en onder Instellingen → Reparaties als de SOC-meter afwijkt of de cellen uit balans raken, met advies. Alleen bij een patroon: 1× wordt alleen vastgelegd, 2× in 45 dagen is \"let op\", 3× is advies. Uit = geen berichten; de kaart laat het wel zien.",
+          "sidebar": "Batterijcapaciteit in de zijbalk, met al je batterijen erin. Geldt voor het hele menu-item: uit bij één batterij = geen menu-item.",
           "soc_sensitivity": "Wanneer een afwijking van de SOC-meter meetelt. Normaal: 5 % of meer. Ruim: 8 %. Extra: 3 %. Uit: alleen op de kaart, nooit \"let op\" of advies.",
           "cell_sensitivity": "Wanneer het celverschil te hoog is. Normaal: 2× de eigen normale waarde. Ruim: 3×. Extra: 1,5×. Uit: alleen op de kaart. Alleen met celspanningssensoren."
         }
@@ -171,7 +173,8 @@
           "good": "Goed",
           "attention": "Onder specificatie",
           "critical": "Melden bij Marstek",
-          "no_measurement": "Nog geen volledige ontlading gemeten"
+          "no_measurement": "Nog geen volledige ontlading gemeten",
+          "check_model": "Klopt het model?"
         }
       },
       "red_threshold": {
@@ -254,6 +257,7 @@
     "model": {
       "options": {
         "venus_e_v12": "Venus E v1 / v2 (5,12 kWh)",
+        "venus_c": "Venus C (2,56 kWh)",
         "venus_e_v3": "Venus E v3 (5,12 kWh)",
         "venus_e_v4": "Venus E 4.0 (5,02 kWh)",
         "venus_e_max": "Venus E Max (10,05 kWh)",
@@ -311,6 +315,10 @@
           "battery_gone": "Deze batterij bestaat niet meer."
         }
       }
+    },
+    "check_model": {
+      "title": "{name}: klopt het model?",
+      "description": "De gemeten capaciteit is {pct} % van nieuw: ongeveer de helft van de ingestelde {kwh} kWh. Meestal is dan het model verkeerd gekozen, niet de batterij versleten. Een Venus C heeft 2,56 kWh, de helft van een Venus E.\n\nIs het een Venus C? Zet bij Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren de opgegeven capaciteit op 2,56 kWh en de reserve op 0,26 kWh. De metingen worden dan opnieuw berekend.\n\nKlopt het model wel? Meld het dan via de Marstek-app.\n\nDeze melding verdwijnt vanzelf als de meting niet meer ongeveer de helft is."
     }
   }
 }

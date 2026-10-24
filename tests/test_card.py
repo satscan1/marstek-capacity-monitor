@@ -187,3 +187,94 @@ def test_card_language_foot_and_cycles_note(tmp_path):
     # Cycles before monitoring: from the counter, AC side, an estimate
     assert "Waarvan 352 vóór de monitoring" in out["nl"] and "AC-kant" in out["nl"]
     assert "AC side" in out["nlen"]
+
+
+NODE_LANG = r"""
+const fs = require("fs");
+global.HTMLElement = class {};
+const defined = {};
+global.customElements = { get: (n) => defined[n], define: (n, c) => { defined[n] = c; } };
+global.window = {};
+global.console = { info() {}, log: console.log };
+eval(fs.readFileSync(process.argv[2], "utf8"));
+(async () => {
+  const S = defined["ll-strategy-dashboard-marstek-capacity"];
+  const entities = {
+    "sensor.marstek_mt1_monitor_status": { platform: "marstek_capacity_monitor", device_id: "d1" },
+    "sensor.marstek_mt1_capacity_pct": { platform: "marstek_capacity_monitor", device_id: "d1" },
+  };
+  const devices = { d1: { name: "MT1" } };
+  const hass = { entities, devices, locale: { language: "en" } };
+  const fixed = await S.generate({ lang: "nl" }, hass);
+  const free = await S.generate({}, hass);
+  const langs = (c) => c.views[0].sections[0].cards.map((x) => x.lang || null);
+  process.stdout.write(JSON.stringify({ fixed: langs(fixed), free: langs(free), title: fixed.title }));
+})();
+"""
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
+def test_dashboard_language_goes_to_the_cards(tmp_path):
+    """0.5.1: lang: nl on the dashboard also makes the cards Dutch."""
+    script = tmp_path / "lang.js"
+    script.write_text(NODE_LANG)
+    out = json.loads(
+        subprocess.run(
+            ["node", str(script), str(build_card.OUT)], capture_output=True, text=True, check=True
+        ).stdout
+    )
+    assert out["title"] == "Batterijcapaciteit"
+    assert out["fixed"] == ["nl", "nl"]
+    assert out["free"] == [None, None]
+
+
+INFO_TEST = r"""
+const fs = require("fs");
+global.HTMLElement = class {};
+const defined = {};
+global.customElements = { get: (n) => defined[n], define: (n, c) => { defined[n] = c; } };
+global.window = {};
+global.console = { info() {}, log: console.log };
+eval(fs.readFileSync(process.argv[2], "utf8"));
+const S = {
+  "sensor.marstek_mt2_measured_capacity": { state: "4.818", attributes: { trend: [], measurement_count: 1 } },
+  "sensor.marstek_mt2_capacity_pct": { state: "106.8", attributes: { tolerance_pct: 4, red_pct: 70 } },
+  "sensor.marstek_mt2_expected_capacity": { state: "99.1", attributes: { cycles: 272, trend: [] } },
+  "sensor.marstek_mt2_monitor_status": { state: "measuring", attributes: {} },
+};
+const card = new defined["marstek-capacity-card"]();
+card._config = { battery: "mt2" };
+card._hass = { states: S, entities: {}, devices: {}, locale: { language: "nl" }, language: "nl" };
+const acts = (html) => [...html.matchAll(/data-mc="([^"]*)"/g)].map((m) => m[1]);
+const closed = card._html();
+const info = acts(closed).find((a) => a.includes("'info'"));
+card._action(info);
+const open = card._html();
+const ov = new defined["marstek-capacity-overview-card"]();
+ov._config = { batteries: ["mt2"] };
+ov._hass = card._hass;
+process.stdout.write(JSON.stringify({
+  info: !!info, popup: open.includes("position:fixed") && open.includes("SOC-meter"),
+  closed,
+  overview: ov._html(),
+}));
+"""
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
+def test_above_100_explained_by_click_and_limits_follow_settings(tmp_path):
+    script = tmp_path / "t.js"
+    script.write_text(INFO_TEST)
+    out = json.loads(subprocess.run(
+        ["node", str(script), str(build_card.OUT)], capture_output=True, text=True, check=True
+    ).stdout)
+    # Above 100 %: "voorlopig ⓘ" opens a window with the explanation (also on a phone)
+    assert out["info"] and out["popup"]
+    assert "voorlopig" in out["closed"]
+    # Grey, not green: not certain yet
+    assert "#66bb6a\">4,82" not in out["closed"] and "#2e7d32\">4,82" not in out["closed"]
+    # The colour limits in the texts follow the settings (4 points, 70 %)
+    assert "Groen tot 4 punten" in out["closed"] and "rood bij 70 %" in out["closed"]
+    assert "tot 4 punten eronder" in out["overview"] and "rood: 70 %" in out["overview"]
+    # Overview: an ⓘ after a value above 100 %
+    assert "Hoger dan nieuw" in out["overview"]

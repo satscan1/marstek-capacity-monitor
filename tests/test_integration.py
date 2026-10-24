@@ -975,3 +975,32 @@ async def test_no_offer_when_start_value_entered(hass: HomeAssistant) -> None:
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     assert ir.async_get(hass).async_get_issue(DOMAIN, f"extras_{entry.entry_id}") is None
+
+
+async def test_venus_c_preset_and_guess(hass: HomeAssistant) -> None:
+    """Venus C: 2.56 kWh, picked from the name; the step text mentions it."""
+    hass.states.async_set("sensor.venus_c_battery_soc", 50,
+        {"unit_of_measurement": "%", "device_class": "battery"})
+    hass.states.async_set("sensor.venus_c_battery_power", 0,
+        {"unit_of_measurement": "W", "device_class": "power"})
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"candidate": "0"})
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {"battery_id": "vc", "name": "Venus C",
+         "soc_entity": "sensor.venus_c_battery_soc",
+         "power_entity": "sensor.venus_c_battery_power"},
+    )
+    assert result["step_id"] == "model"
+    model_key = next(k for k in result["data_schema"].schema if str(k) == "model")
+    assert model_key.default() == "venus_c"
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"model": "venus_c", "purchase_date": "2025-06-01"}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"]["nominal_kwh"] == 2.56
+    assert result["data"]["reserve_kwh"] == 0.256
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.marstek_vc_usable_capacity").state == "2.304"
