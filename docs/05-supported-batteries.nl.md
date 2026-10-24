@@ -51,13 +51,13 @@ De Venus A heeft nog geen vooraf ingevulde waarden: er is geen openbare capacite
 |---|---|---|---|
 | Venus E v1 / v2 | 90 % volgens de datasheet; in de praktijk stoppen sommige exemplaren rond 11–12 %, dus 88 % | 0,51 kWh (of 0,61 kWh bij 88 %) | Datasheet Venus E / eigen meting |
 | Venus E v3 | 90 % | 0,51 kWh | Handleiding Venus E 3.0 |
-| Venus C (2,56 kWh) | 90 % volgens een verkoper; Marstek noemt het niet | 0,26 kWh | Productpagina verkoper (sun.store) |
+| Venus C (2,56 kWh) | 90 % volgens een verkoper; Marstek noemt het niet; in de praktijk stopt hij soms rond 11 % | 0,26 kWh (of 0,28 kWh als hij rond 11 % stopt) | Productpagina verkoper (sun.store) / gebruiker |
 | Venus D (2,56 kWh) | Niet als specificatie vermeld; Marstek rekent op de productpagina met 90 % | 0,26 kWh | Productpagina Venus D |
 | Venus E 4.0 (5,024 kWh) | 88 % | 0,60 kWh | Brochure Venus E 4.0 |
 | Venus E Max (10,048 kWh) | 90 % | 1,00 kWh | Brochure Venus E Max |
 | Venus E Pro (2,08 kWh per pakket) | 90 % | 0,21 kWh per pakket | Brochure Venus E Pro |
 
-Tip: kijk bij een volledige ontlading tot welk percentage jouw batterij zakt. Stopt hij rond 10 %, gebruik dan 90 %; stopt hij rond 12 %, gebruik dan 88 %. Dit verandert alleen de **kWh** (bruikbaar en gemeten), niet het **percentage nog beschikbaar**: dat volgt uit de opgegeven capaciteit. Een percentage boven 100 % los je hier dus niet mee op; zie [Problemen oplossen](04-troubleshooting.nl.md).
+Tip: kijk bij een volledige ontlading tot welk percentage jouw batterij zakt. Stopt hij rond 10 %, gebruik dan 90 %; stopt hij rond 12 %, gebruik dan 88 %. Een Venus C die rond 11 % stopt (er blijft dan ongeveer 0,28 kWh in), vul je in met een reserve van 0,28 kWh. Kijk wel of de ontlaadgrens in de Marstek-app op het laagste staat; anders meet je je eigen instelling en niet de reserve van de batterij. Dit verandert alleen de **kWh** (bruikbaar en gemeten), niet het **percentage nog beschikbaar**: dat volgt uit de opgegeven capaciteit. Een percentage boven 100 % los je hier dus niet mee op; zie [Problemen oplossen](04-troubleshooting.nl.md).
 
 ## Bronnen voor de specificaties van de fabrikant
 

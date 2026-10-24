@@ -78,6 +78,14 @@ Changes per version: [CHANGELOG](CHANGELOG.md).
 
 ![Standard cards](screenshots/09-standard-cards.png)
 
+## Support this project
+
+Find this tool useful? Give it a ⭐ on GitHub, so others can find it too.
+
+Want to do a little more? Buy me a coffee:
+
+<a href="https://buymeacoffee.com/satscan"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-satscan-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
+
 ## License
 
 [GPL-3.0](LICENSE)

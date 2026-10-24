@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.5.1 — test version (not released)
+## v0.5.1 — 2026-10-24
 
 **Battery capacity in the sidebar by itself.**
 
@@ -34,6 +34,9 @@
 - The card texts about the colours now use your own settings (tolerance and red limit) instead of the fixed 5 points and 75 %.
 - Supported batteries: the 88 % tip only changes the kWh, not the percentage.
 - New screenshot of the standard cards.
+- Gear on the card: the back arrow on the settings page now takes you back to the dashboard you came from, instead of the integrations overview.
+- Supported batteries: a Venus C that stops around 11 % gets a reserve of 0.28 kWh (thanks to Flori on simon42).
+- README (EN/NL/DE): a *Support this project* section. Find the tool useful? A ⭐ on GitHub helps others find it, and there is a Buy me a coffee button.
 
 ## v0.5.0 — 2026-10-22
 

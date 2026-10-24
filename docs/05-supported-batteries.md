@@ -51,13 +51,13 @@ The Venus A has no preset yet: no public capacity figure was found. Choose *Othe
 |---|---|---|---|
 | Venus E v1 / v2 | 90 % per datasheet; in practice some units stop around 11–12 %, i.e. 88 % | 0.51 kWh (or 0.61 kWh at 88 %) | Venus E datasheet / own measurement |
 | Venus E v3 | 90 % | 0.51 kWh | Venus E 3.0 manual |
-| Venus C (2.56 kWh) | 90 % per a reseller; Marstek does not state it | 0.26 kWh | Reseller product page (sun.store) |
+| Venus C (2.56 kWh) | 90 % per a reseller; Marstek does not state it; in practice it sometimes stops around 11 % | 0.26 kWh (or 0.28 kWh if it stops around 11 %) | Reseller product page (sun.store) / user |
 | Venus D (2.56 kWh) | Not listed as a spec; Marstek's product page calculates with 90 % | 0.26 kWh | Venus D product page |
 | Venus E 4.0 (5.024 kWh) | 88 % | 0.60 kWh | Venus E 4.0 brochure |
 | Venus E Max (10.048 kWh) | 90 % | 1.00 kWh | Venus E Max brochure |
 | Venus E Pro (2.08 kWh per pack) | 90 % | 0.21 kWh per pack | Venus E Pro brochure |
 
-Tip: check down to which percentage your battery goes during a full discharge. If it stops around 10 %, use 90 %; if it stops around 12 %, use 88 %. This only changes the **kWh** (usable and measured), not the **percentage remaining**: that follows from the rated capacity. So it does not fix a percentage above 100 %; see [Troubleshooting](04-troubleshooting.md).
+Tip: check down to which percentage your battery goes during a full discharge. If it stops around 10 %, use 90 %; if it stops around 12 %, use 88 %. A Venus C that stops around 11 % (about 0.28 kWh stays in) gets a reserve of 0.28 kWh. Do check that the discharge limit in the Marstek app is at its lowest; otherwise you measure your own setting, not the battery's reserve. This only changes the **kWh** (usable and measured), not the **percentage remaining**: that follows from the rated capacity. So it does not fix a percentage above 100 %; see [Troubleshooting](04-troubleshooting.md).
 
 ## Sources for the manufacturer specs
 
