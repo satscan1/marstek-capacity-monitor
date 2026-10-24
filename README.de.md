@@ -47,7 +47,21 @@ Starte Home Assistant danach neu und gehe zu **Einstellungen → Dashboards → 
 
 Die Screenshots verwenden **Demodaten**: erfundene Batterien, die zeigen, wie die Karten aussehen, nicht wie eine echte Batterie altert. Mehr Beispiele, von 1 bis 6 Batterien: [Galerie](docs/06-dashboard-gallery.de.md).
 
-![Dashboard](screenshots/gallery/de/3-batterien-diagramm.png)
+**Die Batteriekarte (v0.5.1)**
+
+![Batteriekarte](screenshots/card/de/1-karte.png)
+
+Nach einem Klick auf **Diagramm**: die Kapazität pro Monat, verglichen mit der Herstellerangabe
+
+![Diagramm](screenshots/card/de/2-diagramm.png)
+
+Nach einem Klick auf **SOC**: stimmt die SOC-Anzeige noch?
+
+![SOC](screenshots/card/de/3-soc.png)
+
+Nach einem Klick auf **Zellen**: sind die Zellen noch im Gleichgewicht?
+
+![Zellen](screenshots/card/de/4-zellen.png)
 
 ## Projekt unterstützen
 
