@@ -44,7 +44,7 @@ Wijzigingen per versie: [CHANGELOG](CHANGELOG.md) (Engels).
 
 ## Schermafbeeldingen
 
-> De schermafbeeldingen gebruiken **demogegevens**: vier voorbeeldbatterijen (Venus E v1 via ESPHome, Venus E v2 via LilyGo RS485, Venus E v3 en Venus D via Modbus TCP) met verzonnen metingen (ongeveer 2 % capaciteitsverlies per jaar). Ze laten zien hoe de schermen eruitzien, niet hoe deze modellen in werkelijkheid verouderen.
+> De schermafbeeldingen gebruiken **demogegevens**: vijf voorbeeldbatterijen (Venus C, Venus E v1, v2, v3 en Venus D) met verzonnen metingen (ongeveer 2 % capaciteitsverlies per jaar). Ze laten zien hoe de schermen eruitzien, niet hoe deze modellen in werkelijkheid verouderen.
 
 **1. Batterij toevoegen: de scan vindt de sensoren die je al hebt**
 
