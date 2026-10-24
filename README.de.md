@@ -8,7 +8,7 @@ Behalte in Home Assistant im Blick, ob dein Marstek-Heimspeicher seine Kapazitä
 
 ![Marstek Capacity Monitor](screenshots/infographic-de.png)
 
-## Kurz gesagt
+## Kurz gesagt 
 
 - **Zwei Sensoren, die du schon hast:** Ladezustand und DC-Leistung der Batterie. Die Integration findet sie selbst.
 - **Gemessen bei einer vollständigen Entladung** (≥ 95 % → ≤ 15 %) und verglichen mit der nutzbaren Kapazität im Neuzustand.
