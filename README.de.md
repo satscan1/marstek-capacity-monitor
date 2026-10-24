@@ -45,9 +45,35 @@ Starte Home Assistant danach neu und gehe zu **Einstellungen → Dashboards → 
 
 ## Screenshots
 
-Die Screenshots verwenden **Demodaten**: erfundene Batterien, die zeigen, wie die Karten aussehen, nicht wie eine echte Batterie altert. Mehr Beispiele, von 1 bis 6 Batterien: [Galerie](docs/06-dashboard-gallery.de.md).
+Die Screenshots verwenden **Demodaten**: fünf Beispielbatterien (Venus C, Venus E v1, v2, v3 und Venus D) mit erfundenen Messungen. Sie zeigen, wie die Bildschirme aussehen, nicht wie diese Modelle tatsächlich altern. Mehr Beispiele, von 1 bis 6 Batterien: [Galerie](docs/06-dashboard-gallery.de.md).
 
-**Die Batteriekarte (v0.5.1)**
+**1. Batterie hinzufügen: der Scan findet die Sensoren, die du schon hast**
+
+![Scan](screenshots/de/01-scan.png)
+
+**2. Vorgeschlagene Sensoren prüfen (Zellspannung und Zelltemperatur sind optional)**
+
+![Sensoren](screenshots/de/02-sensors.png)
+
+**3. Modell und Datum der Inbetriebnahme wählen: die Herstellerdaten werden für dich ausgefüllt**
+
+![Modell](screenshots/de/03-model.png)
+
+**4. Alles später unter Konfigurieren ändern: Herstellerdaten und Garantie…**
+
+![Herstellerdaten](screenshots/de/03-factory-data.png)
+
+**…und weiter unten das Vorzeichen des Leistungssensors, Hinweise, der Menüeintrag in der Seitenleiste und die Empfindlichkeit für SOC-Drift und Zellkalibrierung**
+
+![Einstellungen](screenshots/de/04-settings.png)
+
+**5. Ein Gerät pro Batterie**
+
+![Integration](screenshots/de/05-integration.png)
+
+![Gerät](screenshots/de/06-device.png)
+
+**6. Die Batteriekarte (v0.5.1)**
 
 ![Batteriekarte](screenshots/card/de/1-karte.png)
 

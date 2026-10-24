@@ -44,21 +44,25 @@ Wijzigingen per versie: [CHANGELOG](CHANGELOG.md) (Engels).
 
 ## Schermafbeeldingen
 
-> De schermafbeeldingen gebruiken **demogegevens**: vier voorbeeldbatterijen (Venus E v1 via ESPHome, Venus E v2 via LilyGo RS485, Venus E v3 en Venus D via Modbus TCP) met verzonnen metingen (ongeveer 2 % capaciteitsverlies per jaar). Ze laten zien hoe de schermen eruitzien, niet hoe deze modellen in werkelijkheid verouderen.
+> De schermafbeeldingen gebruiken **demogegevens**: vijf voorbeeldbatterijen (Venus C, Venus E v1, v2, v3 en Venus D) met verzonnen metingen (ongeveer 2 % capaciteitsverlies per jaar). Ze laten zien hoe de schermen eruitzien, niet hoe deze modellen in werkelijkheid verouderen.
 
 **1. Batterij toevoegen: de scan vindt de sensoren die je al hebt**
 
 ![Scan](screenshots/01-scan.png)
 
-**2. Voorgestelde sensoren controleren**
+**2. Voorgestelde sensoren controleren (celspanning en celtemperatuur zijn optioneel)**
 
 ![Sensoren](screenshots/02-sensors.png)
 
-**3. Fabrieksgegevens (standaardwaarden uit de datasheet van de Venus E; hier het instellingenscherm van een bestaande batterij)**
+**3. Kies het model en de installatiedatum: de fabrieksgegevens worden voor je ingevuld**
+
+![Model](screenshots/03-model.png)
+
+**4. Alles later aanpassen onder Configureren: fabrieksgegevens en garantie…**
 
 ![Fabrieksgegevens](screenshots/03-factory-data.png)
 
-**4. Instellingen later aanpassen, ook plus/min van de vermogensensor**
+**…en verderop plus/min van de vermogensensor, meldingen, het menu-item in de zijbalk en de gevoeligheid voor SOC-drift en celkalibratie**
 
 ![Instellingen](screenshots/04-settings.png)
 

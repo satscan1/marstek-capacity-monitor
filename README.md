@@ -44,21 +44,25 @@ Changes per version: [CHANGELOG](CHANGELOG.md).
 
 ## Screenshots
 
-> The screenshots use **demo data**: four example batteries (Venus E v1 via ESPHome, Venus E v2 via LilyGo RS485, Venus E v3 and Venus D via Modbus TCP) with made-up measurements (about 2 % capacity loss per year). They show what the screens look like, not how these models actually age.
+> The screenshots use **demo data**: five example batteries (Venus C, Venus E v1, v2, v3 and Venus D) with made-up measurements (about 2 % capacity loss per year). They show what the screens look like, not how these models actually age.
 
 **1. Adding a battery: the scan finds the sensors you already have**
 
 ![Scan](screenshots/01-scan.png)
 
-**2. Check the proposed sensors**
+**2. Check the proposed sensors (cell voltage and cell temperature are optional)**
 
 ![Sensors](screenshots/02-sensors.png)
 
-**3. Factory data (defaults from the Venus E datasheet; this view is the settings screen with an existing battery)**
+**3. Pick the model and the installation date: the factory data are filled in for you**
+
+![Model](screenshots/03-model.png)
+
+**4. Change everything later under Configure: factory data and warranty…**
 
 ![Factory data](screenshots/03-factory-data.png)
 
-**4. Change settings later, including the sign of the power sensor**
+**…and further down the sign of the power sensor, notifications, the sidebar menu item and the sensitivity for SOC drift and cell calibration**
 
 ![Settings](screenshots/04-settings.png)
 
