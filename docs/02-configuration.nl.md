@@ -8,7 +8,7 @@ Alle waarden stel je in bij het toevoegen van een batterij. Later wijzigen kan v
 |---|---|---|
 | Opgegeven capaciteit | 5,12 kWh | Totaal in de cellen volgens de fabrikant |
 | Interne reserve | 0,51 kWh | Deel dat de batterij nooit afgeeft; opgegeven capaciteit × (100 % − ontlaaddiepte). 0,51 = 90 %, 0,61 = 88 % |
-| Model | – | Venus E v1/v2, Venus E v3, Venus E 4.0, Venus E Max, Venus E Pro, Venus D of ander model. Vult bij het toevoegen de fabrieksgegevens in; zie [Ondersteunde batterijen](05-supported-batteries.nl.md#fabrieksgegevens-per-model) |
+| Model | – | Venus E v1/v2, Venus E v3, Venus E 4.0, Venus E Max, Venus E Pro, Venus C, Venus D of ander model. Een Venus C kan zich melden als Venus E v1/v2: kies dan zelf Venus C. Vult bij het toevoegen de fabrieksgegevens in; zie [Ondersteunde batterijen](05-supported-batteries.nl.md#fabrieksgegevens-per-model) |
 | Installatiedatum | – | Voor de leeftijd en het einde van de garantietermijn |
 | Garantietermijn | 10 jaar | Alleen ter informatie op de kaart |
 | Opgegeven aantal cycli | 6.000 | Specificatie fabrikant |
@@ -21,6 +21,7 @@ Alle waarden stel je in bij het toevoegen van een batterij. Later wijzigen kan v
 | Hoogste / laagste celspanning | leeg | Optioneel, voor de celbalans. Vul beide in of geen van beide. Alleen cel**spanningen**: sommige koppelingen geven MOSFET-temperaturen door als "celtemperatuur" |
 | Gevoeligheid SOC-drift / celkalibratie | Normaal | Uit (alleen op de kaart), Ruim (SOC 8 %, cellen 3× normaal), Normaal (5 %, 2×) of Extra (3 %, 1,5×). Zie [Hoe het werkt](03-how-it-works.nl.md#seintjes-en-wegklikken-vanaf-05) |
 | Seintjes | aan | Bericht op je telefoon en onder Reparaties bij SOC-drift of celkalibratie, alleen bij een patroon. Uit = geen berichten; de kaart laat het wel zien. Zie [Hoe het werkt](03-how-it-works.nl.md#seintjes-en-wegklikken-vanaf-05) |
+| Menu-item in de zijbalk | aan | Vanaf 0.5.1: **Batterijcapaciteit** in de zijbalk, met al je batterijen. Geldt voor het hele menu-item: uit bij één batterij = geen menu-item. Zie [Installatie](01-installation.nl.md#vanzelf-in-de-zijbalk-vanaf-051) |
 
 ## Sensoren
 

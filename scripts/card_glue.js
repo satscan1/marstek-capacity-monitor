@@ -47,6 +47,34 @@ function mcLang(hass, config) {
   return l.startsWith("nl") ? "nl" : l.startsWith("de") ? "de" : "en";
 }
 
+// Back from the settings: the arrow on the integration page always goes to the
+// integrations overview. When the settings were opened with the gear on a card,
+// that arrow brings you back to the dashboard instead. One time only; any other
+// page in between forgets it.
+const MC_SETTINGS_PATH = `/config/integrations/integration/${MC_DOMAIN}`;
+const MC_OVERVIEW_PATH = "/config/integrations/dashboard";
+
+function mcRememberBack(target) {
+  if (!String(target).startsWith(MC_SETTINGS_PATH)) return;
+  window.__mcBack = { from: location.pathname + location.search, at: Date.now() };
+  if (window.__mcBackWatch) return;
+  window.__mcBackWatch = true;
+  const check = () => {
+    const back = window.__mcBack;
+    if (!back) return;
+    const path = location.pathname;
+    if (path === MC_SETTINGS_PATH) return;
+    window.__mcBack = null;
+    if (path === MC_OVERVIEW_PATH && Date.now() - back.at < 3600000) {
+      history.replaceState(null, "", back.from);
+      window.dispatchEvent(new CustomEvent("location-changed", { detail: { replace: true } }));
+    }
+  };
+  const later = () => setTimeout(check, 0);
+  window.addEventListener("location-changed", later);
+  window.addEventListener("popstate", later);
+}
+
 function batteryBody(states, variables, ctx) {
 /*__BATTERY_BODY__*/
 }
@@ -157,6 +185,7 @@ class MarstekCapacityCard extends MarstekCapacityBase {
   _action(act) {
     const nav = /pushState\(null,'','([^']+)'\)/.exec(act);
     if (nav) {
+      mcRememberBack(nav[1]);
       history.pushState(null, "", nav[1]);
       window.dispatchEvent(new CustomEvent("location-changed"));
       return;
@@ -251,12 +280,14 @@ class MarstekCapacityDashboardStrategy {
     const T = MC_DASH_TEXT[mcLang(hass, config)] || MC_DASH_TEXT.en;
     const found = mcBatteries(hass).slice(0, 6);
     const n = found.length;
+    // A fixed language for the dashboard (lang: nl/de/en) also goes to the cards
+    const lang = config && config.lang ? { lang: config.lang } : {};
     const battery = (b, columns) => ({
-      type: "custom:marstek-capacity-card", battery: b.id, name: b.name,
+      type: "custom:marstek-capacity-card", battery: b.id, name: b.name, ...lang,
       grid_options: { columns, rows: "auto" },
     });
     const overview = (columns) => ({
-      type: "custom:marstek-capacity-overview-card",
+      type: "custom:marstek-capacity-overview-card", ...lang,
       grid_options: { columns, rows: "auto" },
     });
     let cards;
@@ -284,10 +315,22 @@ class MarstekCapacityDashboardStrategy {
   }
 }
 
-if (!customElements.get("marstek-capacity-card")) {
-  customElements.define("marstek-capacity-card", MarstekCapacityCard);
-  customElements.define("marstek-capacity-overview-card", MarstekCapacityOverviewCard);
-  customElements.define("ll-strategy-dashboard-marstek-capacity", class extends HTMLElement {
+// Define the cards and the dashboard only once Home Assistant has started.
+// This file is loaded next to the HA app, not after it. HA installs a polyfill
+// (scoped custom element registry) that replaces window.customElements in
+// browsers without that feature (Firefox, some Chrome/Android versions).
+// Anything defined before that is invisible to HA: "Timeout waiting for
+// strategy element ll-strategy-dashboard-marstek-capacity to be registered".
+// <home-assistant> is defined right after the polyfill, so wait for it.
+// Always the registry HA uses right now (the polyfill replaces it).
+const mcRegistry = () => (typeof window !== "undefined" && window.customElements) || customElements;
+
+function mcDefine() {
+  const registry = mcRegistry();
+  if (registry.get("marstek-capacity-card")) return;
+  registry.define("marstek-capacity-card", MarstekCapacityCard);
+  registry.define("marstek-capacity-overview-card", MarstekCapacityOverviewCard);
+  registry.define("ll-strategy-dashboard-marstek-capacity", class extends HTMLElement {
     static generate(config, hass) {
       return MarstekCapacityDashboardStrategy.generate(config, hass);
     }
@@ -326,4 +369,12 @@ if (!customElements.get("marstek-capacity-card")) {
     documentationURL: `${MC_DOCS}/06-dashboard-gallery.md`,
   });
   console.info(`%c MARSTEK-CAPACITY-CARD %c ${MC_VERSION} `, "background:#42a5f5;color:#000", "");
+}
+
+if (mcRegistry().get("home-assistant") || !mcRegistry().whenDefined) {
+  mcDefine();
+} else {
+  mcRegistry().whenDefined("home-assistant").then(mcDefine);
+  // Safety net: a page without <home-assistant> still gets the cards.
+  setTimeout(mcDefine, 10000);
 }

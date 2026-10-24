@@ -51,6 +51,14 @@ MAX_RECORDS = 500  # other swings kept (recent context only)
 MAX_FULL_RECORDS = 3000  # full discharges are kept for the whole warranty period
 TREND_MONTHS = 120  # monthly trend over 10 years (warranty period)
 HISTORY_ITEMS = 10
+# SOC meter at the edges (0.5.1): energy per SOC point in the first or last
+# 3 points of a swing compared with the middle (30-80 %). A battery whose SOC
+# stands still at the top or bottom while energy keeps flowing makes the
+# capacity look too high (or low); such a measurement gets an open dot.
+EDGE_PTS = 3
+EDGE_RATIO = 2.0
+EDGE_MID = (30.0, 80.0)
+EDGE_MIN_MID_STEPS = 5
 
 
 @dataclass
@@ -115,6 +123,12 @@ def expected_pct(spec: BatterySpec, on: date, cycles: float) -> float:
     """Expected capacity. Only the factory cycle line counts: Marstek gives
     no capacity guarantee in years. `on` is kept for future use."""
     return cycle_expected_pct(spec, cycles)
+
+
+# About half of the usable capacity: more likely a wrong model than a battery
+# that lost half its capacity (a Venus C, 2.56 kWh, set up as a Venus E,
+# 5.12 kWh, measures about 50 %). Shown as "check the model", not red.
+CHECK_MODEL_PCT = (40.0, 60.0)
 
 
 def classify(spec: BatterySpec, pct: float | None, expected: float) -> str:
@@ -193,6 +207,40 @@ def new_tracker_state() -> dict[str, Any]:
         "sign_flipped": False,
         "bridge": None,  # {"ts", "p"}: last power before a restart, to bridge the gap
     }
+
+
+def edge_ratio(steps: list[list[float]] | None, direction: str) -> float | None:
+    """How much more energy per SOC point went in or out in the first or last
+    EDGE_PTS points of a swing than in the middle (30-80 %).
+
+    1.0 = the SOC meter kept pace all the way; 2.0 or more = at the top or the
+    bottom the SOC stood (nearly) still while energy kept flowing, so the
+    capacity of this swing is off. None = not enough steps to tell."""
+    if not steps or len(steps) < EDGE_MIN_MID_STEPS + 2:
+        return None
+    k = 1 if direction == "charge" else 2
+    rates = []
+    for a, b in zip(steps, steps[1:]):
+        d = abs(b[0] - a[0])
+        if d > 0 and EDGE_MID[0] <= min(a[0], b[0]) and max(a[0], b[0]) <= EDGE_MID[1]:
+            rates.append((b[k] - a[k]) / d)
+    if len(rates) < EDGE_MIN_MID_STEPS:
+        return None
+    mid = median(rates)
+    if mid <= 0:
+        return None
+
+    def rate(first: list[float], others: list[list[float]]) -> float | None:
+        for st in others:
+            d = abs(st[0] - first[0])
+            if d >= EDGE_PTS:
+                return abs(st[k] - first[k]) / d
+        return None
+
+    top = rate(steps[0], steps[1:])
+    bottom = rate(steps[-1], list(reversed(steps[:-1])))
+    edges = [r for r in (top, bottom) if r is not None]
+    return round(max(edges) / mid, 2) if edges else None
 
 
 class SwingTracker:
@@ -350,11 +398,15 @@ class SwingTracker:
             if abs(soc - sw["start"]["soc"]) >= 1:
                 sw["direction"] = "charge" if soc > sw["start"]["soc"] else "discharge"
                 sw["extreme"] = self._point(soc, ts)
+                sw["steps"] = [self._step(sw["start"]), self._step(sw["extreme"])]
             return None
 
         rising = sw["direction"] == "charge"
         if (rising and soc > ext["soc"]) or (not rising and soc < ext["soc"]):
             sw["extreme"] = self._point(soc, ts)
+            steps = sw.get("steps")
+            if steps is not None and len(steps) < 200:
+                steps.append(self._step(sw["extreme"]))
             return None
 
         if abs(ext["soc"] - soc) < HYSTERESIS_PCT:
@@ -365,13 +417,20 @@ class SwingTracker:
         record = self._make_record(sw)
         if record is not None and flipped:
             record["sign_corrected"] = True
+        new_ext = self._point(soc, ts)
         self.s["swing"] = {
             "direction": "discharge" if rising else "charge",
             "start": dict(ext),
-            "extreme": self._point(soc, ts),
+            "extreme": new_ext,
             "valid": True,
+            "steps": [self._step(ext), self._step(new_ext)],
         }
         return record
+
+    @staticmethod
+    def _step(pt: dict[str, float]) -> list[float]:
+        """[soc, energy charged, energy discharged] at a new SOC extreme."""
+        return [pt["soc"], round(pt["e_charge"], 4), round(pt["e_discharge"], 4)]
 
     def _check_sign(self, sw: dict[str, Any]) -> bool:
         """Auto-detect whether the power sensor reports charging as negative.
@@ -414,6 +473,8 @@ class SwingTracker:
         for pt in (sw.get("start"), sw.get("extreme")):
             if pt:
                 pt["e_charge"], pt["e_discharge"] = pt["e_discharge"], pt["e_charge"]
+        for st in sw.get("steps") or []:
+            st[1], st[2] = st[2], st[1]
         if self.s["power_w"] is not None:
             self.s["power_w"] = -self.s["power_w"]
         if self.s.get("bridge"):
@@ -457,6 +518,7 @@ class SwingTracker:
             "valid": bool(sw.get("valid", True)) and e > 0,
             "reason": sw.get("reason"),
             "bridged_s": sw.get("bridged_s"),
+            "edge_ratio": edge_ratio(sw.get("steps"), sw["direction"]),
             "cumulative_discharge_kwh": round(self.s["e_discharge_kwh"], 3),
         }
 
@@ -590,6 +652,8 @@ def evaluate(
     w_end = spec.warranty_end
 
     status = classify(spec, measured_pct, exp)
+    if measured_pct is not None and CHECK_MODEL_PCT[0] <= measured_pct <= CHECK_MODEL_PCT[1]:
+        status = "check_model"
 
     # Monthly trend, newest month first
     by_month: dict[str, list[dict[str, Any]]] = {}

@@ -1,5 +1,43 @@
 # Changelog
 
+## v0.5.1 — 2026-10-24
+
+**Battery capacity in the sidebar by itself.**
+
+- After adding the first battery, **Battery capacity** (NL *Batterijcapaciteit*, DE *Batteriekapazität*) appears in the sidebar, with all your batteries arranged for you (1 to 6). Nothing to set up. It is read-only; for your own layout, make a dashboard from *Marstek battery capacity* under Add dashboard as before.
+- Off under **Configure → Menu item in the sidebar**. Off for one battery = no menu item. An existing dashboard of your own at `/marstek-capacity` is left alone.
+- The one-click dashboard with `lang: nl` (or `de`, `en`) now also gives that language to the cards, not only to the title.
+
+**Above 100 %: explained instead of a surprise.**
+
+- A measured value above 100 % now reads *provisional* on the card (after 3 measurements: *check*), with the explanation when you point at it. Higher than new is hardly possible; it usually comes from the battery's SOC meter standing still at the top or bottom while energy keeps flowing.
+- The monitor now sees that itself: if the first or last 3 SOC points of a discharge cost 2× (or more) the energy per point of the middle (30–80 %), the measurement is shown as an open dot (○ less reliable) with the reason when you point at it. Applies to new measurements.
+- Troubleshooting (EN/NL/DE): the row *Percentage above 100 %* is rewritten. The old advice (adjust the internal reserve) was wrong: the reserve only changes the kWh, not the percentage.
+
+- Easier to find: tap or click *provisional ⓘ* (or *check the model ⓘ*) on the card and a small window explains it, also on a phone. A value above 100 % is shown in grey instead of green: not certain yet. The overview has an ⓘ after such a value.
+
+**Venus C.**
+
+- New model: **Venus C** (2.56 kWh, 90 %, more than 6,000 cycles; 80 % after 6,000 assumed, as for the Venus E). Same Modbus registers as the Venus E v1/v2. Picked by itself when its name says Venus C.
+- A Venus C can report the same model code as a Venus E v1/v2 (HMG). The model step now says: Venus C? Pick Venus C, also when Venus E v1 / v2 is already selected.
+- Safety net: a measurement of about half (40–60 %) is no longer red *report to Marstek* but orange **Check the model**, with a message under Settings → Repairs on how to change it. A Venus C set up as a Venus E measures about 50 %.
+- Supported batteries (EN/NL) and Troubleshooting (EN/NL/DE) updated.
+
+**Dashboard in Firefox and on Android.**
+
+- Fix: *Timeout waiting for strategy element ll-strategy-dashboard-marstek-capacity to be registered* in Firefox and in Chrome or Brave on Android (#5). The card file was ready before Home Assistant itself and registered its cards and dashboard in a place Home Assistant no longer looks once it starts. The card now waits until Home Assistant has started.
+
+**Guides and smaller things.**
+
+- Installation (EN/NL/DE): the sidebar item, how to turn it off and how to bring a hidden item back. Venus C in the model lists (README, Installation, Configuration).
+- Troubleshooting (EN/NL/DE): no measurement while the battery often runs far down (charging back 3 points ends the swing; thanks to @brauwers1981 for the tip in #1), sidebar item missing, nothing under Resources is correct, and the timeout error in Firefox/Android.
+- The card texts about the colours now use your own settings (tolerance and red limit) instead of the fixed 5 points and 75 %.
+- Supported batteries: the 88 % tip only changes the kWh, not the percentage.
+- New screenshot of the standard cards.
+- Gear on the card: the back arrow on the settings page now takes you back to the dashboard you came from, instead of the integrations overview.
+- Supported batteries: a Venus C that stops around 11 % gets a reserve of 0.28 kWh (thanks to Flori on simon42).
+- README (EN/NL/DE): a *Support this project* section. Find the tool useful? A ⭐ on GitHub helps others find it, and there is a Ko-fi button.
+
 ## v0.5.0 — 2026-10-22
 
 **SOC drift and cell calibration: the monitor sees when the SOC meter drifts or the cells get out of balance, and tells you what to do. Plus three new models.**

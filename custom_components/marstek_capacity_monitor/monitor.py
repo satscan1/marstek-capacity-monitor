@@ -539,8 +539,36 @@ class BatteryMonitor:
             self._tops(),
             self.soc_since,
         )
+        self._check_model_issue()
         self._evaluate_health()
         async_dispatcher_send(self.hass, self.signal)
+
+    @property
+    def check_model_issue_id(self) -> str:
+        return f"check_model_{self.entry.entry_id}"
+
+    def _check_model_issue(self) -> None:
+        """About half of the set capacity measured: ask whether the model is
+        right (a Venus C set up as a Venus E), under Settings -> Repairs."""
+        if self.result.get("status") != "check_model":
+            ir.async_delete_issue(self.hass, DOMAIN, self.check_model_issue_id)
+            return
+        lang = (self.hass.config.language or "en")[:2]
+        dec = "," if lang in ("nl", "de") else "."
+        ir.async_create_issue(
+            self.hass,
+            DOMAIN,
+            self.check_model_issue_id,
+            is_fixable=False,
+            is_persistent=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key="check_model",
+            translation_placeholders={
+                "name": self.entry.title,
+                "pct": f"{self.result.get('measured_pct') or 0:.1f}".replace(".", dec),
+                "kwh": f"{self.spec.nominal_kwh:.2f}".replace(".", dec),
+            },
+        )
 
     # -- advice: "let op" and advice messages -------------------------------
 
