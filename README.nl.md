@@ -1,6 +1,6 @@
 # Marstek Capacity Monitor
 
-*[English](README.md) · [Deutsch](README.de.md)*
+*[English](README.md) · [Deutsch](README.de.md)* 
 
 Volg in Home Assistant of je Marstek-thuisbatterij zijn capaciteit houdt, gemeten aan de **DC-kant** (de batterij zelf, niet het stopcontact). Tot **6 batterijen**.
 
