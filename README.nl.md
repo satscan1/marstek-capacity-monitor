@@ -68,11 +68,21 @@ Wijzigingen per versie: [CHANGELOG](CHANGELOG.md) (Engels).
 
 ![Apparaat](screenshots/06-device.png)
 
-**6. De kaarten: overzicht en batterijkaarten, met het SOC-venster open (Nederlands en Engels). Meer voorbeelden, van 1 tot 6 batterijen: [galerij](docs/06-dashboard-gallery.nl.md)**
+**6. De batterijkaart (v0.5.1). Meer voorbeelden, van 1 tot 6 batterijen: [galerij](docs/06-dashboard-gallery.nl.md)**
 
-![Dashboard NL](screenshots/08-dashboard-nl.png)
+![Batterijkaart](screenshots/card/nl/1-kaart.png)
 
-![Dashboard EN](screenshots/07-dashboard-en.png)
+Na een klik op **Grafiek**: de capaciteit per maand, afgezet tegen de specificatie
+
+![Grafiek](screenshots/card/nl/2-grafiek.png)
+
+Na een klik op **SOC**: klopt de SOC-meter nog?
+
+![SOC](screenshots/card/nl/3-soc.png)
+
+Na een klik op **Cellen**: zijn de cellen nog in balans?
+
+![Cellen](screenshots/card/nl/4-cellen.png)
 
 **7. Standaardkaarten (geen HACS nodig)**
 
