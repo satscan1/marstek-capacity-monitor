@@ -6,7 +6,7 @@ Behalte in Home Assistant im Blick, ob dein Marstek-Heimspeicher seine Kapazitä
 
 > **Hält meine Batterie ihre Kapazität, verglichen mit der Herstellerangabe?**
 
-![Marstek Capacity Monitor](screenshots/infographic-de.png)
+![Marstek Capacity Monitor](https://raw.githubusercontent.com/satscan1/marstek-capacity-monitor/main/screenshots/infographic-de.png)
 
 ## Kurz gesagt 
 
