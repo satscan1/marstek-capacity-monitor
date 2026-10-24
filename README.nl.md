@@ -50,15 +50,19 @@ Wijzigingen per versie: [CHANGELOG](CHANGELOG.md) (Engels).
 
 ![Scan](screenshots/01-scan.png)
 
-**2. Voorgestelde sensoren controleren**
+**2. Voorgestelde sensoren controleren (celspanning en celtemperatuur zijn optioneel)**
 
 ![Sensoren](screenshots/02-sensors.png)
 
-**3. Fabrieksgegevens (standaardwaarden uit de datasheet van de Venus E; hier het instellingenscherm van een bestaande batterij)**
+**3. Kies het model en de installatiedatum: de fabrieksgegevens worden voor je ingevuld**
+
+![Model](screenshots/03-model.png)
+
+**4. Alles later aanpassen onder Configureren: fabrieksgegevens en garantie…**
 
 ![Fabrieksgegevens](screenshots/03-factory-data.png)
 
-**4. Instellingen later aanpassen, ook plus/min van de vermogensensor**
+**…en verderop plus/min van de vermogensensor, meldingen, het menu-item in de zijbalk en de gevoeligheid voor SOC-drift en celkalibratie**
 
 ![Instellingen](screenshots/04-settings.png)
 

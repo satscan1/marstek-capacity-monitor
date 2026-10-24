@@ -50,15 +50,19 @@ Changes per version: [CHANGELOG](CHANGELOG.md).
 
 ![Scan](screenshots/01-scan.png)
 
-**2. Check the proposed sensors**
+**2. Check the proposed sensors (cell voltage and cell temperature are optional)**
 
 ![Sensors](screenshots/02-sensors.png)
 
-**3. Factory data (defaults from the Venus E datasheet; this view is the settings screen with an existing battery)**
+**3. Pick the model and the installation date: the factory data are filled in for you**
+
+![Model](screenshots/03-model.png)
+
+**4. Change everything later under Configure: factory data and warranty…**
 
 ![Factory data](screenshots/03-factory-data.png)
 
-**4. Change settings later, including the sign of the power sensor**
+**…and further down the sign of the power sensor, notifications, the sidebar menu item and the sensitivity for SOC drift and cell calibration**
 
 ![Settings](screenshots/04-settings.png)
 
