@@ -84,9 +84,9 @@ De installatieschermen van Home Assistant zijn in het Engels gemaakt; in een Ned
 
 Vind je dit een bruikbare tool? Geef het een ⭐ op GitHub, dan vinden anderen hem ook.
 
-Wil je iets extra's doen? Trakteer me op een kop koffie:
+Wil je iets extra's doen? Steun me via Ko-fi:
 
-<a href="https://buymeacoffee.com/satscan"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-satscan-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
+<a href="https://ko-fi.com/satscan"><img src="https://img.shields.io/badge/Ko--fi-satscan-FF5E5B?logo=kofi&logoColor=white" alt="Support me on Ko-fi"></a>
 
 ## Licentie
 
