@@ -49,6 +49,14 @@ Die Screenshots verwenden **Demodaten**: erfundene Batterien, die zeigen, wie di
 
 ![Dashboard](screenshots/gallery/de/3-batterien-diagramm.png)
 
+## Projekt unterstützen
+
+Findest du das Tool nützlich? Gib ihm einen ⭐ auf GitHub, damit andere es auch finden.
+
+Möchtest du noch etwas mehr tun? Spendier mir einen Kaffee:
+
+<a href="https://buymeacoffee.com/satscan"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-satscan-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
+
 ## Lizenz
 
 [GPL-3.0](LICENSE)

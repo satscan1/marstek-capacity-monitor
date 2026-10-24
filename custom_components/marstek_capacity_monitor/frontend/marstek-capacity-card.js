@@ -47,6 +47,34 @@ function mcLang(hass, config) {
   return l.startsWith("nl") ? "nl" : l.startsWith("de") ? "de" : "en";
 }
 
+// Back from the settings: the arrow on the integration page always goes to the
+// integrations overview. When the settings were opened with the gear on a card,
+// that arrow brings you back to the dashboard instead. One time only; any other
+// page in between forgets it.
+const MC_SETTINGS_PATH = `/config/integrations/integration/${MC_DOMAIN}`;
+const MC_OVERVIEW_PATH = "/config/integrations/dashboard";
+
+function mcRememberBack(target) {
+  if (!String(target).startsWith(MC_SETTINGS_PATH)) return;
+  window.__mcBack = { from: location.pathname + location.search, at: Date.now() };
+  if (window.__mcBackWatch) return;
+  window.__mcBackWatch = true;
+  const check = () => {
+    const back = window.__mcBack;
+    if (!back) return;
+    const path = location.pathname;
+    if (path === MC_SETTINGS_PATH) return;
+    window.__mcBack = null;
+    if (path === MC_OVERVIEW_PATH && Date.now() - back.at < 3600000) {
+      history.replaceState(null, "", back.from);
+      window.dispatchEvent(new CustomEvent("location-changed", { detail: { replace: true } }));
+    }
+  };
+  const later = () => setTimeout(check, 0);
+  window.addEventListener("location-changed", later);
+  window.addEventListener("popstate", later);
+}
+
 function batteryBody(states, variables, ctx) {
   // Colours: dark (the original look) or light, following the Home Assistant theme
   const dark = variables.dark ?? ((typeof hass !== 'undefined' && hass && hass.themes) ? hass.themes.darkMode !== false : true);
@@ -615,6 +643,7 @@ class MarstekCapacityCard extends MarstekCapacityBase {
   _action(act) {
     const nav = /pushState\(null,'','([^']+)'\)/.exec(act);
     if (nav) {
+      mcRememberBack(nav[1]);
       history.pushState(null, "", nav[1]);
       window.dispatchEvent(new CustomEvent("location-changed"));
       return;
