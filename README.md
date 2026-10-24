@@ -68,11 +68,21 @@ Changes per version: [CHANGELOG](CHANGELOG.md).
 
 ![Device](screenshots/06-device.png)
 
-**6. The cards: overview and battery cards, with the SOC window open (English and Dutch). More examples, from 1 to 6 batteries: [gallery](docs/06-dashboard-gallery.md)**
+**6. The battery card (v0.5.1). More examples, from 1 to 6 batteries: [gallery](docs/06-dashboard-gallery.md)**
 
-![Dashboard](screenshots/07-dashboard-en.png)
+![Battery card](screenshots/card/en/1-card.png)
 
-![Dashboard NL](screenshots/08-dashboard-nl.png)
+After a click on **Chart**: remaining capacity per month, against the manufacturer spec
+
+![Chart](screenshots/card/en/2-chart.png)
+
+After a click on **SOC**: is the SOC meter still right?
+
+![SOC](screenshots/card/en/3-soc.png)
+
+After a click on **Cells**: are the cells still in balance?
+
+![Cells](screenshots/card/en/4-cells.png)
 
 **7. Standard cards (no HACS needed)**
 
