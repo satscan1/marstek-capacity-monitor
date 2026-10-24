@@ -80,6 +80,14 @@ Wijzigingen per versie: [CHANGELOG](CHANGELOG.md) (Engels).
 
 De installatieschermen van Home Assistant zijn in het Engels gemaakt; in een Nederlandstalige HA staan dezelfde schermen in het Nederlands.
 
+## Steun dit project
+
+Vind je dit een bruikbare tool? Geef het een ⭐ op GitHub, dan vinden anderen hem ook.
+
+Wil je iets extra's doen? Trakteer me op een kop koffie:
+
+<a href="https://buymeacoffee.com/satscan"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-satscan-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
+
 ## Licentie
 
 [GPL-3.0](LICENSE)
