@@ -1,6 +1,6 @@
 # Marstek Capacity Monitor
 
-*[English](README.md) · [Nederlands](README.nl.md)*
+*[English](README.md) · [Nederlands](README.nl.md)* 
 
 Behalte in Home Assistant im Blick, ob dein Marstek-Heimspeicher seine Kapazität hält, gemessen auf der **DC-Seite** (an der Batterie selbst, nicht an der Steckdose). Bis zu **6 Batterien**.
 
