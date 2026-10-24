@@ -10,7 +10,7 @@ Behalte in Home Assistant im Blick, ob dein Marstek-Heimspeicher seine Kapazitä
 
 ## Kurz gesagt 
 
-- **Zwei Sensoren, die du schon hast:** Ladezustand und DC-Leistung der Batterie. Die Integration findet sie selbst.
+- **Zwei Sensoren, die du schon hast:** Ladezustand und DC-Leistung der Batterie. Die Integration findet sie selbst. 
 - **Gemessen bei einer vollständigen Entladung** (≥ 95 % → ≤ 15 %) und verglichen mit der nutzbaren Kapazität im Neuzustand.
 - **Herstellerangabe** als Maßstab: 80 % nach 6000 Zyklen. Grün im Rahmen der Herstellerangabe, orange darunter, rot bei 75 % oder weniger: über die Marstek-App melden.
 - **Jede Anbindung, die Ladezustand und DC-Leistung liefert:** ESPHome, Modbus (RS485 oder LAN) oder eine andere Integration. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus C, Venus D.
