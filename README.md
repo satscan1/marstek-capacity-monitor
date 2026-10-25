@@ -1,5 +1,7 @@
 # Marstek Capacity Monitor
 
+[![Release](https://img.shields.io/github/v/release/satscan1/marstek-capacity-monitor)](https://github.com/satscan1/marstek-capacity-monitor/releases/latest) [![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=satscan1&repository=marstek-capacity-monitor&category=integration) [![Stars](https://img.shields.io/github/stars/satscan1/marstek-capacity-monitor?style=flat)](https://github.com/satscan1/marstek-capacity-monitor/stargazers) [![Ko-fi](https://img.shields.io/badge/Ko--fi-satscan-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/satscan)
+
 *[Nederlands](README.nl.md) · [Deutsch](README.de.md)*
 
 Track in Home Assistant whether your Marstek home battery keeps its capacity, measured on the **DC side** (the battery itself, not the wall socket). Up to **6 batteries**.
@@ -96,9 +98,7 @@ After a click on **Cells**: are the cells still in balance?
 
 Find this tool useful? Give it a ⭐ on GitHub, so others can find it too.
 
-Want to do a little more? Support me on Ko-fi:
-
-<a href="https://ko-fi.com/satscan"><img src="https://img.shields.io/badge/Ko--fi-satscan-FF5E5B?logo=kofi&logoColor=white" alt="Support me on Ko-fi"></a>
+Want to do a little more? Support me on [Ko-fi](https://ko-fi.com/satscan).
 
 ## License
 
