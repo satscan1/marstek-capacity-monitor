@@ -1,5 +1,7 @@
 # Marstek Capacity Monitor
 
+[![Release](https://img.shields.io/github/v/release/satscan1/marstek-capacity-monitor)](https://github.com/satscan1/marstek-capacity-monitor/releases/latest) [![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=satscan1&repository=marstek-capacity-monitor&category=integration) [![Stars](https://img.shields.io/github/stars/satscan1/marstek-capacity-monitor?style=flat)](https://github.com/satscan1/marstek-capacity-monitor/stargazers) [![Ko-fi](https://img.shields.io/badge/Ko--fi-satscan-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/satscan)
+
 *[English](README.md) · [Deutsch](README.de.md)* 
 
 Volg in Home Assistant of je Marstek-thuisbatterij zijn capaciteit houdt, gemeten aan de **DC-kant** (de batterij zelf, niet het stopcontact). Tot **6 batterijen**.
@@ -98,9 +100,7 @@ De installatieschermen van Home Assistant zijn in het Engels gemaakt; in een Ned
 
 Vind je dit een bruikbare tool? Geef het een ⭐ op GitHub, dan vinden anderen hem ook.
 
-Wil je iets extra's doen? Steun me via Ko-fi:
-
-<a href="https://ko-fi.com/satscan"><img src="https://img.shields.io/badge/Ko--fi-satscan-FF5E5B?logo=kofi&logoColor=white" alt="Support me on Ko-fi"></a>
+Wil je iets extra's doen? Steun me via [Ko-fi](https://ko-fi.com/satscan).
 
 ## Licentie
 
