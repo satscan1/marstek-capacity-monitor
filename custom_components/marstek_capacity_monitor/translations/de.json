@@ -319,6 +319,10 @@
     "check_model": {
       "title": "{name}: stimmt das Modell?",
       "description": "Die gemessene Kapazität ist {pct} % vom Neuzustand: etwa die Hälfte der eingestellten {kwh} kWh. Meist ist dann das Modell falsch gewählt, nicht die Batterie verschlissen. Eine Venus C hat 2,56 kWh, halb so viel wie eine Venus E.\n\nIst es eine Venus C? Stelle unter Einstellungen → Geräte & Dienste → Marstek Capacity Monitor → Konfigurieren die Nennkapazität auf 2,56 kWh und die Reserve auf 0,26 kWh. Die Messungen werden dann neu berechnet.\n\nStimmt das Modell? Dann melde es über die Marstek-App.\n\nDiese Meldung verschwindet von selbst, wenn die Messung nicht mehr etwa die Hälfte ist."
+    },
+    "implausible_power": {
+      "title": "{name}: Leistungssensor liefert unmögliche Werte",
+      "description": "Der Sensor {entity} hat {value} ({watts} W) gemeldet. So schnell lädt oder entlädt kein Heimspeicher, deshalb ignoriert der Monitor diese Werte.\n\nMeist stimmt die Einheit nicht (kW, obwohl der Wert in W ist), oder ein selbst gebauter Sensor rechnet mit mA oder mV statt A und V. Korrigiere den Sensor oder wähle einen anderen unter Einstellungen → Geräte & Dienste → Marstek Capacity Monitor → Konfigurieren.\n\nSind die Vollzyklen schon stark gestiegen? Dann starte die Zählung neu mit der Aktion Messungen löschen für diese Batterie.\n\nDiese Meldung verschwindet von selbst nach 24 Stunden ohne solche Werte."
     }
   }
 }

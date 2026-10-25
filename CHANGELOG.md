@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.5.2 — test version (not released)
+
+**Lost in translation... fixed!**
+
+- The search for batteries now also knows German and Dutch names. In a German Home Assistant the sensors are called *SoC Batterie* and *Batterieleistung*, in Dutch *Laadtoestand* and *Batterijvermogen*; until now only English names such as *battery power* were found. Thanks to the simon42 community for the report.
+- Phones and tablets with the Home Assistant app are no longer offered as a battery (the app reports a battery level and a battery power too).
+
+**Impossible power values are ignored.**
+
+- A power sensor that reports more than 25 kW is ignored: no home battery charges or discharges that fast. Usually the unit is wrong (kW while the value is in W) or a self-made sensor multiplies mA or mV. Before, such a sensor made the full cycles jump by hundreds in a day.
+- A message under **Settings → Repairs** says which sensor, which value, and what to check. It goes away by itself after 24 hours without such values. Already counted too much? *Reset measurements* starts the count again.
+
 ## v0.5.1 — 2026-10-24
 
 **Battery capacity in the sidebar by itself.**

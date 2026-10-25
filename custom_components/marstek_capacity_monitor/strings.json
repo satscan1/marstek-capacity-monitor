@@ -319,6 +319,10 @@
     "check_model": {
       "title": "{name}: is the model right?",
       "description": "The measured capacity is {pct} % of new: about half of the {kwh} kWh that is set. That usually means a wrong model, not a worn battery. A Venus C has 2.56 kWh, half a Venus E.\n\nIs it a Venus C? Under Settings → Devices & services → Marstek Capacity Monitor → Configure, set the rated capacity to 2.56 kWh and the reserve to 0.26 kWh. The measurements are then recalculated.\n\nIs the model right? Then report it via the Marstek app.\n\nThis message disappears by itself when the measurement is no longer about half."
+    },
+    "implausible_power": {
+      "title": "{name}: power sensor reports impossible values",
+      "description": "The sensor {entity} reported {value} ({watts} W). No home battery charges or discharges that fast, so the monitor ignores these values.\n\nUsually the unit is wrong (kW while the value is in W), or a self-made sensor multiplies mA or mV instead of A and V. Fix the sensor, or choose another one under Settings → Devices & services → Marstek Capacity Monitor → Configure.\n\nDid the full cycles already jump up? Start counting again with the action Reset measurements for this battery.\n\nThis message goes away by itself after 24 hours without such values."
     }
   }
 }

@@ -1004,3 +1004,83 @@ async def test_venus_c_preset_and_guess(hass: HomeAssistant) -> None:
     assert result["data"]["reserve_kwh"] == 0.256
     await hass.async_block_till_done()
     assert hass.states.get("sensor.marstek_vc_usable_capacity").state == "2.304"
+
+
+async def test_scan_finds_german_names_and_skips_phones(hass: HomeAssistant) -> None:
+    """Seen on simon42: a German HA names the sensors 'SoC Batterie' and
+    'Batterieleistung'; the Home Assistant app on a phone must not show up."""
+    from homeassistant.helpers import entity_registry as er
+
+    from custom_components.marstek_capacity_monitor.discovery import find_candidates
+
+    W = {"unit_of_measurement": "W", "device_class": "power"}
+    P = {"unit_of_measurement": "%", "device_class": "battery"}
+    hass.states.async_set("sensor.marstek_soc_batterie", 11, P)
+    hass.states.async_set("sensor.marstek_batterieleistung", -17, W)
+    hass.states.async_set("sensor.marstek_ac_leistung", 0, W)
+    reg = er.async_get(hass)
+    for uid, obj, value, attrs in (
+        ("phone_level", "sm_a525f_battery_level", 80, P),
+        ("phone_power", "sm_a525f_battery_power", 3, W),
+    ):
+        reg.async_get_or_create("sensor", "mobile_app", uid, suggested_object_id=obj)
+        hass.states.async_set(f"sensor.{obj}", value, attrs)
+    cands = find_candidates(hass)
+    assert [(c.soc_entity, c.power_entity) for c in cands] == [
+        ("sensor.marstek_soc_batterie", "sensor.marstek_batterieleistung")
+    ]
+
+
+async def test_scan_finds_dutch_names(hass: HomeAssistant) -> None:
+    from custom_components.marstek_capacity_monitor.discovery import find_candidates
+
+    hass.states.async_set("sensor.venus_laadtoestand", 50, {"unit_of_measurement": "%"})
+    hass.states.async_set("sensor.venus_batterijvermogen", 0, {"unit_of_measurement": "W"})
+    cands = find_candidates(hass)
+    assert [c.power_entity for c in cands] == ["sensor.venus_batterijvermogen"]
+
+
+async def test_impossible_power_is_ignored_and_reported(hass: HomeAssistant, freezer) -> None:
+    """Seen on simon42: a self-made sensor 1000x too high made the full cycles
+    jump by 400 in a day. Such values are ignored and reported under Repairs."""
+    from homeassistant.helpers import issue_registry as ir
+
+    freezer.move_to("2026-10-24 12:00:00+00:00")
+    hass.states.async_set(SOC, 40, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    issue_id = f"implausible_power_{entry.entry_id}"
+
+    # 800 W reported as 800 kW, for an hour
+    for i in range(60):
+        hass.states.async_set(POWER, -800 - i % 2, {"unit_of_measurement": "kW"})
+        await hass.async_block_till_done()
+        freezer.tick(timedelta(seconds=60))
+        async_fire_time_changed(hass, dt_util.utcnow())
+        await hass.async_block_till_done()
+    assert float(hass.states.get("sensor.marstek_mt1_dc_discharged").state) < 0.01
+    t = entry.runtime_data.tracker.s
+    assert t["e_discharge_kwh"] + t["e_charge_kwh"] < 0.01
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, issue_id)
+    assert issue is not None
+    assert issue.translation_placeholders["value"] == "-800 kW"
+    assert issue.translation_placeholders["watts"] == "800,000"
+
+    # Sensor fixed: real values count again, the message goes after 24 h
+    hass.states.async_set(POWER, -800, {"unit_of_measurement": "W"})
+    await hass.async_block_till_done()
+    for _ in range(30):
+        freezer.tick(timedelta(seconds=60))
+        async_fire_time_changed(hass, dt_util.utcnow())
+        await hass.async_block_till_done()
+    t = entry.runtime_data.tracker.s  # sign not known yet: either bucket
+    assert t["e_discharge_kwh"] + t["e_charge_kwh"] == pytest.approx(0.4, abs=0.05)
+    assert ir.async_get(hass).async_get_issue(DOMAIN, issue_id) is not None
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    freezer.tick(timedelta(hours=25))
+    async_fire_time_changed(hass, dt_util.utcnow())
+    await hass.async_block_till_done()
+    assert ir.async_get(hass).async_get_issue(DOMAIN, issue_id) is None
