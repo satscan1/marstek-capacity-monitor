@@ -23,7 +23,7 @@ Volg in Home Assistant of je Marstek-thuisbatterij zijn capaciteit houdt, gemete
 
 ## Installeren in 3 stappen
 
-1. In HACS: drie puntjes → *Custom repositories* → URL van deze repo, type *Integration*. Installeer **Marstek Capacity Monitor** en herstart Home Assistant.
+1. Zoek in HACS op **Marstek Capacity Monitor**, download hem en herstart Home Assistant. (Niet gevonden? Drie puntjes → *Custom repositories* → URL van deze repo, type *Integration*.)
 2. **Instellingen → Apparaten en diensten → Voeg integratie toe → Marstek Capacity Monitor**.
 3. Kies de gevonden batterij, kies het model en vul de installatiedatum in. Klaar.
 

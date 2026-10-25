@@ -24,7 +24,7 @@ Behalte in Home Assistant im Blick, ob dein Marstek-Heimspeicher seine Kapazitä
 
 ## Installation in 3 Schritten
 
-1. In HACS: drei Punkte → *Benutzerdefinierte Repositories* → URL dieses Repos, Typ *Integration*. **Marstek Capacity Monitor** herunterladen und Home Assistant neu starten.
+1. In HACS nach **Marstek Capacity Monitor** suchen, herunterladen und Home Assistant neu starten. (Nicht gefunden? Drei Punkte → *Benutzerdefinierte Repositories* → URL dieses Repos, Typ *Integration*.)
 2. **Einstellungen → Geräte & Dienste → Integration hinzufügen → Marstek Capacity Monitor**.
 3. Die gefundene Batterie wählen, das Modell auswählen und das Datum der Inbetriebnahme eingeben. Fertig.
 
