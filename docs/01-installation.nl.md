@@ -19,6 +19,10 @@ Welke modellen en koppelingen werken: zie [Ondersteunde batterijen](05-supported
 
 **Via HACS**
 
+[![Open in HACS in je Home Assistant](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=satscan1&repository=marstek-capacity-monitor&category=integration)
+
+Deze knop opent de monitor meteen in HACS in je eigen Home Assistant. Of zonder knop:
+
 1. Zoek in HACS op **Marstek Capacity Monitor**.
 2. Download hem en herstart Home Assistant.
 
