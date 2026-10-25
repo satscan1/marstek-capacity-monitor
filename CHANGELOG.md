@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.5.2 — test version (not released)
+## v0.5.2 — 2026-10-25
 
 **Lost in translation... fixed!**
 
