@@ -23,7 +23,7 @@ Track in Home Assistant whether your Marstek home battery keeps its capacity, me
 
 ## Install in 3 steps
 
-1. In HACS: three dots → *Custom repositories* → URL of this repo, type *Integration*. Install **Marstek Capacity Monitor** and restart Home Assistant.
+1. In HACS, search for **Marstek Capacity Monitor**, download it and restart Home Assistant. (Not found? Three dots → *Custom repositories* → URL of this repo, type *Integration*.)
 2. **Settings → Devices & services → Add integration → Marstek Capacity Monitor**.
 3. Pick the battery that was found, choose its model and fill in the installation date. Done.
 
