@@ -18,8 +18,20 @@ from homeassistant.helpers import device_registry as dr, entity_registry as er
 
 from .const import DOMAIN
 
-SOC_RE = re.compile(r"state_of_charge|(^|_)soc($|_)|battery_level|battery_percent")
-POWER_RE = re.compile(r"battery_power|batt_power|bat_power|battery_dc_power|dc_power")
+# Entity ids and names follow the language of Home Assistant, so the German
+# and Dutch words are needed too ("SoC Batterie", "Batterieleistung",
+# "Laadtoestand", "Batterijvermogen").
+SOC_RE = re.compile(
+    r"state_of_charge|(^|_)soc($|_)|battery_level|battery_percent|"
+    r"ladezustand|laadtoestand"
+)
+POWER_RE = re.compile(
+    r"battery_power|batt_power|bat_power|battery_dc_power|dc_power|"
+    r"batterie_?leistung|akku_?leistung|batterij_?vermogen|accu_?vermogen"
+)
+# Integrations that never describe a home battery (phones and tablets of the
+# Home Assistant app report a battery level and a battery power too).
+SKIP_PLATFORMS = {"mobile_app"}
 # Names that point to settings or limits rather than measurements
 EXCLUDE_RE = re.compile(
     r"cutoff|cut_off|limit|min_|_min|max_|_max|target|reserve|setpoint|set_|"
@@ -89,7 +101,9 @@ def _prefix(entity_id: str, pattern: re.Pattern[str]) -> str:
     obj = entity_id.split(".", 1)[1]
     m = pattern.search(obj)
     head = obj[: m.start()] if m else obj
-    return re.sub(r"(battery_?|batt_?|bat_?)$", "", head)
+    # Without the trailing "_", so "x_battery_soc", "x_soc_batterie" and
+    # "x_batterieleistung" all give "x".
+    return re.sub(r"(battery_?|batt_?|bat_?)$", "", head).rstrip("_")
 
 
 NAME_STRIP_RE = re.compile(
@@ -122,7 +136,7 @@ def find_candidates(
     powers: list[tuple[State, er.RegistryEntry | None]] = []
     for state in hass.states.async_all("sensor"):
         entry = ent_reg.async_get(state.entity_id)
-        if entry is not None and entry.platform == DOMAIN:
+        if entry is not None and (entry.platform == DOMAIN or entry.platform in SKIP_PLATFORMS):
             continue
         if is_soc(state, entry) and state.entity_id not in exclude_soc:
             socs.append((state, entry))
@@ -209,7 +223,7 @@ def find_cell_sensors(hass: HomeAssistant, soc_entity: str) -> dict[str, str]:
             continue
         entry = ent_reg.async_get(state.entity_id)
         same_device = dev_id is not None and entry is not None and entry.device_id == dev_id
-        same_name = bool(prefix) and state.entity_id.split(".", 1)[1].startswith(prefix)
+        same_name = bool(prefix) and state.entity_id.split(".", 1)[1].startswith(prefix + "_")
         if not (same_device or same_name):
             continue
         text = _text(state, entry)
@@ -279,10 +293,10 @@ def find_discharge_counter(hass: HomeAssistant, soc_entity: str) -> str | None:
         if state.attributes.get("unit_of_measurement") not in ENERGY_FACTOR:
             continue
         entry = ent_reg.async_get(state.entity_id)
-        if entry is not None and entry.platform == DOMAIN:
+        if entry is not None and (entry.platform == DOMAIN or entry.platform in SKIP_PLATFORMS):
             continue
         same_device = dev_id is not None and entry is not None and entry.device_id == dev_id
-        same_name = bool(prefix) and state.entity_id.split(".", 1)[1].startswith(prefix)
+        same_name = bool(prefix) and state.entity_id.split(".", 1)[1].startswith(prefix + "_")
         if not (same_device or same_name):
             continue
         text = _text(state, entry)

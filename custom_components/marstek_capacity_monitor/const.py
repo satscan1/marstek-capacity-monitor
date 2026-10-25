@@ -161,6 +161,13 @@ STALE_SECONDS = 3600  # no new SOC or power value for an hour
 # for hours; that is not a broken connection. Below this power it counts as idle.
 IDLE_POWER_W = 50
 
+# No home battery charges or discharges this fast. A value above it is a
+# sensor with the wrong unit (W shown as kW) or a self-made sensor that
+# multiplies mA or mV: ignored, and reported under Repairs.
+MAX_PLAUSIBLE_POWER_W = 25000
+# The Repairs message goes away after this long without such a value.
+IMPLAUSIBLE_CLEAR_S = 24 * 3600
+
 STORAGE_VERSION = 1
 TICK_SECONDS = 60
 SAVE_DELAY_SECONDS = 600  # keep write load low; records are saved immediately
