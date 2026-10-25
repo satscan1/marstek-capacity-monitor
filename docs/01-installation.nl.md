@@ -17,10 +17,12 @@ Welke modellen en koppelingen werken: zie [Ondersteunde batterijen](05-supported
 
 ## Integratie installeren
 
-**Via HACS (custom repository)**
+**Via HACS**
 
-1. Ga in HACS naar de drie puntjes → *Custom repositories*. Vul de URL van deze repo in, type *Integration*.
-2. Installeer **Marstek Capacity Monitor** en herstart Home Assistant.
+1. Zoek in HACS op **Marstek Capacity Monitor**.
+2. Download hem en herstart Home Assistant.
+
+Niet gevonden in HACS? Voeg hem toe als custom repository: drie puntjes → *Custom repositories* → URL van deze repo, type *Integration*. Ga daarna verder met stap 2.
 
 **Handmatig**
 

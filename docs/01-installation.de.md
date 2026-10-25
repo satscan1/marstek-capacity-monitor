@@ -17,10 +17,12 @@ Welche Modelle und Anbindungen funktionieren: siehe [Supported batteries](05-sup
 
 ## Integration installieren
 
-**Über HACS (benutzerdefiniertes Repository)**
+**Über HACS**
 
-1. Öffne in HACS die drei Punkte → *Benutzerdefinierte Repositories*. Gib die URL dieses Repos ein, Typ *Integration*.
-2. Lade **Marstek Capacity Monitor** herunter und starte Home Assistant neu.
+1. Suche in HACS nach **Marstek Capacity Monitor**.
+2. Lade ihn herunter und starte Home Assistant neu.
+
+In HACS nicht gefunden? Füge ihn als benutzerdefiniertes Repository hinzu: drei Punkte → *Benutzerdefinierte Repositories* → URL dieses Repos, Typ *Integration*. Mach dann mit Schritt 2 weiter.
 
 **Von Hand**
 
