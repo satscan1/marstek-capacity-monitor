@@ -90,6 +90,8 @@ from .const import (
     SIGNAL_UPDATE,
     SIGN_AUTO,
     IDLE_POWER_W,
+    IMPLAUSIBLE_CLEAR_S,
+    MAX_PLAUSIBLE_POWER_W,
     STALE_SECONDS,
     STATUS_COLLECTING,
     STATUS_MEASURING,
@@ -179,6 +181,7 @@ class BatteryMonitor:
         self.soc_result: dict[str, Any] = {"level": "ok", "trend": []}
         self.cell_health: dict[str, Any] = {"level": "ok"}
         self._issues: dict[str, str] = {}
+        self._implausible_ts: float | None = None
 
     @property
     def signal(self) -> str:
@@ -349,7 +352,7 @@ class BatteryMonitor:
                         _load, self.soc_entity, day, stop, first
                     )
                     events = [
-                        (st.last_updated.timestamp(), "p", self._power_w(st))
+                        (st.last_updated.timestamp(), "p", self._plausible_w(self._power_w(st)))
                         for st in pow_states
                     ] + [
                         (st.last_updated.timestamp(), "s", self._soc(st))
@@ -867,9 +870,62 @@ class BatteryMonitor:
     def _bridging(self) -> bool:
         return bool(self.tracker.s.get("bridge"))
 
+    @staticmethod
+    def _plausible_w(watts: float | None) -> float | None:
+        """None for a value no home battery can reach (wrong unit)."""
+        if watts is not None and abs(watts) > MAX_PLAUSIBLE_POWER_W:
+            return None
+        return watts
+
+    @property
+    def implausible_issue_id(self) -> str:
+        return f"implausible_power_{self.entry.entry_id}"
+
+    def _implausible_power(self, state: State, watts: float) -> None:
+        """Report a power value that cannot be right, under Settings -> Repairs.
+        The value itself is ignored (counts as a gap in the data)."""
+        first = self._implausible_ts is None
+        self._implausible_ts = self._now_ts()
+        if not first:
+            return
+        _LOGGER.warning(
+            "%s: %s reports %s %s (%.0f W); ignored, check the unit of the sensor",
+            self.entry.title,
+            self.power_entity,
+            state.state,
+            state.attributes.get("unit_of_measurement", ""),
+            watts,
+        )
+        lang = (self.hass.config.language or "en")[:2]
+        sep = "." if lang in ("nl", "de") else ","
+        ir.async_create_issue(
+            self.hass,
+            DOMAIN,
+            self.implausible_issue_id,
+            is_fixable=False,
+            is_persistent=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key="implausible_power",
+            translation_placeholders={
+                "name": self.entry.title,
+                "entity": self.power_entity,
+                "value": f"{state.state} {state.attributes.get('unit_of_measurement', '')}".strip(),
+                "watts": f"{abs(watts):,.0f}".replace(",", sep),
+            },
+        )
+
+    def _check_implausible_clear(self, ts: float) -> None:
+        if self._implausible_ts is not None and ts - self._implausible_ts > IMPLAUSIBLE_CLEAR_S:
+            self._implausible_ts = None
+            ir.async_delete_issue(self.hass, DOMAIN, self.implausible_issue_id)
+
     def _handle_power(self, state: State | None) -> None:
         ts = self._now_ts()
-        record = self.tracker.update_power(self._power_w(state), ts)
+        watts = self._power_w(state)
+        if state is not None and watts is not None and self._plausible_w(watts) is None:
+            self._implausible_power(state, watts)
+            watts = None
+        record = self.tracker.update_power(watts, ts)
         self._health_events(
             self.health.on_power(self.tracker.s.get("power_w"), ts, gap=self._bridging)
         )
@@ -955,6 +1011,7 @@ class BatteryMonitor:
     def _on_tick(self, _now: datetime) -> None:
         ts = self._now_ts()
         record = self.tracker.tick(ts)
+        self._check_implausible_clear(ts)
         self._health_events(self.health.tick(ts, gap=self._bridging))
         note_day(self.full_days, self.alive_days, self.tracker.s.get("soc"), ts)
         self._sample_temps()
