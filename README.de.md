@@ -1,5 +1,7 @@
 # Marstek Capacity Monitor
 
+[![Release](https://img.shields.io/github/v/release/satscan1/marstek-capacity-monitor)](https://github.com/satscan1/marstek-capacity-monitor/releases/latest) [![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=satscan1&repository=marstek-capacity-monitor&category=integration) [![Stars](https://img.shields.io/github/stars/satscan1/marstek-capacity-monitor?style=flat)](https://github.com/satscan1/marstek-capacity-monitor/stargazers) [![Ko-fi](https://img.shields.io/badge/Ko--fi-satscan-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/satscan)
+
 *[English](README.md) · [Nederlands](README.nl.md)* 
 
 Behalte in Home Assistant im Blick, ob dein Marstek-Heimspeicher seine Kapazität hält, gemessen auf der **DC-Seite** (an der Batterie selbst, nicht an der Steckdose). Bis zu **6 Batterien**.
@@ -93,9 +95,7 @@ Nach einem Klick auf **Zellen**: sind die Zellen noch im Gleichgewicht?
 
 Findest du das Tool nützlich? Gib ihm einen ⭐ auf GitHub, damit andere es auch finden.
 
-Möchtest du noch etwas mehr tun? Unterstütze mich über Ko-fi:
-
-<a href="https://ko-fi.com/satscan"><img src="https://img.shields.io/badge/Ko--fi-satscan-FF5E5B?logo=kofi&logoColor=white" alt="Support me on Ko-fi"></a>
+Möchtest du noch etwas mehr tun? Unterstütze mich über [Ko-fi](https://ko-fi.com/satscan).
 
 ## Lizenz
 
