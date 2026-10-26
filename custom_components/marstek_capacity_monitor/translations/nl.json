@@ -265,6 +265,16 @@
           "description": "soc = SOC-drift, cells = celkalibratie."
         }
       }
+    },
+    "demo": {
+      "name": "Demo-situatie",
+      "description": "Voegt (één keer) een batterij \"Demo\" toe en vult die met verzonnen gegevens voor één situatie. De kaart, Reparaties en telefoonberichten reageren zoals bij een echte batterij. Je eigen batterijen worden niet aangeraakt; de demobatterij haal je weg zoals elke andere.",
+      "fields": {
+        "scenario": {
+          "name": "Situatie",
+          "description": "Situatie"
+        }
+      }
     }
   },
   "selector": {
@@ -305,6 +315,25 @@
       "options": {
         "merge": "Samenvoegen: alles van beide houden",
         "replace": "Vervangen: het bestand wint"
+      }
+    },
+    "scenario": {
+      "options": {
+        "normal": "Normaal",
+        "since_start": "Langzame daling sinds begin meting",
+        "high_provisional": "Boven 100 %, voorlopig",
+        "high_confirmed": "Boven 100 %, bevestigd (groen)",
+        "drop_unconfirmed": "Plotselinge daling, nog niet bevestigd",
+        "drop_confirmed": "Plotselinge daling, bevestigd na 5 metingen",
+        "drop_recovered": "Plotselinge daling, hersteld",
+        "below_spec": "Onder specificatie (oranje)",
+        "critical": "Melden bij Marstek (rood)",
+        "check_model": "Klopt het model? (ongeveer de helft)",
+        "soc_letop": "SOC-drift: let op",
+        "soc_advies": "SOC-drift: advies",
+        "cells_letop": "Celkalibratie: let op",
+        "cells_advies": "Celkalibratie: advies",
+        "collecting": "Nog geen meting (verzamelt data)"
       }
     }
   },

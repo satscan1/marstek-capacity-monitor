@@ -265,6 +265,16 @@
           "description": "soc = SOC-Drift, cells = Zellkalibrierung."
         }
       }
+    },
+    "demo": {
+      "name": "Demo-Situation",
+      "description": "Fügt (einmal) eine Batterie „Demo“ hinzu und füllt sie mit erfundenen Daten für eine Situation. Karte, Reparaturen und Handy-Nachrichten reagieren wie bei einer echten Batterie. Deine eigenen Batterien bleiben unberührt; die Demo-Batterie entfernst du wie jede andere.",
+      "fields": {
+        "scenario": {
+          "name": "Situation",
+          "description": "Situation"
+        }
+      }
     }
   },
   "selector": {
@@ -305,6 +315,25 @@
       "options": {
         "merge": "Zusammenführen: alles aus beiden behalten",
         "replace": "Ersetzen: die Datei gewinnt"
+      }
+    },
+    "scenario": {
+      "options": {
+        "normal": "Normal",
+        "since_start": "Langsamer Rückgang seit Beginn der Messung",
+        "high_provisional": "Über 100 %, vorläufig",
+        "high_confirmed": "Über 100 %, bestätigt (grün)",
+        "drop_unconfirmed": "Plötzlicher Rückgang, noch nicht bestätigt",
+        "drop_confirmed": "Plötzlicher Rückgang, bestätigt nach 5 Messungen",
+        "drop_recovered": "Plötzlicher Rückgang, erholt",
+        "below_spec": "Unter Herstellerangabe (orange)",
+        "critical": "An Marstek melden (rot)",
+        "check_model": "Modell prüfen (etwa die Hälfte)",
+        "soc_letop": "SOC-Drift: Achtung",
+        "soc_advies": "SOC-Drift: Empfehlung",
+        "cells_letop": "Zellkalibrierung: Achtung",
+        "cells_advies": "Zellkalibrierung: Empfehlung",
+        "collecting": "Noch keine Messung (sammelt Daten)"
       }
     }
   },

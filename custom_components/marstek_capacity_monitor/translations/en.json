@@ -265,6 +265,16 @@
           "description": "soc = SOC drift, cells = cell calibration."
         }
       }
+    },
+    "demo": {
+      "name": "Demo situation",
+      "description": "Adds a battery \"Demo\" (once) and fills it with made-up data for one situation. The card, Repairs and phone messages react as they would for a real battery. Your own batteries are not touched; remove the demo battery like any other.",
+      "fields": {
+        "scenario": {
+          "name": "Situation",
+          "description": "Situation"
+        }
+      }
     }
   },
   "selector": {
@@ -305,6 +315,25 @@
       "options": {
         "merge": "Merge: keep everything from both",
         "replace": "Replace: the file wins"
+      }
+    },
+    "scenario": {
+      "options": {
+        "normal": "Normal",
+        "since_start": "Slow drop since monitoring began",
+        "high_provisional": "Above 100 %, provisional",
+        "high_confirmed": "Above 100 %, confirmed (green)",
+        "drop_unconfirmed": "Sudden drop, not confirmed yet",
+        "drop_confirmed": "Sudden drop, confirmed after 5 measurements",
+        "drop_recovered": "Sudden drop, recovered",
+        "below_spec": "Below spec (orange)",
+        "critical": "Report to Marstek (red)",
+        "check_model": "Check the model (about half)",
+        "soc_letop": "SOC drift: attention",
+        "soc_advies": "SOC drift: advice",
+        "cells_letop": "Cell calibration: attention",
+        "cells_advies": "Cell calibration: advice",
+        "collecting": "No measurement yet (collecting data)"
       }
     }
   },

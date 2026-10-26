@@ -556,6 +556,20 @@ class BatteryMonitor:
         full = [r for r in (incoming.get("data") or {}).get("records", []) if is_full_discharge(r)]
         return {"variant": incoming.get("variant"), "records": len((incoming.get("data") or {}).get("records", [])), "full": len(full)}
 
+    async def async_demo(self, scenario: str) -> None:
+        """Fill the demo battery with one made-up situation (0.5.5)."""
+        from . import demo
+
+        await self.async_reset()
+        data = demo.build(scenario, self._now_ts(), self.spec.usable_kwh, self.spec.nominal_kwh)
+        self._apply({**self._data(), **data})
+        self._history_until = None
+        for kind in (KIND_SOC, KIND_CELLS):
+            self._clear_issue(kind)
+        await self._store.async_save(self._data())
+        self._recalculate()
+        self._update_status(force=True)
+
     # -- helpers ------------------------------------------------------------
 
     def _new_tracker(self, state: dict[str, Any] | None = None) -> SwingTracker:

@@ -146,3 +146,68 @@ async def test_share_code_stays_the_same(hass: HomeAssistant) -> None:
     await hass.config_entries.async_reload(entry.entry_id)
     await hass.async_block_till_done()
     assert entry.runtime_data.share_id == code
+
+
+async def test_demo_battery_shows_every_situation(hass: HomeAssistant) -> None:
+    from homeassistant.helpers import issue_registry as ir
+
+    assert await __import__("homeassistant.setup", fromlist=["x"]).async_setup_component(hass, DOMAIN, {})
+    await hass.services.async_call(DOMAIN, "demo", {"scenario": "high_confirmed"}, blocking=True)
+    await hass.async_block_till_done()
+    pct = hass.states.get("sensor.marstek_demo_capacity_pct")
+    assert pct.attributes["display_state"] == "high_confirmed"
+    assert hass.states.get("sensor.marstek_demo_warranty_status").state == "good"
+
+    await hass.services.async_call(DOMAIN, "demo", {"scenario": "drop_unconfirmed"}, blocking=True)
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.marstek_demo_warranty_status").state == "unconfirmed"
+
+    await hass.services.async_call(DOMAIN, "demo", {"scenario": "soc_advies"}, blocking=True)
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.marstek_demo_soc_health").state == "advies"
+    assert any(i.domain == DOMAIN and i.issue_id.startswith("soc") for i in ir.async_get(hass).issues.values())
+
+    await hass.services.async_call(DOMAIN, "demo", {"scenario": "cells_letop"}, blocking=True)
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.marstek_demo_cell_health").state == "letop"
+    assert hass.states.get("sensor.marstek_demo_soc_health").state == "ok"
+
+    await hass.services.async_call(DOMAIN, "demo", {"scenario": "check_model"}, blocking=True)
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.marstek_demo_warranty_status").state == "check_model"
+    # one demo battery only
+    assert len(hass.config_entries.async_entries(DOMAIN)) == 1
+
+
+EXPECT = {
+    "normal": ("normal", "good", "ok", "ok"),
+    "since_start": ("normal", "good", "ok", "ok"),
+    "high_provisional": ("high_provisional", "good", "ok", "ok"),
+    "high_confirmed": ("high_confirmed", "good", "ok", "ok"),
+    "drop_unconfirmed": ("drop_unconfirmed", "unconfirmed", "ok", "ok"),
+    "drop_confirmed": ("normal", "attention", "ok", "ok"),
+    "drop_recovered": ("normal", "good", "ok", "ok"),
+    "below_spec": ("normal", "attention", "ok", "ok"),
+    "critical": ("normal", "critical", "ok", "ok"),
+    "check_model": ("normal", "check_model", "ok", "ok"),
+    "soc_letop": ("normal", "good", "letop", "ok"),
+    "soc_advies": ("normal", "good", "advies", "ok"),
+    "cells_letop": ("normal", "good", "ok", "letop"),
+    "cells_advies": ("normal", "good", "ok", "advies"),
+    "collecting": ("normal", "no_measurement", "ok", "ok"),
+}
+
+
+@pytest.mark.parametrize("scenario", list(EXPECT))
+async def test_demo_scenario(hass: HomeAssistant, scenario) -> None:
+    from homeassistant.setup import async_setup_component
+
+    assert await async_setup_component(hass, DOMAIN, {})
+    await hass.services.async_call(DOMAIN, "demo", {"scenario": scenario}, blocking=True)
+    await hass.async_block_till_done()
+    g = lambda k: hass.states.get(f"sensor.marstek_demo_{k}")  # noqa: E731
+    got = (g("capacity_pct").attributes.get("display_state") or "normal", g("warranty_status").state,
+           g("soc_health").state, g("cell_health").state)
+    assert got == EXPECT[scenario]
+    if scenario == "since_start":
+        assert g("capacity_pct").attributes["since_start_pct"] < -1

@@ -425,6 +425,12 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
+    async def async_step_demo(self, data: dict[str, Any]) -> ConfigFlowResult:
+        """Demo battery (0.5.5), added by the service marstek_capacity_monitor.demo."""
+        await self.async_set_unique_id(data[CONF_BATTERY_ID])
+        self._abort_if_unique_id_configured()
+        return self.async_create_entry(title=data[CONF_NAME], data=data)
+
     @staticmethod
     @callback
     def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
