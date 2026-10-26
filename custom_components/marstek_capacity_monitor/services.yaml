@@ -45,6 +45,7 @@ demo:
             - drop_recovered
             - below_spec
             - critical
+            - critical_confirmed
             - check_model
             - soc_letop
             - soc_advies

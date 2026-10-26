@@ -172,9 +172,22 @@ async def test_demo_battery_shows_every_situation(hass: HomeAssistant) -> None:
     assert hass.states.get("sensor.marstek_demo_cell_health").state == "letop"
     assert hass.states.get("sensor.marstek_demo_soc_health").state == "ok"
 
+    def crit():
+        return [i for i in ir.async_get(hass).issues.values() if i.domain == DOMAIN and i.issue_id.startswith("critical_")]
+
+    await hass.services.async_call(DOMAIN, "demo", {"scenario": "critical"}, blocking=True)
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.marstek_demo_warranty_status").state == "critical"
+    assert not crit()  # red, but only 4 measurements in a row: no message yet
+
+    await hass.services.async_call(DOMAIN, "demo", {"scenario": "critical_confirmed"}, blocking=True)
+    await hass.async_block_till_done()
+    assert len(crit()) == 1 and crit()[0].severity == ir.IssueSeverity.ERROR
+
     await hass.services.async_call(DOMAIN, "demo", {"scenario": "check_model"}, blocking=True)
     await hass.async_block_till_done()
     assert hass.states.get("sensor.marstek_demo_warranty_status").state == "check_model"
+    assert not crit()
     # one demo battery only
     assert len(hass.config_entries.async_entries(DOMAIN)) == 1
 
@@ -189,6 +202,7 @@ EXPECT = {
     "drop_recovered": ("normal", "good", "ok", "ok"),
     "below_spec": ("normal", "attention", "ok", "ok"),
     "critical": ("normal", "critical", "ok", "ok"),
+    "critical_confirmed": ("normal", "critical", "ok", "ok"),
     "check_model": ("normal", "check_model", "ok", "ok"),
     "soc_letop": ("normal", "good", "letop", "ok"),
     "soc_advies": ("normal", "good", "advies", "ok"),

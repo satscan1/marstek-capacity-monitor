@@ -566,6 +566,7 @@ class BatteryMonitor:
         self._history_until = None
         for kind in (KIND_SOC, KIND_CELLS):
             self._clear_issue(kind)
+        self.notified.pop("critical", None)
         await self._store.async_save(self._data())
         self._recalculate()
         self._update_status(force=True)
@@ -695,6 +696,7 @@ class BatteryMonitor:
             self.soc_since,
         )
         self._check_model_issue()
+        self._critical_issue()
         self._evaluate_health()
         async_dispatcher_send(self.hass, self.signal)
 
@@ -724,6 +726,63 @@ class BatteryMonitor:
                 "kwh": f"{self.spec.nominal_kwh:.2f}".replace(".", dec),
             },
         )
+
+    @property
+    def critical_issue_id(self) -> str:
+        since = int(self.result.get("red_since") or 0)
+        return f"critical_{self.entry.entry_id}_{since}"
+
+    def _critical_issue(self) -> None:
+        """Red, confirmed by CONFIRM_N measurements in a row (0.5.5): one
+        message under Settings -> Repairs and on the phone, with a pointer to
+        the Marstek report. Then it is up to Marstek to look into it."""
+        old = self.notified.get("critical")
+        if not self.result.get("red_confirmed") or not self.notify:
+            for domain, issue_id in list(ir.async_get(self.hass).issues):
+                if domain == DOMAIN and issue_id.startswith(f"critical_{self.entry.entry_id}_"):
+                    ir.async_delete_issue(self.hass, DOMAIN, issue_id)
+            if old is not None and not self.result.get("red_confirmed"):
+                self.notified["critical"] = None
+                self._phone("critical", None)
+                self._store.async_delay_save(self._data, 5)
+            return
+        lang = advice.lang_of(self.hass.config.language)
+        dec = "," if lang in ("nl", "de") else "."
+        pct = f"{self.result.get('measured_pct') or 0:.1f}".replace(".", dec)
+        red = f"{self.spec.red_pct:.0f}"
+        ir.async_create_issue(
+            self.hass,
+            DOMAIN,
+            self.critical_issue_id,
+            is_fixable=False,
+            is_persistent=False,
+            severity=ir.IssueSeverity.ERROR,
+            translation_key="critical",
+            translation_placeholders={
+                "name": self.entry.title,
+                "pct": pct,
+                "red": red,
+                "count": str(self.result.get("red_count") or 0),
+            },
+        )
+        since = self.result.get("red_since")
+        if old == since:
+            return
+        self.notified["critical"] = since
+        self._store.async_delay_save(self._data, 5)
+        text = {
+            "nl": f"{self.entry.title}: capaciteit {pct} %, {self.result.get('red_count')} metingen op rij onder de rode lijn van {red} %. Download het Marstek-rapport (knop Rapport op de kaart) en meld het via de Marstek-app.",
+            "en": f"{self.entry.title}: capacity {pct} %, {self.result.get('red_count')} measurements in a row below the red line of {red} %. Download the Marstek report (Report button on the card) and report it via the Marstek app.",
+            "de": f"{self.entry.title}: Kapazität {pct} %, {self.result.get('red_count')} Messungen in Folge unter der roten Linie von {red} %. Laden Sie den Marstek-Bericht herunter (Taste Bericht auf der Karte) und melden Sie es über die Marstek-App.",
+        }[lang]
+        for name in self._phones():
+            self.hass.async_create_task(
+                self.hass.services.async_call(
+                    "notify", name,
+                    {"title": advice.TITLE, "message": text, "data": {"tag": self._tag("critical")}},
+                    blocking=False,
+                )
+            )
 
     # -- advice: "let op" and advice messages -------------------------------
 

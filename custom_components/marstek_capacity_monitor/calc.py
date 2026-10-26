@@ -728,6 +728,16 @@ def evaluate(
     )
     if sure["display_state"] == "drop_unconfirmed":
         status = "unconfirmed"
+    # Red is reported (Repairs + phone) only once the last CONFIRM_N
+    # measurements are all at or below the red line: one odd measurement
+    # never sends anyone to Marstek.
+    red_count = 0
+    for c in reversed([pct(c) for c in (capacity_from_record(spec, r) for r in full) if c]):
+        if c > spec.red_pct:
+            break
+        red_count += 1
+    red_since = full[-red_count]["ts"] if red_count else None
+    red_confirmed = status == "critical" and red_count >= CONFIRM_N
 
     # Monthly trend, newest month first
     by_month: dict[str, list[dict[str, Any]]] = {}
@@ -799,6 +809,9 @@ def evaluate(
         "expected_kwh": round(exp_kwh, 3),
         "margin_kwh": round(measured_kwh - exp_kwh, 3) if measured_kwh is not None else None,
         "red_pct": spec.red_pct,
+        "red_count": red_count,
+        "red_confirmed": red_confirmed,
+        "red_since": red_since,
         "red_kwh": round(usable * spec.red_pct / 100, 3),
         "tolerance_pct": spec.tolerance_pct,
         "warranty_end": w_end,

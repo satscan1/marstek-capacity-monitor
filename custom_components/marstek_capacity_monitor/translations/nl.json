@@ -328,6 +328,7 @@
         "drop_recovered": "Plotselinge daling, hersteld",
         "below_spec": "Onder specificatie (oranje)",
         "critical": "Melden bij Marstek (rood)",
+        "critical_confirmed": "Melden bij Marstek, bevestigd (rood + melding)",
         "check_model": "Klopt het model? (ongeveer de helft)",
         "soc_letop": "SOC-drift: let op",
         "soc_advies": "SOC-drift: advies",
@@ -379,6 +380,10 @@
     "implausible_power": {
       "title": "{name}: vermogenssensor geeft onmogelijke waarden",
       "description": "De sensor {entity} gaf {value} ({watts} W). Zo snel laadt of ontlaadt geen thuisbatterij, dus de monitor telt deze waarden niet mee.\n\nMeestal klopt de eenheid niet (kW terwijl de waarde in W is), of rekent een zelfgemaakte sensor met mA of mV in plaats van A en V. Pas de sensor aan, of kies een andere bij Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren.\n\nIs het aantal volle cycli al flink opgelopen? Begin dan opnieuw met tellen met de actie Metingen wissen voor deze batterij.\n\nDeze melding verdwijnt vanzelf na 24 uur zonder zulke waarden."
+    },
+    "critical": {
+      "title": "{name}: capaciteit onder de rode lijn",
+      "description": "Gemeten capaciteit: {pct} % van nieuw. De laatste {count} volledige ontladingen zaten allemaal op of onder de rode lijn van {red} %, dus dit is geen losse rare meting.\n\nWat te doen: open de kaart, druk op Rapport en download het Marstek-rapport (Engels, zonder namen of adres). Meld het via de Marstek-app en stuur het rapport mee. Daarna is het aan Marstek om het verder te onderzoeken.\n\nDeze melding verdwijnt vanzelf als de capaciteit weer boven de rode lijn komt. Negeren = wegklikken voor deze reeks."
     }
   }
 }

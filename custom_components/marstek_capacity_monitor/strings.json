@@ -328,6 +328,7 @@
         "drop_recovered": "Sudden drop, recovered",
         "below_spec": "Below spec (orange)",
         "critical": "Report to Marstek (red)",
+        "critical_confirmed": "Report to Marstek, confirmed (red + message)",
         "check_model": "Check the model (about half)",
         "soc_letop": "SOC drift: attention",
         "soc_advies": "SOC drift: advice",
@@ -379,6 +380,10 @@
     "implausible_power": {
       "title": "{name}: power sensor reports impossible values",
       "description": "The sensor {entity} reported {value} ({watts} W). No home battery charges or discharges that fast, so the monitor ignores these values.\n\nUsually the unit is wrong (kW while the value is in W), or a self-made sensor multiplies mA or mV instead of A and V. Fix the sensor, or choose another one under Settings → Devices & services → Marstek Capacity Monitor → Configure.\n\nDid the full cycles already jump up? Start counting again with the action Reset measurements for this battery.\n\nThis message goes away by itself after 24 hours without such values."
+    },
+    "critical": {
+      "title": "{name}: capacity below the red line",
+      "description": "Measured capacity: {pct} % of new. The last {count} full discharges were all at or below the red line of {red} %, so this is not one odd measurement.\n\nWhat to do: open the card, press Report and download the Marstek report (English, without names or addresses). Report it via the Marstek app and attach the report. From there it is up to Marstek to look into it.\n\nThis message disappears by itself when the capacity is above the red line again. Ignore = dismiss it for this series."
     }
   }
 }

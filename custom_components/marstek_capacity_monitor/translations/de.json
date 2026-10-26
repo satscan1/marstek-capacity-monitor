@@ -328,6 +328,7 @@
         "drop_recovered": "Plötzlicher Rückgang, erholt",
         "below_spec": "Unter Herstellerangabe (orange)",
         "critical": "An Marstek melden (rot)",
+        "critical_confirmed": "Bei Marstek melden, bestätigt (rot + Meldung)",
         "check_model": "Modell prüfen (etwa die Hälfte)",
         "soc_letop": "SOC-Drift: Achtung",
         "soc_advies": "SOC-Drift: Empfehlung",
@@ -379,6 +380,10 @@
     "implausible_power": {
       "title": "{name}: Leistungssensor liefert unmögliche Werte",
       "description": "Der Sensor {entity} hat {value} ({watts} W) gemeldet. So schnell lädt oder entlädt kein Heimspeicher, deshalb ignoriert der Monitor diese Werte.\n\nMeist stimmt die Einheit nicht (kW, obwohl der Wert in W ist), oder ein selbst gebauter Sensor rechnet mit mA oder mV statt A und V. Korrigiere den Sensor oder wähle einen anderen unter Einstellungen → Geräte & Dienste → Marstek Capacity Monitor → Konfigurieren.\n\nSind die Vollzyklen schon stark gestiegen? Dann starte die Zählung neu mit der Aktion Messungen löschen für diese Batterie.\n\nDiese Meldung verschwindet von selbst nach 24 Stunden ohne solche Werte."
+    },
+    "critical": {
+      "title": "{name}: Kapazität unter der roten Linie",
+      "description": "Gemessene Kapazität: {pct} % vom Neuwert. Die letzten {count} vollständigen Entladungen lagen alle auf oder unter der roten Linie von {red} %, also keine einzelne seltsame Messung.\n\nWas tun: Karte öffnen, Bericht drücken und den Marstek-Bericht herunterladen (Englisch, ohne Namen oder Adresse). Über die Marstek-App melden und den Bericht anhängen. Danach ist es an Marstek, es weiter zu untersuchen.\n\nDiese Meldung verschwindet von selbst, wenn die Kapazität wieder über der roten Linie liegt. Ignorieren = für diese Reihe ausblenden."
     }
   }
 }

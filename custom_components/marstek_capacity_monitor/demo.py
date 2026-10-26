@@ -32,6 +32,7 @@ _CAPACITY: dict[str, list[float]] = {
     "drop_recovered": [97.4, 96.9, 97.2, 96.6, 84.8, 84.1, 96.5, 96.9],
     "below_spec": [97.0, 93.5, 91.0, 90.2, 89.8, 89.5],
     "critical": [76.0, 74.8, 74.2, 73.9, 73.5],
+    "critical_confirmed": [76.0, 74.8, 74.2, 73.9, 73.5, 73.2],
     "check_model": [50.4, 49.8, 50.1],
 }
 SCENARIOS = [
@@ -44,6 +45,7 @@ SCENARIOS = [
     "drop_recovered",
     "below_spec",
     "critical",
+    "critical_confirmed",
     "check_model",
     "soc_letop",
     "soc_advies",
