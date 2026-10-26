@@ -34,6 +34,8 @@ PLATFORMS = [Platform.SENSOR]
 
 SERVICE_RESET = "reset_measurements"
 SERVICE_DISMISS = "dismiss_advice"
+SERVICE_DEMO = "demo"
+ATTR_SCENARIO = "scenario"
 ATTR_ENTRY_ID = "config_entry_id"
 ATTR_BATTERY = "battery"
 ATTR_KIND = "kind"
@@ -97,6 +99,31 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         if monitor is not None:
             await monitor.async_dismiss(parts[2], float(parts[3]))
 
+    async def _demo(call: ServiceCall) -> None:
+        """Demo battery with one made-up situation (0.5.5): the real card,
+        Repairs and phone messages follow. Your own batteries are untouched."""
+        from .demo import DEMO_ID
+
+        monitor = _find_monitor(hass, None, DEMO_ID)
+        if monitor is None:
+            await hass.config_entries.flow.async_init(
+                DOMAIN, context={"source": "demo"}, data=_demo_entry_data()
+            )
+            await hass.async_block_till_done()
+            monitor = _find_monitor(hass, None, DEMO_ID)
+        if monitor is None:
+            raise ServiceValidationError("Demo battery could not be added")
+        await monitor.async_demo(call.data[ATTR_SCENARIO])
+
+    from .demo import SCENARIOS
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_DEMO,
+        _demo,
+        schema=vol.Schema({vol.Required(ATTR_SCENARIO): vol.In(SCENARIOS)}),
+    )
+
     hass.bus.async_listen("mobile_app_notification_action", _phone_action)
     hass.http.register_view(ReportView())
     return True
@@ -125,6 +152,36 @@ class ReportView(HomeAssistantView):
         return web.Response(text=html, content_type="text/html", charset="utf-8")
 
 
+def _demo_entry_data() -> dict:
+    from .const import MODEL_E_V12, preset_for
+    from .demo import DEMO_CELL_MAX, DEMO_CELL_MIN, DEMO_ID, DEMO_POWER, DEMO_SOC, DEMO_TEMP_MAX
+
+    return {
+        "battery_id": DEMO_ID,
+        "name": "Demo",
+        "soc_entity": DEMO_SOC,
+        "power_entity": DEMO_POWER,
+        "power_sign": "charge_positive",
+        "model": MODEL_E_V12,
+        "purchase_date": "2024-02-01",
+        "cell_max_entity": DEMO_CELL_MAX,
+        "cell_min_entity": DEMO_CELL_MIN,
+        "temp_max_entity": DEMO_TEMP_MAX,
+        **preset_for(MODEL_E_V12),
+    }
+
+
+def _demo_inputs(hass: HomeAssistant) -> None:
+    """Made-up input values of the demo battery: idle, half full."""
+    from .demo import DEMO_CELL_MAX, DEMO_CELL_MIN, DEMO_POWER, DEMO_SOC, DEMO_TEMP_MAX
+
+    hass.states.async_set(DEMO_SOC, 60, {"unit_of_measurement": "%", "friendly_name": "Demo SOC"})
+    hass.states.async_set(DEMO_POWER, 0, {"unit_of_measurement": "W", "friendly_name": "Demo DC power"})
+    hass.states.async_set(DEMO_CELL_MAX, 3.33, {"unit_of_measurement": "V"})
+    hass.states.async_set(DEMO_CELL_MIN, 3.32, {"unit_of_measurement": "V"})
+    hass.states.async_set(DEMO_TEMP_MAX, 16, {"unit_of_measurement": "°C"})
+
+
 def _find_monitor(
     hass: HomeAssistant, entry_id: str | None, battery: str | None
 ) -> BatteryMonitor | None:
@@ -138,6 +195,8 @@ def _find_monitor(
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: MonitorConfigEntry) -> bool:
+    if entry.data.get("battery_id") == "demo":
+        _demo_inputs(hass)
     monitor = BatteryMonitor(hass, entry)
     monitor.app_version = str((await async_get_integration(hass, DOMAIN)).version)
     await monitor.async_start()

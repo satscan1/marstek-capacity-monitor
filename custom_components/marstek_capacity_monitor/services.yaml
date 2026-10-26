@@ -26,3 +26,28 @@ dismiss_advice:
             - soc
             - cells
           translation_key: kind
+
+demo:
+  fields:
+    scenario:
+      required: true
+      default: normal
+      selector:
+        select:
+          translation_key: scenario
+          options:
+            - normal
+            - since_start
+            - high_provisional
+            - high_confirmed
+            - drop_unconfirmed
+            - drop_confirmed
+            - drop_recovered
+            - below_spec
+            - critical
+            - check_model
+            - soc_letop
+            - soc_advies
+            - cells_letop
+            - cells_advies
+            - collecting

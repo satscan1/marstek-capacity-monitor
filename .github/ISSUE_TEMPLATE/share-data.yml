@@ -1,0 +1,37 @@
+name: Share data (anonymous)
+description: Share the anonymous report of your battery, so batteries can be compared. Deel het anonieme rapport van je batterij. Teile den anonymen Bericht deiner Batterie.
+title: "[data] "
+labels: ["community-data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **EN** On the battery card: **Report → Anonymous to share**. The report opens in a new tab; press **Download report** and drop the file below. At the top of the report it says what you share. Everything you add here is public.
+
+        **NL** Op de batterijkaart: **Rapport → Anoniem om te delen**. Het rapport opent in een nieuw tabblad; druk op **Rapport downloaden** en sleep het bestand hieronder. Bovenaan het rapport staat wat je deelt. Alles wat je hier toevoegt is openbaar.
+
+        **DE** Auf der Batteriekarte: **Bericht → Anonym zum Teilen**. Der Bericht öffnet sich in einem neuen Tab; drücke **Bericht herunterladen** und zieh die Datei unten hinein. Oben im Bericht steht, was du teilst. Alles, was du hier hinzufügst, ist öffentlich.
+  - type: textarea
+    id: file
+    attributes:
+      label: Anonymous report (.html)
+      description: Drag the downloaded file here. / Sleep het gedownloade bestand hierheen. / Zieh die heruntergeladene Datei hierher.
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model (optional)
+      placeholder: Venus E v2
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything worth knowing? (optional)
+      description: For example where the battery stands (inside, outside, shed) or how you control it. / Bijvoorbeeld waar de batterij staat of hoe je hem stuurt. / Zum Beispiel wo die Batterie steht oder wie du sie steuerst.
+  - type: checkboxes
+    id: ok
+    attributes:
+      label: Public
+      options:
+        - label: I understand that this file becomes public. / Ik begrijp dat dit bestand openbaar wordt. / Mir ist klar, dass diese Datei öffentlich wird.
+          required: true
