@@ -2,6 +2,8 @@
 
 ## v0.5.5-dev2 — test version (pre-release)
 
+**Facts, only facts matter.** The monitor no longer jumps to conclusions on one odd measurement: above 100 %, a sudden drop and red each wait for 5 measurements in a row.
+
 **Red is reported, once it is sure.**
 
 - After 5 full discharges in a row at or below 75 %, one message under **Settings → Repairs** (red) and on the phone: measured value, how many in a row, and the hint to download the Marstek report and attach it in the Marstek app. One odd measurement never gives this message. It disappears by itself when the capacity is above 75 % again; *Ignore* dismisses it for this series.
