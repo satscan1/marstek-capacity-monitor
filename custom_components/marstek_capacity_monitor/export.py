@@ -96,6 +96,17 @@ SUMMARY_KEYS = (
 
 _SCRIPT_ID = "mcm-data"
 
+MODEL_NAMES = {
+    "venus_e_v12": "Venus E v1 / v2",
+    "venus_c": "Venus C",
+    "venus_e_v3": "Venus E v3",
+    "venus_e_v4": "Venus E 4.0",
+    "venus_e_max": "Venus E Max",
+    "venus_e_pro": "Venus E Pro",
+    "venus_d": "Venus D",
+    "other": "–",
+}
+
 
 class ExportError(ValueError):
     """The file is not a monitor export, or from a newer monitor."""
@@ -320,7 +331,7 @@ _L: dict[str, dict[str, Any]] = {
             ("Niet", "namen, sensornamen, codes van je installatie, locatie, weggeklikte seintjes, de lopende meting"),
         ],
         "about_full": "Volledige back-up van de Marstek Capacity Monitor. Terugzetten: Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren → Back-up terugzetten. Bewaar dit bestand zelf; het bevat de namen van je batterij en sensoren.",
-        "about_anonymous": "Anonieme versie om te delen, bijvoorbeeld via het formulier \"Gegevens delen\" op GitHub. De gegevens staan in dit bestand; wat je hierboven ziet is wat je deelt.",
+        "about_anonymous": "Anonieme versie om te delen, bijvoorbeeld via het formulier \"Share data\" op GitHub. De gegevens staan in dit bestand; wat je hierboven ziet is wat je deelt.",
         "about_marstek": "Measured with Marstek Capacity Monitor on the DC side of the battery (open source, Home Assistant). Full discharges from 95 % or more to 15 % or less; capacity = DC energy divided by the SOC drop, scaled to the usable band. A tool, not proof.",
         "none": "Nog geen gegevens.",
     },
@@ -408,7 +419,7 @@ _L: dict[str, dict[str, Any]] = {
             ("Nicht", "Namen, Sensornamen, Kennungen deiner Installation, Standort, ausgeblendete Hinweise, die laufende Messung"),
         ],
         "about_full": "Vollständiges Backup des Marstek Capacity Monitor. Wiederherstellen: Einstellungen → Geräte & Dienste → Marstek Capacity Monitor → Konfigurieren → Backup wiederherstellen. Bewahre diese Datei selbst auf; sie enthält die Namen deiner Batterie und Sensoren.",
-        "about_anonymous": "Anonyme Version zum Teilen, zum Beispiel über das Formular \"Daten teilen\" auf GitHub. Die Daten stehen in dieser Datei; was du oben siehst, ist das, was du teilst.",
+        "about_anonymous": "Anonyme Version zum Teilen, zum Beispiel über das Formular \"Share data\" auf GitHub. Die Daten stehen in dieser Datei; was du oben siehst, ist das, was du teilst.",
         "about_marstek": "Measured with Marstek Capacity Monitor on the DC side of the battery (open source, Home Assistant). Full discharges from 95 % or more to 15 % or less; capacity = DC energy divided by the SOC drop, scaled to the usable band. A tool, not proof.",
         "none": "Noch keine Daten.",
     },
@@ -488,7 +499,7 @@ def render_html(export: dict[str, Any]) -> str:
     status = s.get("status")
     st = L["state"].get(status or "", status or "–")
     ds = s.get("display_state")
-    if ds in L["ds"]:
+    if ds in L["ds"] and status != "unconfirmed":
         st += f' <span class="mut">· {L["ds"][ds]}</span>'
     since = s.get("since_start_pct")
     since_txt = "–" if since is None else ("+" if since > 0 else "−" if since < 0 else "± ") + n(abs(since)) + " %"
@@ -497,7 +508,7 @@ def render_html(export: dict[str, Any]) -> str:
     sections: list[tuple[str, str]] = []
     summary_rows = [
         (K["battery"] if v == "full" else K["code"], name),
-        (K["model"], escape(str(bat.get("model") or "–"))),
+        (K["model"], escape(MODEL_NAMES.get(str(bat.get("model")), str(bat.get("model") or "–")))),
         (K["status"], f'<span class="{_cls(status)}">{st}</span>'),
         (K["measured"], f'{n(s.get("measured_kwh"), 2)} kWh · {n(s.get("measured_pct"))} %'),
         (K["expected"], f'{n(s.get("expected_kwh"), 2)} kWh · {n(s.get("expected_pct"))} %'),
@@ -555,7 +566,7 @@ def render_html(export: dict[str, Any]) -> str:
 
     yn = lambda x: L["yes"] if x else L["no"]  # noqa: E731
     settings = [
-        (K["model"], escape(str(bat.get("model") or "–"))),
+        (K["model"], escape(MODEL_NAMES.get(str(bat.get("model")), str(bat.get("model") or "–")))),
         (K["nominal"], f'{n(bat.get("nominal_kwh"), 2)} kWh'),
         (K["usable"], f'{n(bat.get("usable_kwh"), 2)} kWh'),
         (K["spec"], L["after"].format(eol=n(bat.get("cycle_eol_pct"), 0), life=n(bat.get("cycle_life"), 0))),
