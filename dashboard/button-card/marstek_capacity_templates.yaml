@@ -348,10 +348,12 @@ button_card_templates:
           const gone = (this && this._mcGone) || '';  // clicked away on a demo card
           const msg = (this && this._mcMsg) || '';  // message under the report buttons
           const sh = g('soc_health'), ch = g('cell_health'), cs = g('cell_spread');
+          // Let op (⚠) / advice (🔧) as coloured icons: an emoji keeps its own grey colours and does not stand out
+          const icon = (k, sz = 14) => `<svg viewBox="0 0 24 24" width="${sz}" height="${sz}" style="vertical-align:-2px"><path fill="${k === 'advies' ? P.red : P.orange}" d="${k === 'advies' ? 'M22.7,19L13.6,9.9C14.5,7.6 14,4.9 12.1,3C10.1,1 7.1,0.6 4.7,1.7L9,6L6,9L1.6,4.7C0.4,7.1 0.9,10.1 2.9,12.1C4.8,14 7.5,14.5 9.8,13.6L18.9,22.7C19.3,23.1 19.9,23.1 20.3,22.7L22.6,20.4C23.1,20 23.1,19.3 22.7,19Z' : 'M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z'}"/></svg>`;
           // Let op (⚠) / advice (🔧) that has not been clicked away
           const shown = (s, kind) => !!s && ['letop', 'advies'].includes(s.state) && !s.attributes.dismissed && !gone.includes(kind);
           const sym = s => !s || !['letop', 'advies'].includes(s.state) ? `<span style="color:${P.green}">●</span>`
-            : s.state === 'advies' ? `<span style="color:${P.red}">🔧</span>` : `<span style="color:${P.orange}">⚠</span>`;
+            : icon(s.state === 'advies' ? 'advies' : 'letop');
           const badge = (s, kind) => shown(s, kind) ? ' ' + sym(s) : '';
           const pill = (key, label) => `<span ${act(`h._mcPanel=h._mcPanel==='${key}'?'':'${key}';`)} style="display:inline-block;margin:0 6px 4px 0;font-size:12px;padding:1px 11px;border:1px solid ${panel === key ? P.edge : P.pillLine};border-radius:12px;background:${panel === key ? P.pillOn : 'transparent'};color:${panel === key ? P.text : P.muted};cursor:pointer;user-select:none;pointer-events:auto">${label}</span>`;
           // Settings: opens this battery under Settings -> Devices & services (then the cog: Configure)
@@ -569,7 +571,7 @@ button_card_templates:
                   const sym = {measuring: ['✓', P.green], collecting: ['⏳', P.blue], no_recent_data: ['⚠', P.orange], sensor_missing: ['⚠', P.red]}[r.s.state] || ['', ''];
                   return ` <span title="${T.mon[r.s.state] || r.s.state}" style="font-size:11px;color:${sym[1]}">${sym[0]}</span>`; })() : ''}${r.adv.length ? (() => {
                   const big = r.adv.some(h => h.state === 'advies');
-                  return ` <span title="${T.adv}" style="font-size:11px;color:${big ? P.red : P.orange}">${big ? '🔧' : '⚠'}</span>`; })() : ''}</td>
+                  return ` <span title="${T.adv}"><svg viewBox="0 0 24 24" width="13" height="13" style="vertical-align:-2px"><path fill="${big ? P.red : P.orange}" d="${big ? 'M22.7,19L13.6,9.9C14.5,7.6 14,4.9 12.1,3C10.1,1 7.1,0.6 4.7,1.7L9,6L6,9L1.6,4.7C0.4,7.1 0.9,10.1 2.9,12.1C4.8,14 7.5,14.5 9.8,13.6L18.9,22.7C19.3,23.1 19.9,23.1 20.3,22.7L22.6,20.4C23.1,20 23.1,19.3 22.7,19Z' : 'M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z'}"/></svg></span>`; })() : ''}</td>
                 <td style="padding:4px 10px;text-align:right;color:${d < -1 ? colNow(now) : P.muted}">${arrow}</td>
                 <td style="padding:4px 10px;text-align:right;font-weight:600;color:${colNow(now)}"${r.chk ? ` title="${T.chk}"` : ''}>${isNaN(now) ? `<span style="font-weight:400;font-size:11px;${muted}">${T.none}</span>` : f(now, 1) + '%'}${ds === 'drop_unconfirmed' ? ` <span title="${T.drop}" style="cursor:help;font-weight:400;font-size:11px">ⓘ</span>` : now > 100 ? ` <span title="${ds === 'high_confirmed' ? T.highOk : T.high}" style="cursor:help;font-weight:400;font-size:11px">ⓘ</span>` : ''}</td>
                 ${cells}
