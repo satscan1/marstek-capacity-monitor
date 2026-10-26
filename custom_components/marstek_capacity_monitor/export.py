@@ -287,13 +287,16 @@ _CSS = (
     "gap:12px;flex-wrap:wrap}button{background:var(--ac);color:#fff;border:0;border-radius:8px;"
     "padding:9px 14px;font-weight:600;cursor:pointer}.note{border-left:3px solid var(--ac);"
     "padding:10px 12px}.share td:last-child{white-space:normal;text-align:left;font-weight:400}"
+    ".in{border-left:4px solid var(--ok);padding:4px 0 4px 12px}.out{border-left:4px solid var(--mut);"
+    "padding:4px 0 4px 12px;margin-top:14px;color:var(--mut)}.out ul{margin:6px 0 0;padding-left:18px}"
+    ".bh{font-weight:700;margin-bottom:4px}.in .bh{color:var(--ok)}"
     "@media print{button,.chips{display:none}}"
 )
 
 _L: dict[str, dict[str, Any]] = {
     "nl": {
         "title": {"full": "Back-up batterijcapaciteit", "anonymous": "Batterijcapaciteit — anoniem om te delen", "marstek": "Battery capacity report"},
-        "made": "gemaakt", "download": "Rapport downloaden",
+        "made": "gemaakt", "download": "Rapport downloaden", "share_in": "Dit staat in het bestand", "share_out": "Dit zit er níet in",
         "sec": {"summary": "Samenvatting", "share": "Dit deel je", "months": "Capaciteit per maand",
                 "meas": "Metingen (nieuwste eerst)", "soc": "SOC-meter per maand", "cells": "Cellen per maand",
                 "settings": "Instellingen", "runtime": "Werking", "about": "Over dit rapport"},
@@ -328,6 +331,7 @@ _L: dict[str, dict[str, Any]] = {
             ("SOC-gebeurtenissen", "ijkpunten, sprongen, bijladen op 99 %, dagen vol"),
             ("Cellen", "celverschil na volle lading (als ingesteld)"),
             ("Batterij", "model, capaciteit, specificatie, installatie als jaar en maand, koppeling"),
+            ("Niet", "je naam en de naam van je batterij, sensornamen, codes van je installatie, je adres of woonplaats, weggeklikte meldingen, de lopende meting"),
         ],
         "about_full": "Volledige back-up van de Marstek Capacity Monitor. Terugzetten: Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren → Back-up terugzetten. Bewaar dit bestand zelf; het bevat de namen van je batterij en sensoren.",
         "about_anonymous": "Anonieme versie om te delen, bijvoorbeeld via het formulier \"Share data\" op GitHub. De gegevens staan in dit bestand; wat je hierboven ziet is wat je deelt.",
@@ -336,7 +340,7 @@ _L: dict[str, dict[str, Any]] = {
     },
     "en": {
         "title": {"full": "Battery capacity back-up", "anonymous": "Battery capacity — anonymous to share", "marstek": "Battery capacity report"},
-        "made": "made", "download": "Download report",
+        "made": "made", "download": "Download report", "share_in": "This is in the file", "share_out": "This is not in it",
         "sec": {"summary": "Summary", "share": "What you share", "months": "Capacity per month",
                 "meas": "Measurements (newest first)", "soc": "SOC meter per month", "cells": "Cells per month",
                 "settings": "Settings", "runtime": "Runtime", "about": "About this report"},
@@ -371,6 +375,7 @@ _L: dict[str, dict[str, Any]] = {
             ("SOC events", "calibration points, jumps, top-up at 99 %, days full"),
             ("Cells", "cell spread after a full charge (when set up)"),
             ("Battery", "model, capacity, spec, installation as year and month, connection"),
+            ("Not", "your name and the name of your battery, sensor names, ids of your installation, your address or town, dismissed notices, the running measurement"),
         ],
         "about_full": "Full back-up of Marstek Capacity Monitor. Restore: Settings → Devices & services → Marstek Capacity Monitor → Configure → Restore back-up. Keep this file yourself; it holds the names of your battery and sensors.",
         "about_anonymous": "Anonymous version to share, for example with the \"Share data\" form on GitHub. The data is in this file; what you see above is what you share.",
@@ -379,7 +384,7 @@ _L: dict[str, dict[str, Any]] = {
     },
     "de": {
         "title": {"full": "Backup Batteriekapazität", "anonymous": "Batteriekapazität — anonym zum Teilen", "marstek": "Battery capacity report"},
-        "made": "erstellt", "download": "Bericht herunterladen",
+        "made": "erstellt", "download": "Bericht herunterladen", "share_in": "Das steht in der Datei", "share_out": "Das ist nicht enthalten",
         "sec": {"summary": "Zusammenfassung", "share": "Das teilst du", "months": "Kapazität pro Monat",
                 "meas": "Messungen (neueste zuerst)", "soc": "SOC-Anzeige pro Monat", "cells": "Zellen pro Monat",
                 "settings": "Einstellungen", "runtime": "Betrieb", "about": "Über diesen Bericht"},
@@ -414,6 +419,7 @@ _L: dict[str, dict[str, Any]] = {
             ("SOC-Ereignisse", "Kalibrierpunkte, Sprünge, Nachladen bei 99 %, Tage voll"),
             ("Zellen", "Zellspannungsdifferenz nach Vollladung (wenn eingerichtet)"),
             ("Batterie", "Modell, Kapazität, Herstellerangabe, Inbetriebnahme als Jahr und Monat, Anbindung"),
+            ("Nicht", "dein Name und der Name deiner Batterie, Sensornamen, Kennungen deiner Installation, deine Adresse oder dein Wohnort, ausgeblendete Hinweise, die laufende Messung"),
         ],
         "about_full": "Vollständiges Backup des Marstek Capacity Monitor. Wiederherstellen: Einstellungen → Geräte & Dienste → Marstek Capacity Monitor → Konfigurieren → Backup wiederherstellen. Bewahre diese Datei selbst auf; sie enthält die Namen deiner Batterie und Sensoren.",
         "about_anonymous": "Anonyme Version zum Teilen, zum Beispiel über das Formular \"Share data\" auf GitHub. Die Daten stehen in dieser Datei; was du oben siehst, ist das, was du teilst.",
@@ -521,8 +527,15 @@ def render_html(export: dict[str, Any]) -> str:
     sections.append(("summary", _kv(summary_rows)))
 
     if v == "anonymous":
-        rows = "".join(f"<tr><td>{escape(a)}</td><td>{escape(b)}</td></tr>" for a, b in L["share"])
-        sections.append(("share", f'<table class="kv share">{rows}</table>'))
+        # Two blocks: what is in the file (green) and what stays out (grey)
+        yes = [(a, b) for a, b in L["share"] if a not in ("Niet", "Not", "Nicht")]
+        no = [b for a, b in L["share"] if a in ("Niet", "Not", "Nicht")]
+        rows = "".join(f"<tr><td>{escape(a)}</td><td>{escape(b)}</td></tr>" for a, b in yes)
+        out = f'<div class="in"><div class="bh">✓ {L["share_in"]}</div><table class="kv share">{rows}</table></div>'
+        if no:
+            items = "".join(f"<li>{escape(x.strip())}</li>" for x in no[0].split(","))
+            out += f'<div class="out"><div class="bh">✕ {L["share_out"]}</div><ul>{items}</ul></div>'
+        sections.append(("share", out))
 
     trend = s.get("trend") or []
     if trend:
