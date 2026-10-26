@@ -8,5 +8,6 @@
 | [04 – Troubleshooting](04-troubleshooting.md) · [Nederlands](04-troubleshooting.nl.md) | Common messages and what to do |
 | [05 – Supported batteries](05-supported-batteries.md) · [Nederlands](05-supported-batteries.nl.md) | Models and integrations, depth of discharge per model, sources for the manufacturer specs |
 | [06 – Dashboard and gallery](06-dashboard-gallery.md) · [Nederlands](06-dashboard-gallery.nl.md) | Layout for 1 to 6 batteries, the battery card explained with numbers, gallery with and without chart |
+| [07 – How the monitor measures](07-measuring-method.md) · [Nederlands](07-measuring-method.nl.md) · [Deutsch](07-measuring-method.de.md) | Why only full discharges count, and why measuring while the battery charges in between is not reliable |
 
 See also the [CHANGELOG](../CHANGELOG.md).
