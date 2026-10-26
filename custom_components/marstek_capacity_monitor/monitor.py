@@ -461,6 +461,9 @@ class BatteryMonitor:
         self.soc_events, self.full_days, self.alive_days = [], [], []
         self.soc_since = None
         self.dismissed, self.notified = {}, {}
+        # start from the SOC the battery shows now, so the card does not
+        # read "now – %" until the SOC moves (0.5.5)
+        self._handle_soc(self.hass.states.get(self.soc_entity))
         await self._store.async_save(self._data())
         self._recalculate()
         self._update_status(force=True)
