@@ -805,6 +805,7 @@ async def test_options_have_notify_switch(hass: HomeAssistant) -> None:
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {"next_step_id": "settings"})
     assert "notify" in result["data_schema"].schema
 
 
@@ -843,6 +844,7 @@ async def test_sensitivity_options(hass: HomeAssistant, freezer) -> None:
     freezer.move_to("2026-10-22 12:00:00+00:00")
     entry, calls = await _setup_with_phone(hass)
     result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {"next_step_id": "settings"})
     assert "soc_sensitivity" in result["data_schema"].schema
     hass.config_entries.async_update_entry(entry, options={**entry.options, "soc_sensitivity": "off"})
     await hass.async_block_till_done()
@@ -934,6 +936,7 @@ async def test_found_sensors_offered_under_repairs(hass: HomeAssistant) -> None:
 
     # The options form keeps the counter; a hand-changed value drops it
     result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {"next_step_id": "settings"})
     form = {
         str(k): (k.default() if callable(getattr(k, "default", None)) else None)
         for k in result["data_schema"].schema

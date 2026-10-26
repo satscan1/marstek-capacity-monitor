@@ -90,6 +90,13 @@
   "options": {
     "step": {
       "init": {
+        "title": "Marstek Capacity Monitor",
+        "menu_options": {
+          "settings": "Settings",
+          "restore": "Restore back-up"
+        }
+      },
+      "settings": {
         "title": "Factory data and warranty",
         "data": {
           "nominal_kwh": "Rated capacity (manufacturer)",
@@ -130,12 +137,25 @@
           "soc_sensitivity": "When a deviation of the SOC meter counts. Normal: 5 % or more. Relaxed: 8 %. Strict: 3 %. Off: only shown on the card, never \"attention\" or advice.",
           "cell_sensitivity": "When the cell spread counts as too high. Normal: 2× the own normal value. Relaxed: 3×. Strict: 1.5×. Off: only shown on the card. Only with cell voltage sensors."
         }
+      },
+      "restore": {
+        "title": "Restore back-up",
+        "description": "Choose a report or back-up file of this monitor (.html or .json). Merge keeps all measurements from both; replace makes the file win (a full back-up also brings back the running measurement). A full back-up of the current data is written first to /config/marstek_capacity_monitor/backup/.",
+        "data": {
+          "file": "Back-up file",
+          "mode": "How"
+        }
       }
     },
     "error": {
       "reserve_too_large": "The reserve must be smaller than the nominal capacity.",
       "cells_both": "Fill in both the highest and the lowest cell voltage, or neither.",
-      "same_entity": "SOC and power must be different sensors."
+      "same_entity": "SOC and power must be different sensors.",
+      "restore_invalid": "This is not a back-up of Marstek Capacity Monitor, or it was made by a newer version.",
+      "restore_unreadable": "The file could not be read."
+    },
+    "abort": {
+      "restored": "Back-up restored: {records} swings, of which {full} full discharges. The card shows them within a minute."
     }
   },
   "entity": {
@@ -174,7 +194,8 @@
           "attention": "Below spec",
           "critical": "Report to Marstek",
           "no_measurement": "No full discharge measured yet",
-          "check_model": "Check the model"
+          "check_model": "Check the model",
+          "unconfirmed": "Not confirmed yet"
         }
       },
       "red_threshold": {
@@ -278,6 +299,12 @@
         "relaxed": "Relaxed",
         "normal": "Normal",
         "strict": "Strict"
+      }
+    },
+    "restore_mode": {
+      "options": {
+        "merge": "Merge: keep everything from both",
+        "replace": "Replace: the file wins"
       }
     }
   },

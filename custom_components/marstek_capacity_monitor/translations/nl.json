@@ -90,6 +90,13 @@
   "options": {
     "step": {
       "init": {
+        "title": "Marstek Capacity Monitor",
+        "menu_options": {
+          "settings": "Instellingen",
+          "restore": "Back-up terugzetten"
+        }
+      },
+      "settings": {
         "title": "Fabrieksgegevens en garantie",
         "data": {
           "nominal_kwh": "Opgegeven capaciteit (fabrikant)",
@@ -130,12 +137,25 @@
           "soc_sensitivity": "Wanneer een afwijking van de SOC-meter meetelt. Normaal: 5 % of meer. Ruim: 8 %. Extra: 3 %. Uit: alleen op de kaart, nooit \"let op\" of advies.",
           "cell_sensitivity": "Wanneer het celverschil te hoog is. Normaal: 2× de eigen normale waarde. Ruim: 3×. Extra: 1,5×. Uit: alleen op de kaart. Alleen met celspanningssensoren."
         }
+      },
+      "restore": {
+        "title": "Back-up terugzetten",
+        "description": "Kies een rapport- of back-upbestand van deze monitor (.html of .json). Samenvoegen houdt alle metingen van beide; vervangen laat het bestand winnen (een volledige back-up zet ook de lopende meting terug). Eerst wordt een volledige back-up van de huidige gegevens gemaakt in /config/marstek_capacity_monitor/backup/.",
+        "data": {
+          "file": "Back-upbestand",
+          "mode": "Hoe"
+        }
       }
     },
     "error": {
       "reserve_too_large": "De reserve moet kleiner zijn dan de fabriekscapaciteit.",
       "cells_both": "Vul zowel de hoogste als de laagste celspanning in, of geen van beide.",
-      "same_entity": "SOC en vermogen moeten verschillende sensoren zijn."
+      "same_entity": "SOC en vermogen moeten verschillende sensoren zijn.",
+      "restore_invalid": "Dit is geen back-up van Marstek Capacity Monitor, of hij is gemaakt door een nieuwere versie.",
+      "restore_unreadable": "Het bestand kon niet worden gelezen."
+    },
+    "abort": {
+      "restored": "Back-up teruggezet: {records} rondes, waarvan {full} volledige ontladingen. De kaart toont ze binnen een minuut."
     }
   },
   "entity": {
@@ -174,7 +194,8 @@
           "attention": "Onder specificatie",
           "critical": "Melden bij Marstek",
           "no_measurement": "Nog geen volledige ontlading gemeten",
-          "check_model": "Klopt het model?"
+          "check_model": "Klopt het model?",
+          "unconfirmed": "Nog niet bevestigd"
         }
       },
       "red_threshold": {
@@ -278,6 +299,12 @@
         "relaxed": "Ruim",
         "normal": "Normaal",
         "strict": "Extra"
+      }
+    },
+    "restore_mode": {
+      "options": {
+        "merge": "Samenvoegen: alles van beide houden",
+        "replace": "Vervangen: het bestand wint"
       }
     }
   },

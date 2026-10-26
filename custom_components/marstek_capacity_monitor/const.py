@@ -185,3 +185,9 @@ DEFAULTS[CONF_SIDEBAR] = True
 DASHBOARD_URL = "marstek-capacity"
 DASHBOARD_ICON = "mdi:home-battery"
 DASHBOARD_TITLE = {"nl": "Batterijcapaciteit", "de": "Batteriekapazität", "en": "Battery capacity"}
+
+
+# Back-up and report (0.5.5): served behind the login, opened by the card with
+# a short-lived signed link.
+REPORT_URL = f"/api/{DOMAIN}/report"
+RESTORE_MODES = ["merge", "replace"]

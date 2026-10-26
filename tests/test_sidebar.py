@@ -47,6 +47,8 @@ async def test_option_off_removes_menu_item(hass: HomeAssistant) -> None:
     assert DASHBOARD_URL in hass.data[DATA_PANELS]
 
     result = await hass.config_entries.options.async_init(entry.entry_id)
+
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {"next_step_id": "settings"})
     assert "sidebar" in result["data_schema"].schema
     data = {
         k.schema: k.default()

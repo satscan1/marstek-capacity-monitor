@@ -90,6 +90,13 @@
   "options": {
     "step": {
       "init": {
+        "title": "Marstek Capacity Monitor",
+        "menu_options": {
+          "settings": "Einstellungen",
+          "restore": "Backup wiederherstellen"
+        }
+      },
+      "settings": {
         "title": "Herstellerdaten und Garantie",
         "data": {
           "nominal_kwh": "Nennkapazität (Hersteller)",
@@ -130,12 +137,25 @@
           "soc_sensitivity": "Ab wann eine Abweichung der SOC-Anzeige zählt. Normal: 5 % oder mehr. Großzügig: 8 %. Streng: 3 %. Aus: nur auf der Karte, nie \"Achtung\" oder Empfehlung.",
           "cell_sensitivity": "Ab wann die Zellspannungsdifferenz zu hoch ist. Normal: 2× der eigene Normalwert. Großzügig: 3×. Streng: 1,5×. Aus: nur auf der Karte. Nur mit Zellspannungssensoren."
         }
+      },
+      "restore": {
+        "title": "Backup wiederherstellen",
+        "description": "Wähle eine Bericht- oder Backup-Datei dieses Monitors (.html oder .json). Zusammenführen behält alle Messungen aus beiden; Ersetzen lässt die Datei gewinnen (ein vollständiges Backup stellt auch die laufende Messung wieder her). Vorher wird ein vollständiges Backup der aktuellen Daten in /config/marstek_capacity_monitor/backup/ angelegt.",
+        "data": {
+          "file": "Backup-Datei",
+          "mode": "Wie"
+        }
       }
     },
     "error": {
       "reserve_too_large": "Die Reserve muss kleiner sein als die Nennkapazität.",
       "cells_both": "Gib sowohl die höchste als auch die niedrigste Zellspannung an, oder keine von beiden.",
-      "same_entity": "SOC und Leistung müssen verschiedene Sensoren sein."
+      "same_entity": "SOC und Leistung müssen verschiedene Sensoren sein.",
+      "restore_invalid": "Das ist kein Backup des Marstek Capacity Monitor, oder es stammt von einer neueren Version.",
+      "restore_unreadable": "Die Datei konnte nicht gelesen werden."
+    },
+    "abort": {
+      "restored": "Backup wiederhergestellt: {records} Zyklen, davon {full} vollständige Entladungen. Die Karte zeigt sie innerhalb einer Minute."
     }
   },
   "entity": {
@@ -174,7 +194,8 @@
           "attention": "Unter Herstellerangabe",
           "critical": "An Marstek melden",
           "no_measurement": "Noch keine vollständige Entladung gemessen",
-          "check_model": "Modell prüfen"
+          "check_model": "Modell prüfen",
+          "unconfirmed": "Noch nicht bestätigt"
         }
       },
       "red_threshold": {
@@ -278,6 +299,12 @@
         "relaxed": "Großzügig",
         "normal": "Normal",
         "strict": "Streng"
+      }
+    },
+    "restore_mode": {
+      "options": {
+        "merge": "Zusammenführen: alles aus beiden behalten",
+        "replace": "Ersetzen: die Datei gewinnt"
       }
     }
   },

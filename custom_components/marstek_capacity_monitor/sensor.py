@@ -29,7 +29,7 @@ from .const import CONF_BATTERY_ID, DOMAIN, KIND_CELLS, KIND_SOC, MONITOR_STATUS
 from .health import LEVELS
 from .monitor import BatteryMonitor
 
-STATUS_OPTIONS = ["good", "attention", "critical", "no_measurement", "check_model"]
+STATUS_OPTIONS = ["good", "attention", "critical", "no_measurement", "check_model", "unconfirmed"]
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -80,6 +80,16 @@ SENSORS: tuple[CapacitySensorDescription, ...] = (
             "expected_pct": m.result.get("expected_pct"),
             "red_pct": m.result.get("red_pct"),
             "tolerance_pct": m.result.get("tolerance_pct"),
+        } | {
+            k: m.result.get(k)
+            for k in (
+                "display_state",
+                "baseline_pct",
+                "since_start_pct",
+                "confirm_count",
+                "confirm_needed",
+                "drop_ref_pct",
+            )
         },
     ),
     CapacitySensorDescription(
