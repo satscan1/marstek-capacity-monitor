@@ -285,7 +285,8 @@ _CSS = (
     "border-radius:14px;padding:4px 10px;color:var(--tx);text-decoration:none;font-size:12px;"
     "background:var(--card)}.top{display:flex;justify-content:space-between;align-items:flex-start;"
     "gap:12px;flex-wrap:wrap}button{background:var(--ac);color:#fff;border:0;border-radius:8px;"
-    "padding:9px 14px;font-weight:600;cursor:pointer}.note{border-left:3px solid var(--ac);"
+    "padding:9px 14px;font-weight:600;cursor:pointer}.btns{display:flex;gap:8px;flex-wrap:wrap}"
+    "button.sec{background:transparent;color:var(--tx);border:1px solid var(--ln)}.note{border-left:3px solid var(--ac);"
     "padding:10px 12px}.share td:last-child{white-space:normal;text-align:left;font-weight:400}"
     ".in{border-left:4px solid var(--ok);padding:4px 0 4px 12px}.out{border-left:4px solid var(--mut);"
     "padding:4px 0 4px 12px;margin-top:14px;color:var(--mut)}.out ul{margin:6px 0 0;padding-left:18px}"
@@ -296,7 +297,7 @@ _CSS = (
 _L: dict[str, dict[str, Any]] = {
     "nl": {
         "title": {"full": "Back-up batterijcapaciteit", "anonymous": "Batterijcapaciteit — anoniem om te delen", "marstek": "Battery capacity report"},
-        "made": "gemaakt", "download": "Rapport downloaden", "share_in": "Dit staat in het bestand", "share_out": "Dit zit er níet in",
+        "made": "gemaakt", "download": "Rapport downloaden", "back": "← Terug naar Home Assistant", "share_in": "Dit staat in het bestand", "share_out": "Dit zit er níet in",
         "sec": {"summary": "Samenvatting", "share": "Dit deel je", "months": "Capaciteit per maand",
                 "meas": "Metingen (nieuwste eerst)", "soc": "SOC-meter per maand", "cells": "Cellen per maand",
                 "settings": "Instellingen", "runtime": "Werking", "about": "Over dit rapport"},
@@ -340,7 +341,7 @@ _L: dict[str, dict[str, Any]] = {
     },
     "en": {
         "title": {"full": "Battery capacity back-up", "anonymous": "Battery capacity — anonymous to share", "marstek": "Battery capacity report"},
-        "made": "made", "download": "Download report", "share_in": "This is in the file", "share_out": "This is not in it",
+        "made": "made", "download": "Download report", "back": "← Back to Home Assistant", "share_in": "This is in the file", "share_out": "This is not in it",
         "sec": {"summary": "Summary", "share": "What you share", "months": "Capacity per month",
                 "meas": "Measurements (newest first)", "soc": "SOC meter per month", "cells": "Cells per month",
                 "settings": "Settings", "runtime": "Runtime", "about": "About this report"},
@@ -384,7 +385,7 @@ _L: dict[str, dict[str, Any]] = {
     },
     "de": {
         "title": {"full": "Backup Batteriekapazität", "anonymous": "Batteriekapazität — anonym zum Teilen", "marstek": "Battery capacity report"},
-        "made": "erstellt", "download": "Bericht herunterladen", "share_in": "Das steht in der Datei", "share_out": "Das ist nicht enthalten",
+        "made": "erstellt", "download": "Bericht herunterladen", "back": "← Zurück zu Home Assistant", "share_in": "Das steht in der Datei", "share_out": "Das ist nicht enthalten",
         "sec": {"summary": "Zusammenfassung", "share": "Das teilst du", "months": "Kapazität pro Monat",
                 "meas": "Messungen (neueste zuerst)", "soc": "SOC-Anzeige pro Monat", "cells": "Zellen pro Monat",
                 "settings": "Einstellungen", "runtime": "Betrieb", "about": "Über diesen Bericht"},
@@ -621,7 +622,14 @@ def render_html(export: dict[str, Any]) -> str:
     created = escape(str(export.get("created") or ""))[:16].replace("T", " ")
     payload = json.dumps(export, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     fname = f"marstek-capacity-{v}-{escape(str(bat.get('battery_id') or bat.get('share_id') or 'battery'))}-{created[:10]}.html"
+    # Back button (0.5.5): only when opened from Home Assistant. On a phone
+    # the report replaces the app view, so this is the way back; in a
+    # downloaded copy it is removed (there is no Home Assistant to go to).
     script = (
+        "(function(){var k=document.getElementById('back');"
+        "if(location.pathname.indexOf('/api/marstek_capacity_monitor/')!==0){k.remove();return;}"
+        "k.addEventListener('click',function(){if(window.opener&&!window.opener.closed){window.close();}"
+        "var r=document.referrer;location.href=(r&&r.indexOf(location.origin)===0)?r:'/';});})();"
         "document.getElementById('dl').addEventListener('click',function(){var b=new Blob(['<!doctype html>'"
         "+document.documentElement.outerHTML],{type:'text/html'});var a=document.createElement('a');"
         f"a.href=URL.createObjectURL(b);a.download='{fname}';document.body.appendChild(a);a.click();a.remove();}});"
@@ -632,6 +640,6 @@ def render_html(export: dict[str, Any]) -> str:
         f"<title>{escape(title)}</title><style>{_CSS}</style></head><body><div class=\"wrap\">"
         f'<div class="top"><div><h1>{escape(title)}</h1><div class="sub">{name} · {L["made"]} {created} · '
         f'v{escape(str(export.get("app_version") or ""))} · {len(full)} × 95 → 15 %</div></div>'
-        f'<button id="dl">{L["download"]}</button></div><div class="chips">{chips}</div>{body}</div>'
+        f'<div class="btns"><button id="back" class="sec">{L["back"]}</button><button id="dl">{L["download"]}</button></div></div><div class="chips">{chips}</div>{body}</div>'
         f'<script type="application/json" id="{_SCRIPT_ID}">{payload}</script><script>{script}</script></body></html>'
     )
