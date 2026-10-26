@@ -51,7 +51,7 @@ Dit is een **specificatie, geen garantie**. Marstek geeft geen capaciteitsgarant
 |---|---|
 | 🟢 Groen | Volgens specificatie, of maximaal 5 punten eronder |
 | 🟠 Oranje | Onder specificatie, maar boven 75 % |
-| 🔴 Rood | **75 % of lager**: meld het bij Marstek **via de Marstek-app** |
+| 🔴 Rood | **75 % of lager**: meld het bij Marstek **via de Marstek-app**. Vanaf 0.5.5: na 5 volledige ontladingen op rij op of onder 75 % één melding onder Instellingen → Reparaties en op de telefoon, met de tip het Marstek-rapport mee te sturen |
 
 De marge laat zien hoeveel kWh de batterij boven of onder de specificatie zit. Alle grenzen kun je aanpassen.
 

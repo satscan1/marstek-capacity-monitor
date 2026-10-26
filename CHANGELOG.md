@@ -1,6 +1,21 @@
 # Changelog
 
-## v0.5.5 — test version (not released)
+## v0.5.5-dev2 — test version (pre-release)
+
+**Red is reported, once it is sure.**
+
+- After 5 full discharges in a row at or below 75 %, one message under **Settings → Repairs** (red) and on the phone: measured value, how many in a row, and the hint to download the Marstek report and attach it in the Marstek app. One odd measurement never gives this message. It disappears by itself when the capacity is above 75 % again; *Ignore* dismisses it for this series.
+- New attributes on `sensor.marstek_<id>_capacity_pct`: `red_count`, `red_confirmed`, `red_since`.
+
+**Small things.**
+
+- The report has **← Back to Home Assistant** when opened from Home Assistant (on a phone the report replaces the app view). A downloaded or shared copy has no such button.
+- *Let op* and advice are coloured icons on the card and in the overview: an orange triangle and a red wrench, instead of grey emoji that hardly stood out.
+- The anonymous report shows what you share in two blocks: green *This is in the file*, grey *This is not in it* (no names, sensor names, address or town).
+- After *Reset measurements* the card starts from the state of charge the battery shows now, instead of *now – %* until it moves.
+- Demo: new situation *Report to Marstek, confirmed* (red + message).
+
+## v0.5.5-dev1 — test version (not released)
 
 **How sure is the latest value?**
 

@@ -51,7 +51,7 @@ This is a **specification, not a warranty**. Marstek gives no capacity guarantee
 |---|---|
 | 🟢 Green | Within spec, or at most 5 points below |
 | 🟠 Orange | Below spec, but above 75 % |
-| 🔴 Red | **75 % or lower**: report it to Marstek **via the Marstek app** |
+| 🔴 Red | **75 % or lower**: report it to Marstek **via the Marstek app**. From 0.5.5: after 5 full discharges in a row at or below 75 %, one message under Settings → Repairs and on the phone, with the hint to attach the Marstek report |
 
 The margin shows how many kWh the battery is above or below the spec. All thresholds can be adjusted.
 
