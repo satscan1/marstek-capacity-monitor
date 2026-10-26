@@ -168,6 +168,7 @@ def _demo_entry_data() -> dict:
         "cell_min_entity": DEMO_CELL_MIN,
         "temp_max_entity": DEMO_TEMP_MAX,
         **preset_for(MODEL_E_V12),
+        "initial_cycles": 300,
     }
 
 

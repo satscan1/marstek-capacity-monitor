@@ -68,9 +68,10 @@ def build(scenario: str, now_ts: float, usable_kwh: float, nominal_kwh: float) -
 
     records: list[dict[str, Any]] = []
     events: list[dict[str, Any]] = []
-    # one full discharge every 4 days, the newest yesterday
+    # one full discharge every 9 days, the newest yesterday (spread over
+    # a few months, so the chart shows a line)
     for i, pct in enumerate(caps):
-        end = now_ts - (len(caps) - i) * 4 * day + 3 * day
+        end = now_ts - (len(caps) - i) * 9 * day + 8 * day
         start = end - 6 * 3600
         delta = 89.0
         kwh = pct / 100 * usable_kwh * delta / band
