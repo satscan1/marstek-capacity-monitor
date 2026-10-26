@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.5.5 — test version (not released)
+
+**How sure is the latest value?**
+
+- **Above 100 %:** grey with *provisional 3/5* until 5 measurements in a row are above 100 % and no more than 3 points apart; then green with *above new* (new cells often deliver more than the rating plate, and the plate assumes 51.2 V while the battery works around 52–53 V). The real value is always shown, never cut off at 100 %.
+- **Suddenly lower:** a drop of more than 5 points against the 3 measurements before it, that also moves the value shown, is grey with *not confirmed yet* and status *Not confirmed yet* instead of orange or red. Real wear is slow; such a jump is nearly always the battery's SOC meter shifting for a while. After 5 low measurements in a row it counts as real; when it recovers the note goes away. No Repairs or phone message for this.
+- **Since monitoring began:** a small line in the Measured box, e.g. *−1.2 % since monitoring began*, against the middle of the first 3 measurements of this monitor (not against new). Appears after 3 full discharges.
+- New attributes on `sensor.marstek_<id>_capacity_pct`: `display_state`, `baseline_pct`, `since_start_pct`, `confirm_count`, `confirm_needed`, `drop_ref_pct`.
+
+**Report, back-up and restore.**
+
+- New button **Report** on the battery card: *Full back-up*, *Anonymous to share* or *For Marstek* (in English). The report opens in a new tab, in the same style as the HESC report, behind the login of Home Assistant (a short-lived signed link; nothing in the public `www` folder). **Download report** saves it as one HTML file with the data embedded: what you see is what you share.
+- **Restore:** Configure → *Restore back-up* (report or JSON file; merge or replace). A full back-up of the current data is written first to `/config/marstek_capacity_monitor/backup/`.
+- One versioned format (`schema`), so a newer monitor always reads an older back-up. When a future version changes how data is stored, a back-up is written automatically before converting.
+- **Download diagnostics** (Settings → Devices & services → the monitor → ⋮) now works, with the battery name left out.
+- New issue form **Share data** on GitHub, for the anonymous report.
+
+**Demo of every situation.**
+
+- Action `marstek_capacity_monitor.demo` with a situation (normal, above 100 %, sudden drop, below spec, red, check the model, SOC drift, cell calibration, …). It adds a battery *Demo* once and fills it with made-up data; the card, Repairs and phone messages react as for a real battery. Your own batteries are untouched; remove *Demo* like any other battery.
+
+**Guide.**
+
+- New page *07 – How the monitor measures* (EN/NL/DE): why only full discharges count, why measuring while the battery charges in between is not reliable, why a battery can come out above 100 %.
+- Troubleshooting (EN/NL/DE): rows rewritten or added for above 100 %, suddenly lower, since monitoring began, measuring in between, report and back-up; the battery scan row mentions German and Dutch names.
+
 ## v0.5.2 — 2026-10-25
 
 **Lost in translation... fixed!**

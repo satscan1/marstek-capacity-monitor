@@ -41,6 +41,7 @@ Then restart Home Assistant and go to **Settings → Dashboards → Add dashboar
 | [04 – Troubleshooting](docs/04-troubleshooting.md) | Common messages and what to do |
 | [05 – Supported batteries](docs/05-supported-batteries.md) | Models, depth of discharge per model, **sources for the manufacturer specs** |
 | [06 – Dashboard and gallery](docs/06-dashboard-gallery.md) | Layout for 1 to 6 batteries, the card explained with numbers, gallery with and without chart |
+| [07 – How the monitor measures](docs/07-measuring-method.md) | Why only full discharges count, and why measuring while the battery charges in between is not reliable |
 
 Changes per version: [CHANGELOG](CHANGELOG.md).
 

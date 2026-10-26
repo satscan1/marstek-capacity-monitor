@@ -42,6 +42,7 @@ Starte Home Assistant danach neu und gehe zu **Einstellungen → Dashboards → 
 | [03 – How it works](docs/03-how-it-works.md) (Englisch) | Drei Kapazitäten, Messung, Umrechnung auf 100 %, Herstellerangabe und Farben |
 | [04 – Fehlerbehebung](docs/04-troubleshooting.de.md) | Häufige Meldungen und Fragen, und was zu tun ist |
 | [05 – Supported batteries](docs/05-supported-batteries.md) (Englisch) | Modelle, Entladetiefe pro Modell, **Quellen der Herstellerangaben** |
+| [07 – Wie der Monitor misst](docs/07-measuring-method.de.md) | Warum nur vollständige Entladungen zählen, und warum Messen bei Zwischenladen nicht zuverlässig ist |
 
 Änderungen pro Version: [CHANGELOG](CHANGELOG.md) (Englisch).
 

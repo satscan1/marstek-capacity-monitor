@@ -41,6 +41,7 @@ Herstart daarna Home Assistant en ga naar **Instellingen → Dashboards → Voeg
 | [04 – Problemen oplossen](docs/04-troubleshooting.nl.md) | Veelvoorkomende meldingen en wat te doen |
 | [05 – Ondersteunde batterijen](docs/05-supported-batteries.nl.md) | Modellen, ontlaaddiepte per model, **bronnen voor de specificaties van de fabrikant** |
 | [06 – Dashboard en galerij](docs/06-dashboard-gallery.nl.md) | Indeling bij 1 tot 6 batterijen, de kaart genummerd uitgelegd, galerij met en zonder grafiek |
+| [07 – Hoe de monitor meet](docs/07-measuring-method.nl.md) | Waarom alleen volledige ontladingen tellen, en waarom meten terwijl de batterij tussendoor laadt niet betrouwbaar is |
 
 Wijzigingen per versie: [CHANGELOG](CHANGELOG.md) (Engels).
 
