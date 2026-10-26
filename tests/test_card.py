@@ -139,7 +139,7 @@ def test_card_buttons_open_panels_and_dismiss(tmp_path):
     out = json.loads(subprocess.run(
         ["node", str(script), str(build_card.OUT)], capture_output=True, text=True, check=True
     ).stdout)
-    assert out["closed"] == 3  # Chart · SOC · Cells
+    assert out["closed"] == 4  # Chart · SOC · Cells · Report
     assert not out["closedHasAdvice"]  # SOC and Cells only open as a popup
     assert out["panel"] == "soc"
     assert out["advice"]

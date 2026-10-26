@@ -12,7 +12,9 @@ from pathlib import Path
 import voluptuous as vol
 
 from homeassistant.components.frontend import add_extra_js_url
-from homeassistant.components.http import StaticPathConfig
+from aiohttp import web
+
+from homeassistant.components.http import HomeAssistantView, StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import Event, HomeAssistant, ServiceCall
@@ -21,7 +23,10 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.loader import async_get_integration
 
-from .const import DOMAIN, KIND_CELLS, KIND_SOC, NOTIFY_ACTION_PREFIX
+from homeassistant.helpers.http import KEY_HASS
+
+from .const import DOMAIN, KIND_CELLS, KIND_SOC, NOTIFY_ACTION_PREFIX, REPORT_URL
+from .export import VARIANTS
 from .dashboard import async_update_sidebar
 from .monitor import BatteryMonitor
 
@@ -93,7 +98,31 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             await monitor.async_dismiss(parts[2], float(parts[3]))
 
     hass.bus.async_listen("mobile_app_notification_action", _phone_action)
+    hass.http.register_view(ReportView())
     return True
+
+
+class ReportView(HomeAssistantView):
+    """The report of one battery (0.5.5): full back-up, anonymous to share,
+    or for Marstek. Behind the login of Home Assistant (the card opens it
+    with a short-lived signed link), never in the public www folder."""
+
+    url = REPORT_URL + "/{entry_id}/{variant}"
+    name = f"api:{DOMAIN}:report"
+    requires_auth = True
+
+    async def get(self, request: web.Request, entry_id: str, variant: str) -> web.Response:
+        hass: HomeAssistant = request.app[KEY_HASS]
+        if variant not in VARIANTS:
+            return web.Response(status=404)
+        user = request.get("hass_user")
+        if variant == "full" and (user is None or not user.is_admin):
+            return web.Response(status=403, text="Only an administrator can make a full back-up.")
+        monitor = _find_monitor(hass, entry_id, None)
+        if monitor is None:
+            return web.Response(status=404)
+        html = monitor.report_html(variant)
+        return web.Response(text=html, content_type="text/html", charset="utf-8")
 
 
 def _find_monitor(
@@ -110,6 +139,7 @@ def _find_monitor(
 
 async def async_setup_entry(hass: HomeAssistant, entry: MonitorConfigEntry) -> bool:
     monitor = BatteryMonitor(hass, entry)
+    monitor.app_version = str((await async_get_integration(hass, DOMAIN)).version)
     await monitor.async_start()
     entry.runtime_data = monitor
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)

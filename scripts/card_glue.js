@@ -190,6 +190,24 @@ class MarstekCapacityCard extends MarstekCapacityBase {
       window.dispatchEvent(new CustomEvent("location-changed"));
       return;
     }
+    // Report and back-up (0.5.5): open the tab within the click, then sign the
+    // link (behind the login of Home Assistant) and load it there.
+    const rep = /report\/[^/]+\/(\w+)'/.exec(act);
+    if (rep) {
+      const entry = this._entryId(this._battery().id);
+      const fail = (/_mcMsg='([^']*)';h\._config/.exec(act) || [])[1] || "";
+      const w = window.open("about:blank", "_blank");
+      this._hass
+        .callWS({ type: "auth/sign_path", path: `/api/${MC_DOMAIN}/report/${entry}/${rep[1]}`, expires: 600 })
+        .then((r) => { if (w) w.location.href = r.path; else location.href = r.path; })
+        .catch(() => { if (w) w.close(); this._msg = fail; this._render && this._render(); });
+      return;
+    }
+    const msg = /^_?h\._mcMsg='([^']*)';$/.exec(act.trim()) || /h\._mcMsg='([^']*)';/.exec(act);
+    if (msg && !act.includes("callWS")) {
+      this._msg = msg[1];
+      return;
+    }
     if (act.includes("_mcPanel=''")) this._panel = "";
     const panel = /_mcPanel==='(\w+)'/.exec(act);
     if (panel) this._panel = this._panel === panel[1] ? "" : panel[1];
@@ -211,7 +229,7 @@ class MarstekCapacityCard extends MarstekCapacityBase {
       }[lang] || "No battery found yet. Add one via Settings → Devices & services → Add integration → Marstek Capacity Monitor.";
     }
     const variables = { battery: b.id, name: b.name, lang, months: this._config.months || 6, demo: this._config.demo, version: MC_VERSION, entry_id: this._entryId(b.id), dark: mcDark(this._hass) };
-    return batteryBody(this._hass.states, variables, { panel: this._panel, gone: this._gone, width: this.offsetWidth });
+    return batteryBody(this._hass.states, variables, { panel: this._panel, gone: this._gone, msg: this._msg, width: this.offsetWidth });
   }
 
   getGridOptions() {

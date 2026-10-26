@@ -35,6 +35,10 @@ BATTERY_EDITS = [
         "const gone = ctx.gone || '';",
     ),
     (
+        "const msg = (this && this._mcMsg) || '';",
+        "const msg = ctx.msg || '';",
+    ),
+    (
         'const act = js => `onclick="event.stopPropagation();const h=this.getRootNode().host;${js}h._config={...h._config};"`;',
         "const act = js => `data-mc=\"${js}\"`;",
     ),

@@ -17,6 +17,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import selector
 
 from .const import (
+    RESTORE_MODES,
     CONF_BATTERY_ID,
     CONF_CELL_MAX_ENTITY,
     CONF_CELL_MIN_ENTITY,
@@ -441,9 +442,57 @@ def _sensitivity_selector() -> selector.SelectSelector:
 
 
 class MarstekCapacityOptionsFlow(OptionsFlow):
-    """Change factory data / warranty terms later."""
+    """Change factory data / warranty terms later, or restore a back-up."""
 
     async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        return self.async_show_menu(step_id="init", menu_options=["settings", "restore"])
+
+    async def async_step_restore(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Restore a back-up (0.5.5): the report file (or JSON) of the
+        monitor. Merge keeps everything from both; replace makes the file win.
+        A full back-up of the current data is always written first."""
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            from homeassistant.components.file_upload import process_uploaded_file
+
+            from .export import ExportError
+
+            def _read() -> str:
+                with process_uploaded_file(self.hass, user_input["file"]) as path:
+                    return path.read_text(encoding="utf-8")
+
+            monitor = getattr(self.config_entry, "runtime_data", None)
+            try:
+                text = await self.hass.async_add_executor_job(_read)
+                if monitor is None:
+                    raise ExportError("not running")
+                done = await monitor.async_restore(text, user_input["mode"])
+            except ExportError:
+                errors["base"] = "restore_invalid"
+            except (OSError, UnicodeDecodeError, ValueError):
+                errors["base"] = "restore_unreadable"
+            else:
+                return self.async_abort(
+                    reason="restored",
+                    description_placeholders={"records": str(done["records"]), "full": str(done["full"])},
+                )
+        schema = vol.Schema(
+            {
+                vol.Required("file"): selector.FileSelector(
+                    selector.FileSelectorConfig(accept=".html,.htm,.json")
+                ),
+                vol.Required("mode", default="merge"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(options=RESTORE_MODES, translation_key="restore_mode")
+                ),
+            }
+        )
+        return self.async_show_form(step_id="restore", data_schema=schema, errors=errors)
+
+    async def async_step_settings(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         current = {**self.config_entry.data, **self.config_entry.options}
@@ -493,4 +542,4 @@ class MarstekCapacityOptionsFlow(OptionsFlow):
                 ): _sensitivity_selector(),
             }
         )
-        return self.async_show_form(step_id="init", data_schema=schema, errors=errors)
+        return self.async_show_form(step_id="settings", data_schema=schema, errors=errors)

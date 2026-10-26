@@ -515,3 +515,77 @@ def test_about_half_asks_to_check_the_model():
     # The same measurement with the Venus C preset is a healthy battery
     venus_c = calc.BatterySpec(nominal_kwh=2.56, reserve_kwh=0.256)
     assert calc.evaluate(venus_c, [rec(2.30)], 0, now)["status"] == "good"
+
+
+# --- 0.5.5: how sure is the latest value? ---------------------------------
+
+def _series(spec, pcts, now):
+    """Full discharges (100 -> 10 %) that measured these % of new, one a day."""
+    usable = spec.usable_kwh
+    band = spec.usable_band_pct
+    out = []
+    for i, p in enumerate(pcts):
+        kwh = p / 100 * usable * 90 / band
+        out.append({"ts": now.timestamp() - (len(pcts) - i) * 86400, "direction": "discharge",
+                    "soc_start": 100, "soc_end": 10, "delta_soc": 90,
+                    "e_dc_kwh": kwh, "valid": True})
+    return out
+
+
+def test_confidence_since_start_needs_three_measurements():
+    c = calc.confidence([97.0, 96.0], 96.5)
+    assert c["baseline_pct"] is None and c["since_start_pct"] is None
+    c = calc.confidence([97.0, 96.0, 98.0, 95.0], 95.5)
+    assert c["baseline_pct"] == 97.0
+    assert c["since_start_pct"] == -1.5
+    assert c["display_state"] == "normal"
+
+
+def test_above_100_provisional_until_five_stable():
+    assert calc.confidence([105.0], 105.0)["display_state"] == "high_provisional"
+    c = calc.confidence([105.0, 104.0, 106.0, 105.5], 105.5)
+    assert c["display_state"] == "high_provisional" and c["confirm_count"] == 4
+    c = calc.confidence([105.0, 104.0, 106.0, 105.5, 104.5], 105.0)
+    assert c["display_state"] == "high_confirmed"
+    # jumping more than 3 points: stays provisional
+    assert calc.confidence([101.0, 106.0, 102.0, 105.0, 103.0], 103.0)["display_state"] == "high_provisional"
+    # one of the last five not above 100: provisional
+    assert calc.confidence([99.5, 102.0, 101.0, 102.5, 101.5], 101.5)["display_state"] == "high_provisional"
+
+
+def test_sudden_drop_unconfirmed_then_confirmed_or_recovered():
+    base = [97.0, 96.5, 97.0, 96.0]
+    # one low measurement that the median of 3 still hides: nothing to say
+    assert calc.confidence(base + [85.0], 96.0)["display_state"] == "normal"
+    c = calc.confidence(base + [85.0, 86.0], 86.0)
+    assert c["display_state"] == "drop_unconfirmed"
+    assert c["confirm_count"] == 2 and c["drop_ref_pct"] == 96.5
+    c = calc.confidence(base + [85.0, 86.0, 84.0, 85.5], 85.0)
+    assert c["display_state"] == "drop_unconfirmed" and c["confirm_count"] == 4
+    # five low in a row: a real value
+    assert calc.confidence(base + [85.0, 86.0, 84.0, 85.5, 85.0], 85.0)["display_state"] == "normal"
+    # recovered: back to normal
+    assert calc.confidence(base + [85.0, 86.0, 96.5], 86.0)["display_state"] == "normal"
+    # slow wear is never "sudden"
+    assert calc.confidence([97, 96, 95, 94, 93, 92, 91, 90], 91.0)["display_state"] == "normal"
+
+
+def test_evaluate_marks_unconfirmed_drop_instead_of_red():
+    spec = calc.BatterySpec()
+    now = datetime(2026, 10, 20)
+    recs = _series(spec, [97, 96, 97, 70, 71], now)
+    out = calc.evaluate(spec, recs, 0, now)
+    assert out["status"] == "unconfirmed"
+    assert out["display_state"] == "drop_unconfirmed"
+    recs = _series(spec, [97, 96, 97, 70, 71, 70, 69, 70], now)
+    assert calc.evaluate(spec, recs, 0, now)["status"] == "critical"
+
+
+def test_evaluate_above_100_and_since_start():
+    spec = calc.BatterySpec()
+    now = datetime(2026, 10, 20)
+    out = calc.evaluate(spec, _series(spec, [106, 105, 106, 105, 105.5], now), 0, now)
+    assert out["display_state"] == "high_confirmed"
+    assert out["status"] == "good"
+    assert out["baseline_pct"] == 106.0
+    assert out["since_start_pct"] == pytest.approx(-0.5, abs=0.15)

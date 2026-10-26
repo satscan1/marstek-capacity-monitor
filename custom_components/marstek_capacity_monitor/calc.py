@@ -144,6 +144,75 @@ def classify(spec: BatterySpec, pct: float | None, expected: float) -> str:
     return "attention"
 
 
+# ---------------------------------------------------------------------------
+# How sure is the latest value? (0.5.5)
+# ---------------------------------------------------------------------------
+# Above 100 %: shown as "provisional" until the last 5 measurements all stay
+# above 100 % within 3 points of each other; then it is a real "more than the
+# rating plate" and the normal colours apply.
+# Sudden drop: more than 5 points below the 3 measurements before it, in one
+# go. Real wear is slow; a jump like that is nearly always the battery's SOC
+# meter shifting for a while (MT1, April 2026). Shown as "not confirmed yet"
+# (grey) until it holds for 5 measurements in a row; if it recovers, it goes.
+# Change since start: the latest value against the middle of the first 3
+# measurements of this monitor (not against "new").
+
+CONFIRM_N = 5
+STABLE_PTS = 3.0
+DROP_PTS = 5.0
+BASELINE_N = 3
+
+
+def confidence(pcts: list[float], measured_pct: float | None) -> dict[str, Any]:
+    """pcts: every full-discharge measurement in % of new, oldest first."""
+    out: dict[str, Any] = {
+        "display_state": "normal",
+        "baseline_pct": None,
+        "since_start_pct": None,
+        "confirm_needed": CONFIRM_N,
+        "confirm_count": None,
+        "drop_ref_pct": None,
+    }
+    if len(pcts) >= BASELINE_N:
+        base = median(pcts[:BASELINE_N])
+        out["baseline_pct"] = round(base, 1)
+        if measured_pct is not None:
+            out["since_start_pct"] = round(measured_pct - base, 1)
+    # Sudden drop: the longest run of latest measurements that are all more
+    # than DROP_PTS below the middle of the 3 measurements before that run,
+    # and the value shown (median of the last 3) is itself that much lower.
+    # One odd measurement that the median already hides is not a drop.
+    run, ref = 0, None
+    for k in range(1, len(pcts)):
+        before = pcts[:-k]
+        if len(before) < BASELINE_N:
+            break
+        r = median(before[-BASELINE_N:])
+        if all(p < r - DROP_PTS for p in pcts[-k:]):
+            run, ref = k, r
+    if 0 < run < CONFIRM_N and measured_pct is not None and measured_pct < ref - DROP_PTS:
+        out.update(display_state="drop_unconfirmed", confirm_count=run, drop_ref_pct=round(ref, 1))
+        return out
+    if measured_pct is not None and measured_pct > 100:
+        last = pcts[-CONFIRM_N:]
+        above = 0
+        for p in reversed(pcts):
+            if p > 100:
+                above += 1
+            else:
+                break
+        stable = (
+            len(last) == CONFIRM_N
+            and all(p > 100 for p in last)
+            and max(last) - min(last) <= STABLE_PTS
+        )
+        out.update(
+            display_state="high_confirmed" if stable else "high_provisional",
+            confirm_count=min(above, CONFIRM_N),
+        )
+    return out
+
+
 def capacity_from_record(spec: BatterySpec, rec: dict[str, Any]) -> float | None:
     """Measured usable capacity (kWh) from one session record."""
     delta = rec.get("delta_soc") or 0
@@ -654,6 +723,11 @@ def evaluate(
     status = classify(spec, measured_pct, exp)
     if measured_pct is not None and CHECK_MODEL_PCT[0] <= measured_pct <= CHECK_MODEL_PCT[1]:
         status = "check_model"
+    sure = confidence(
+        [pct(c) for c in (capacity_from_record(spec, r) for r in full) if c], measured_pct
+    )
+    if sure["display_state"] == "drop_unconfirmed":
+        status = "unconfirmed"
 
     # Monthly trend, newest month first
     by_month: dict[str, list[dict[str, Any]]] = {}
@@ -730,6 +804,7 @@ def evaluate(
         "warranty_end": w_end,
         "in_warranty": w_end is None or today <= w_end,
         "status": status,
+        **sure,
         "trend": trend,
         "history": history,
     }

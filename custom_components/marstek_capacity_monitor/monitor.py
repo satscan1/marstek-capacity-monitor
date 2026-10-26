@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from collections import deque
 from datetime import date, datetime, timedelta
+import json
 import logging
+from pathlib import Path
 from typing import Any
+import uuid
 
 from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
@@ -27,7 +30,7 @@ from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
-from . import advice
+from . import advice, export as mcm_export
 from .extras import find_extras
 from .health import (
     SocHealthTracker,
@@ -52,6 +55,7 @@ from .calc import (
     to_mv,
 )
 from .const import (
+    CONF_BATTERY_ID,
     CONF_CYCLE_COUNTER,
     CONF_EXTRAS_DECLINED,
     EXTRAS_RECHECK_S,
@@ -137,6 +141,38 @@ def spec_from_entry(entry: ConfigEntry) -> BatterySpec:
     )
 
 
+BACKUP_DIR = DOMAIN + "/backup"
+
+
+class MonitorStore(Store):
+    """The monitor's own file in .storage, with a safety net.
+
+    When a new version changes how the data is stored (STORAGE_VERSION), the
+    old data is first written as a full back-up to
+    /config/marstek_capacity_monitor/backup/, then converted. Nothing is lost:
+    the back-up can always be restored."""
+
+    monitor: "BatteryMonitor | None" = None
+
+    async def _async_migrate_func(
+        self, old_major_version: int, old_minor_version: int, old_data: dict
+    ) -> dict:
+        if self.monitor is not None:
+            try:
+                await self.monitor.async_write_backup(
+                    old_data, f"before-update-v{old_major_version}.{old_minor_version}"
+                )
+            except Exception:  # noqa: BLE001 - a failed back-up must never stop the start
+                _LOGGER.exception("Back-up before converting the stored data failed")
+        return migrate_stored(old_major_version, old_minor_version, old_data)
+
+
+def migrate_stored(major: int, minor: int, data: dict) -> dict:
+    """Convert stored data from an older layout. Version 1 is the first
+    layout; add a step here whenever STORAGE_VERSION goes up."""
+    return data
+
+
 class BatteryMonitor:
     """Runtime object for one configured battery."""
 
@@ -161,9 +197,14 @@ class BatteryMonitor:
         self.status: dict[str, Any] = {}
         self._history_until: float | None = None
         self._seed_task = None
-        self._store: Store = Store(
+        self._store: Store = MonitorStore(
             hass, STORAGE_VERSION, f"{DOMAIN}.{entry.entry_id}"
         )
+        self._store.monitor = self
+        # Random, fixed code for the anonymous export (0.5.5): the same battery
+        # keeps the same code, without pointing to a person or installation.
+        self.share_id: str = uuid.uuid4().hex[:10]
+        self.app_version: str = "?"
         self.tracker = self._new_tracker()
         self.records: list[dict[str, Any]] = []
         self.result: dict[str, Any] = {}
@@ -236,21 +277,26 @@ class BatteryMonitor:
             "temp_max_c": round(max(his), 1),
         }
 
+    def _apply(self, data: dict[str, Any]) -> None:
+        """Take over stored data (start, or a restored back-up)."""
+        self.tracker = self._new_tracker(data.get("tracker"))
+        self.records = data.get("records", [])
+        self.cells = CellBalanceTracker(data.get("cells"))
+        self.cell_records = data.get("cell_records", [])
+        self.cell_result = evaluate_cells(self.cell_records)
+        self.health = self._new_health(data.get("health"))
+        self.soc_events = data.get("soc_events", [])
+        self.full_days = data.get("full_days", [])
+        self.alive_days = data.get("alive_days", [])
+        self.soc_since = data.get("soc_since")
+        self.dismissed = data.get("dismissed", {})
+        self.notified = data.get("notified", {})
+        self.share_id = data.get("share_id") or self.share_id
+
     async def async_start(self) -> None:
         data = await self._store.async_load()
         if data:
-            self.tracker = self._new_tracker(data.get("tracker"))
-            self.records = data.get("records", [])
-            self.cells = CellBalanceTracker(data.get("cells"))
-            self.cell_records = data.get("cell_records", [])
-            self.cell_result = evaluate_cells(self.cell_records)
-            self.health = self._new_health(data.get("health"))
-            self.soc_events = data.get("soc_events", [])
-            self.full_days = data.get("full_days", [])
-            self.alive_days = data.get("alive_days", [])
-            self.soc_since = data.get("soc_since")
-            self.dismissed = data.get("dismissed", {})
-            self.notified = data.get("notified", {})
+            self._apply(data)
             self.health.after_restart()
             # HA was down: a short gap (<= 10 min) is bridged with the average
             # of the power before and after; a longer one invalidates the swing.
@@ -419,6 +465,97 @@ class BatteryMonitor:
         self._recalculate()
         self._update_status(force=True)
 
+    # -- back-up, export, report (0.5.5) -----------------------------------
+
+    def _battery_info(self) -> dict[str, Any]:
+        from homeassistant.helpers import entity_registry as er
+
+        ent = er.async_get(self.hass).async_get(self.soc_entity)
+        return {
+            "name": self.entry.title,
+            "battery_id": self.entry.data.get(CONF_BATTERY_ID),
+            "share_id": self.share_id,
+            "model": self.model,
+            "nominal_kwh": self.spec.nominal_kwh,
+            "reserve_kwh": self.spec.reserve_kwh,
+            "usable_kwh": round(self.spec.usable_kwh, 3),
+            "purchase_date": self.spec.purchase_date.isoformat() if self.spec.purchase_date else None,
+            "warranty_years": self.spec.warranty_years,
+            "cycle_life": self.spec.cycle_life,
+            "cycle_eol_pct": self.spec.cycle_eol_pct,
+            "red_pct": self.spec.red_pct,
+            "tolerance_pct": self.spec.tolerance_pct,
+            "initial_cycles": self.spec.initial_cycles,
+            "initial_cycles_from_counter": bool(self.cycle_counter),
+            "power_sign": self.power_sign_state,
+            "connection": ent.platform if ent else None,
+            "has_cells": self.has_cells,
+            "has_temps": self.has_temps,
+            "soc_sensitivity": entry_setting(self.entry, CONF_SOC_SENSITIVITY),
+            "cell_sensitivity": entry_setting(self.entry, CONF_CELL_SENSITIVITY),
+            "notify": self.notify,
+            "soc_entity": self.soc_entity,
+            "power_entity": self.power_entity,
+            "cell_max_entity": self.cell_max_entity,
+            "cell_min_entity": self.cell_min_entity,
+            "temp_max_entity": self.temp_max_entity,
+            "temp_min_entity": self.temp_min_entity,
+        }
+
+    def export(self, variant: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
+        """One export of this battery (full / anonymous / marstek)."""
+        from homeassistant.const import __version__ as ha_version
+
+        summary = {
+            **self.result,
+            "soc": self.soc_result,
+            "cells": {**self.cell_result, **self.cell_health},
+            "monitor": {k: self.status.get(k) for k in ("state", "phase", "soc", "full_discharges")},
+        }
+        meta = {
+            "created": dt_util.now().isoformat(timespec="seconds"),
+            "app_version": self.app_version,
+            "ha_version": ha_version,
+            "language": (self.hass.config.language or "en")[:2],
+        }
+        return mcm_export.build(
+            variant, self._battery_info(), data if data is not None else self._data(), summary, meta
+        )
+
+    def report_html(self, variant: str) -> str:
+        return mcm_export.render_html(self.export(variant))
+
+    async def async_write_backup(self, data: dict[str, Any] | None, label: str) -> Path:
+        """Write a full back-up (report with the data in it) under
+        /config/marstek_capacity_monitor/backup/."""
+        html = mcm_export.render_html(self.export("full", data))
+        stamp = dt_util.now().strftime("%Y%m%d-%H%M")
+        bid = self.entry.data.get(CONF_BATTERY_ID) or self.entry.entry_id
+        path = Path(self.hass.config.path(BACKUP_DIR)) / f"{bid}-{label}-{stamp}.html"
+
+        def _write() -> None:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(html, encoding="utf-8")
+
+        await self.hass.async_add_executor_job(_write)
+        return path
+
+    async def async_restore(self, text: str, mode: str) -> dict[str, Any]:
+        """Restore from a report or JSON export. mode: merge | replace.
+        A full back-up of the current data is always written first."""
+        incoming = mcm_export.parse(text)
+        await self.async_write_backup(None, "before-restore")
+        new_data = mcm_export.merge(self._data(), incoming.get("data") or {}, mode)
+        if self._seed_task is not None and not self._seed_task.done():
+            self._seed_task.cancel()
+        self._apply(new_data)
+        self._history_until = new_data.get("history_until")
+        await self._store.async_save(self._data())
+        self._recalculate()
+        self._update_status(force=True)
+        full = [r for r in (incoming.get("data") or {}).get("records", []) if is_full_discharge(r)]
+        return {"variant": incoming.get("variant"), "records": len((incoming.get("data") or {}).get("records", [])), "full": len(full)}
+
     # -- helpers ------------------------------------------------------------
 
     def _new_tracker(self, state: dict[str, Any] | None = None) -> SwingTracker:
@@ -462,6 +599,7 @@ class BatteryMonitor:
             "soc_since": self.soc_since,
             "dismissed": self.dismissed,
             "notified": self.notified,
+            "share_id": self.share_id,
         }
 
     @staticmethod
