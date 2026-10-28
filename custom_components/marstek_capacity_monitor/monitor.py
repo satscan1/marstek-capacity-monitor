@@ -699,6 +699,7 @@ class BatteryMonitor:
             self.soc_since,
         )
         self._check_model_issue()
+        self._check_power_issue()
         self._critical_issue()
         self._evaluate_health()
         async_dispatcher_send(self.hass, self.signal)
@@ -727,6 +728,37 @@ class BatteryMonitor:
                 "name": self.entry.title,
                 "pct": f"{self.result.get('measured_pct') or 0:.1f}".replace(".", dec),
                 "kwh": f"{self.spec.nominal_kwh:.2f}".replace(".", dec),
+            },
+        )
+
+    @property
+    def check_power_issue_id(self) -> str:
+        return f"check_power_{self.entry.entry_id}"
+
+    def _check_power_issue(self) -> None:
+        """The newest full discharge came out far above new (more energy
+        counted than fits in the battery): ask to check the power sensor,
+        under Settings -> Repairs. Gone again after a credible measurement."""
+        if self.result.get("status") != "check_power":
+            ir.async_delete_issue(self.hass, DOMAIN, self.check_power_issue_id)
+            return
+        lang = (self.hass.config.language or "en")[:2]
+        dec = "," if lang in ("nl", "de") else "."
+        r = self.result
+        ir.async_create_issue(
+            self.hass,
+            DOMAIN,
+            self.check_power_issue_id,
+            is_fixable=False,
+            is_persistent=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key="check_power",
+            translation_placeholders={
+                "name": self.entry.title,
+                "pct": f"{r.get('impossible_last_pct') or 0:.0f}",
+                "kwh": f"{r.get('impossible_last_kwh') or 0:.0f}",
+                "limit": f"{r.get('impossible_limit_pct') or 130:.0f}",
+                "count": str(r.get("impossible_count") or 0),
             },
         )
 

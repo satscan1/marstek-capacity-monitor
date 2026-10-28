@@ -58,6 +58,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     Settings -> Dashboards -> Add dashboard (HA 2026.5 and later).
     """
     integration = await async_get_integration(hass, DOMAIN)
+    # The version that is installed now: the card compares it with its own and
+    # offers a refresh when a page (phone app) still runs an older card.
+    hass.data[f"{DOMAIN}_version"] = integration.version
     await hass.http.async_register_static_paths(
         [StaticPathConfig(CARD_URL, str(Path(__file__).parent / "frontend"), True)]
     )

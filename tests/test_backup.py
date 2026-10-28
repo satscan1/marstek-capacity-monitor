@@ -209,6 +209,7 @@ EXPECT = {
     "cells_letop": ("normal", "good", "ok", "letop"),
     "cells_advies": ("normal", "good", "ok", "advies"),
     "collecting": ("normal", "no_measurement", "ok", "ok"),
+    "check_power": ("normal", "check_power", "ok", "ok"),
 }
 
 
@@ -225,3 +226,26 @@ async def test_demo_scenario(hass: HomeAssistant, scenario) -> None:
     assert got == EXPECT[scenario]
     if scenario == "since_start":
         assert g("capacity_pct").attributes["since_start_pct"] < -1
+
+
+async def test_check_power_message_has_plain_numbers(hass: HomeAssistant) -> None:
+    """The repair message shows whole numbers without thousands separator or
+    decimal comma, so it reads right in every language (0.5.5-dev4)."""
+    from homeassistant.helpers import issue_registry as ir
+    from homeassistant.setup import async_setup_component
+
+    assert await async_setup_component(hass, DOMAIN, {})
+    await hass.services.async_call(DOMAIN, "demo", {"scenario": "check_power"}, blocking=True)
+    await hass.async_block_till_done()
+    issues = [i for i in ir.async_get(hass).issues.values()
+              if i.domain == DOMAIN and i.issue_id.startswith("check_power_")]
+    assert len(issues) == 1 and issues[0].severity == ir.IssueSeverity.WARNING
+    ph = issues[0].translation_placeholders
+    assert ph["pct"].isdigit() and int(ph["pct"]) > 1000
+    assert ph["kwh"].isdigit()
+    assert ph["limit"] == "130" and ph["count"] == "3"
+    # a credible measurement again: the message goes away
+    await hass.services.async_call(DOMAIN, "demo", {"scenario": "normal"}, blocking=True)
+    await hass.async_block_till_done()
+    assert not [i for i in ir.async_get(hass).issues.values()
+                if i.domain == DOMAIN and i.issue_id.startswith("check_power_")]

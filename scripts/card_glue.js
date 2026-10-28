@@ -20,6 +20,48 @@ const MC_KEYS = ["measured_capacity", "capacity_pct", "expected_capacity", "warr
 // Batteries of this integration, found through the entity registry.
 // Cached per registry object: HA replaces it only when the registry changes.
 let mcCache = { entities: null, devices: null, list: [] };
+// After an update the phone app (and a tab left open) keeps running the old
+// card: it reconnects to Home Assistant without loading the page again. The
+// card compares its own version with the installed one and offers one tap to
+// load the new card. Second time on the same version: the cache is stubborn,
+// so explain the app's own reset button instead of trying again.
+function mcInstalledVersion(hass) {
+  for (const b of mcBatteries(hass)) {
+    const s = hass.states[`sensor.marstek_${b.id}_monitor_status`];
+    const v = s && s.attributes && s.attributes.version;
+    if (v) return v;
+  }
+  return null;
+}
+
+function mcUpdateBanner(hass, lang) {
+  const v = mcInstalledVersion(hass);
+  if (!v || v === MC_VERSION) return "";
+  let tried = false;
+  try { tried = sessionStorage.getItem("mc_reload") === v; } catch (e) { /* no storage */ }
+  const T = {
+    nl: [`Nieuwe versie van de monitor geïnstalleerd (${mcEsc(v)}). Tik hier om de kaart te vernieuwen.`,
+      `Deze pagina gebruikt nog de oude kaart (${mcEsc(MC_VERSION)}). In de Home Assistant-app: Instellingen → Companion-app → Problemen oplossen → Frontend-cache resetten (Reset frontend cache), en daarna de app helemaal sluiten en opnieuw openen. In een browser: Ctrl+F5.`],
+    de: [`Neue Version des Monitors installiert (${mcEsc(v)}). Hier tippen, um die Karte neu zu laden.`,
+      `Diese Seite nutzt noch die alte Karte (${mcEsc(MC_VERSION)}). In der Home-Assistant-App: Einstellungen → Companion-App → Problemlösungen → Frontend-Cache zurücksetzen (Reset frontend cache), danach die App ganz schließen und neu öffnen. Im Browser: Strg+F5.`],
+    en: [`New version of the monitor installed (${mcEsc(v)}). Tap here to load the new card.`,
+      `This page still runs the old card (${mcEsc(MC_VERSION)}). In the Home Assistant app: Settings → Companion app → Troubleshooting → Reset frontend cache, then close the app completely and open it again. In a browser: Ctrl+F5.`],
+  }[lang] || null;
+  const t = T || [`New version of the monitor installed (${mcEsc(v)}). Tap here to load the new card.`, ""];
+  return tried
+    ? `<div style="margin:-4px 0 10px;padding:8px 10px;border-radius:8px;background:rgba(255,167,38,.15);color:#ffa726;font-size:12px;line-height:1.4">${t[1]}</div>`
+    : `<div data-mc="mc-reload" style="margin:-4px 0 10px;padding:8px 10px;border-radius:8px;background:rgba(66,165,245,.15);color:#42a5f5;font-size:12px;line-height:1.4;cursor:pointer">⟳ ${t[0]}</div>`;
+}
+
+async function mcReload(hass) {
+  try { sessionStorage.setItem("mc_reload", mcInstalledVersion(hass) || ""); } catch (e) { /* no storage */ }
+  // Same as a hard refresh: drop the cached frontend files of this page, so
+  // the browser asks the server for them again.
+  try { if (window.caches) for (const k of await caches.keys()) await caches.delete(k); } catch (e) { /* ignore */ }
+  try { if (navigator.serviceWorker) for (const r of await navigator.serviceWorker.getRegistrations()) await r.update(); } catch (e) { /* ignore */ }
+  location.reload();
+}
+
 function mcBatteries(hass) {
   if (!hass) return [];
   if (mcCache.entities === hass.entities && mcCache.devices === hass.devices) return mcCache.list;
@@ -136,6 +178,7 @@ class MarstekCapacityBase extends HTMLElement {
         const el = ev.composedPath().find((n) => n.dataset && n.dataset.mc);
         if (!el) return;
         ev.stopPropagation();
+        if (el.dataset.mc === "mc-reload") { mcReload(this._hass); return; }
         this._action(el.dataset.mc);
         this._render();
       });
@@ -146,7 +189,8 @@ class MarstekCapacityBase extends HTMLElement {
     } catch (err) {
       html = `<span style="color:#ef5350">Marstek Capacity Monitor: ${mcEsc(err)}</span>`;
     }
-    this.shadowRoot.innerHTML = `<style>${MC_STYLE}</style><ha-card class="${mcDark(this._hass) ? "" : "light"}">${html}</ha-card>`;
+    const banner = mcUpdateBanner(this._hass, mcLang(this._hass, this._config));
+    this.shadowRoot.innerHTML = `<style>${MC_STYLE}</style><ha-card class="${mcDark(this._hass) ? "" : "light"}">${banner}${html}</ha-card>`;
   }
 
   _action(_act) {}
