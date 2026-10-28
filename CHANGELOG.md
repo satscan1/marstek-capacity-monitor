@@ -2,7 +2,7 @@
 
 ## v0.5.5-rc1 — release candidate (pre-release)
 
-**No more 1,300 % with "Good".** Everything from v0.5.5-dev1 and dev2 below, plus:
+**Facts, only facts matter.** Everything since v0.5.2 in one version: v0.5.5-dev1 and dev2 below, plus:
 
 **A measurement that cannot be right does not count.**
 
