@@ -589,3 +589,26 @@ def test_evaluate_above_100_and_since_start():
     assert out["status"] == "good"
     assert out["baseline_pct"] == 106.0
     assert out["since_start_pct"] == pytest.approx(-0.5, abs=0.15)
+
+
+def test_impossible_measurement_asks_to_check_the_power_sensor():
+    """Far above new (more than 130 %) cannot be the battery: more energy was
+    counted than fits in it. Kept in the history, never counted, and the
+    status asks to check the power sensor (a user saw 1300 %, Oct 2026)."""
+    spec = calc.BatterySpec()
+    now = datetime(2026, 10, 20)
+    out = calc.evaluate(spec, _series(spec, [97, 96, 97, 1300], now), 0, now)
+    assert out["status"] == "check_power"
+    assert out["impossible_count"] == 1
+    assert out["impossible_last_pct"] == pytest.approx(1300, abs=0.5)
+    assert out["impossible_limit_pct"] == 130.0
+    assert out["measurement_count"] == 3  # the 1300 % does not count
+    assert out["measured_pct"] < 100
+    assert out["history"][0]["impossible"] is True
+    assert not any(h["impossible"] for h in out["history"][1:])
+    # a credible full discharge after it: back to normal, still remembered
+    out = calc.evaluate(spec, _series(spec, [97, 96, 1300, 97], now), 0, now)
+    assert out["status"] == "good" and out["impossible_count"] == 1
+    # up to 130 % stays the SOC meter's ground (provisional), not the sensor
+    out = calc.evaluate(spec, _series(spec, [125], now), 0, now)
+    assert out["status"] != "check_power" and out["impossible_count"] == 0

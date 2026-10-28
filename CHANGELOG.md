@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.5.5-rc1 — release candidate (pre-release)
+
+**No more 1,300 % with "Good".** Everything from v0.5.5-dev1 and dev2 below, plus:
+
+**A measurement that cannot be right does not count.**
+
+- Above **130 %** of new, more energy was counted than fits in the battery. That is not the SOC meter (it explains at most about 120 %) but the power sensor: stuck on its last value instead of falling back to 0 W, the wrong sensor, or the wrong scaling factor. A user saw 1,300 % with status *Good*.
+- Such a measurement is kept in the history but never counts: not in the measured value, the monthly trend, red or *provisional*. Between 100 and 130 % everything stays as it was (*provisional*).
+- When the newest full discharge is one of these, the status is **Check the power sensor** (orange), the card shows *check sensor* with an explanation behind ⓘ, the overview shows ⚠, and a message appears under **Settings → Repairs** with what to check. It disappears by itself at the first credible full discharge.
+- The numbers in that message are whole numbers without separators (*1301 %*, *60 kWh*), so they read right in every language, whatever the system language of Home Assistant.
+- New attributes on `sensor.marstek_<id>_capacity_pct`: `impossible_count`, `impossible_last_pct`, `impossible_limit_pct`. History entries have `impossible`.
+- Demo: new situation *Check the power sensor*.
+
+**After an update: tap to load the new card.**
+
+- The Home Assistant app on a phone keeps a page open for days and, after a restart, only reconnects: the old card keeps running, sometimes with an error. The card now compares its own version with the one installed (new attribute `version` on `sensor.marstek_<id>_monitor_status`). When they differ, a blue bar appears: *New version of the monitor installed — tap here to load the new card*.
+- Still the old card after that tap? An orange bar explains the app's own button: Settings → Companion app → Troubleshooting → Reset frontend cache.
+- No automatic reload: the page never jumps by itself. Works from this version on; a card from before 0.5.5 cannot show the bar yet.
+
+**Guide.** Troubleshooting (EN/NL/DE): new rows for *far above 100 %* and for the refresh bar.
+
 ## v0.5.5-dev2 — test version (pre-release)
 
 **Facts, only facts matter.** The monitor no longer jumps to conclusions on one odd measurement: above 100 %, a sudden drop and red each wait for 5 measurements in a row.

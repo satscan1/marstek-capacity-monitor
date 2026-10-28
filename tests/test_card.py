@@ -278,3 +278,59 @@ def test_above_100_explained_by_click_and_limits_follow_settings(tmp_path):
     assert "tot 4 punten eronder" in out["overview"] and "rood: 70 %" in out["overview"]
     # Overview: an ⓘ after a value above 100 %
     assert "Hoger dan nieuw" in out["overview"]
+
+
+BANNER_TEST = r"""
+const fs = require("fs");
+global.HTMLElement = class {};
+const defined = {};
+global.customElements = { get: (n) => defined[n], define: (n, c) => { defined[n] = c; } };
+global.window = {};
+const store = {};
+global.sessionStorage = { getItem: (k) => store[k] ?? null, setItem: (k, v) => { store[k] = String(v); } };
+global.console = { info() {}, log: console.log };
+eval(fs.readFileSync(process.argv[2], "utf8") + ";globalThis.MC = {mcUpdateBanner, MC_VERSION};");
+const B = globalThis.MC;
+const hass = (v) => ({
+  states: { "sensor.marstek_mt1_monitor_status": { state: "measuring", attributes: { version: v } } },
+  entities: { "sensor.marstek_mt1_monitor_status": { platform: "marstek_capacity_monitor" } },
+  devices: {}, locale: { language: "nl" }, language: "nl",
+});
+const out = {
+  same: B.mcUpdateBanner(hass(B.MC_VERSION), "nl"),
+  newer: B.mcUpdateBanner(hass("9.9.9"), "nl"),
+  de: B.mcUpdateBanner(hass("9.9.9"), "de"),
+};
+store.mc_reload = "9.9.9";  // tapped once, still the old card
+out.tried = B.mcUpdateBanner(hass("9.9.9"), "en");
+process.stdout.write(JSON.stringify(out));
+"""
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
+def test_card_offers_a_refresh_after_an_update(tmp_path):
+    """The phone app keeps an old card running for days: compare the card's own
+    version with the installed one and offer a refresh (0.5.5-dev3)."""
+    script = tmp_path / "t.js"
+    script.write_text(BANNER_TEST)
+    out = json.loads(subprocess.run(
+        ["node", str(script), str(build_card.OUT)], capture_output=True, text=True, check=True
+    ).stdout)
+    assert out["same"] == ""  # up to date: nothing
+    assert 'data-mc="mc-reload"' in out["newer"] and "9.9.9" in out["newer"]
+    assert "Tik hier" in out["newer"]
+    assert "Hier tippen" in out["de"]
+    # after one tap the old card is still there: explain the app's own button
+    assert "mc-reload" not in out["tried"] and "Reset frontend cache" in out["tried"]
+    version = json.loads((ROOT / "custom_components/marstek_capacity_monitor/manifest.json").read_text())["version"]
+    assert f'const MC_VERSION = "{version}";' in build_card.OUT.read_text(encoding="utf-8")
+
+
+async def test_status_sensor_reports_installed_version(hass: HomeAssistant) -> None:
+    from custom_components.marstek_capacity_monitor.const import DOMAIN
+
+    assert await async_setup_component(hass, DOMAIN, {})
+    await hass.services.async_call(DOMAIN, "demo", {"scenario": "normal"}, blocking=True)
+    await hass.async_block_till_done()
+    version = json.loads((ROOT / "custom_components/marstek_capacity_monitor/manifest.json").read_text())["version"]
+    assert hass.states.get("sensor.marstek_demo_monitor_status").attributes["version"] == version

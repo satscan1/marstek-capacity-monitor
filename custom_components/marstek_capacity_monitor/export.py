@@ -323,7 +323,7 @@ _L: dict[str, dict[str, Any]] = {
         "why": {"no_calibration": "niet helemaal vol in de 14 dagen ervoor", "cold": "cellen kouder dan 5 °C",
                 "soc_edge": "SOC-meter liep aan het begin of eind niet mee"},
         "state": {"good": "Goed", "attention": "Onder specificatie", "critical": "Melden bij Marstek",
-                  "no_measurement": "Nog geen meting", "check_model": "Klopt het model?", "unconfirmed": "Nog niet bevestigd"},
+                  "no_measurement": "Nog geen meting", "check_model": "Klopt het model?", "unconfirmed": "Nog niet bevestigd", "check_power": "Vermogensensor nakijken"},
         "ds": {"high_provisional": "boven nieuw, voorlopig", "high_confirmed": "boven nieuw, bevestigd (5 metingen)",
                "drop_unconfirmed": "ineens lager, nog niet bevestigd"},
         "level": {"ok": "in orde", "letop": "let op", "advies": "advies"},
@@ -367,7 +367,7 @@ _L: dict[str, dict[str, Any]] = {
         "why": {"no_calibration": "not completely full in the 14 days before", "cold": "cells colder than 5 °C",
                 "soc_edge": "SOC meter did not keep pace at the start or end"},
         "state": {"good": "Good", "attention": "Below spec", "critical": "Report to Marstek",
-                  "no_measurement": "No measurement yet", "check_model": "Check the model", "unconfirmed": "Not confirmed yet"},
+                  "no_measurement": "No measurement yet", "check_model": "Check the model", "unconfirmed": "Not confirmed yet", "check_power": "Check the power sensor"},
         "ds": {"high_provisional": "above new, provisional", "high_confirmed": "above new, confirmed (5 measurements)",
                "drop_unconfirmed": "suddenly lower, not confirmed yet"},
         "level": {"ok": "fine", "letop": "attention", "advies": "advice"},
@@ -411,7 +411,7 @@ _L: dict[str, dict[str, Any]] = {
         "why": {"no_calibration": "in den 14 Tagen davor nicht ganz voll", "cold": "Zellen kälter als 5 °C",
                 "soc_edge": "SOC-Anzeige lief am Anfang oder Ende nicht mit"},
         "state": {"good": "Gut", "attention": "Unter Herstellerangabe", "critical": "An Marstek melden",
-                  "no_measurement": "Noch keine Messung", "check_model": "Modell prüfen", "unconfirmed": "Noch nicht bestätigt"},
+                  "no_measurement": "Noch keine Messung", "check_model": "Modell prüfen", "unconfirmed": "Noch nicht bestätigt", "check_power": "Leistungssensor prüfen"},
         "ds": {"high_provisional": "über neu, vorläufig", "high_confirmed": "über neu, bestätigt (5 Messungen)",
                "drop_unconfirmed": "plötzlich tiefer, noch nicht bestätigt"},
         "level": {"ok": "in Ordnung", "letop": "Achtung", "advies": "Empfehlung"},
@@ -463,7 +463,7 @@ def _date(ts: Any, lang: str, with_time: bool = False) -> str:
 
 
 def _cls(status: str | None) -> str:
-    return {"good": "ok", "attention": "wr", "critical": "bad", "check_model": "wr"}.get(status or "", "mut")
+    return {"good": "ok", "attention": "wr", "critical": "bad", "check_model": "wr", "check_power": "wr"}.get(status or "", "mut")
 
 
 def _kv(rows: list[tuple[str, str]]) -> str:

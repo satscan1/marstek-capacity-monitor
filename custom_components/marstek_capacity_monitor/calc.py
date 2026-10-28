@@ -130,6 +130,14 @@ def expected_pct(spec: BatterySpec, on: date, cycles: float) -> float:
 # 5.12 kWh, measures about 50 %). Shown as "check the model", not red.
 CHECK_MODEL_PCT = (40.0, 60.0)
 
+# Above this a measurement cannot be the battery: more energy was counted than
+# fits in it. The SOC meter alone explains at most about 120 % (it stands
+# still at the top or bottom for a while). Far above that the power sensor is
+# wrong: stuck on its last value instead of falling back to 0 W, the wrong
+# sensor, or a wrong factor. Such a measurement does not count, and the
+# battery shows "check the power sensor" (a user saw 1300 %, Oct 2026).
+IMPOSSIBLE_PCT = 130.0
+
 
 def classify(spec: BatterySpec, pct: float | None, expected: float) -> str:
     """good   : at or at most `tolerance` points below expected
@@ -705,7 +713,16 @@ def evaluate(
     cycles = cycles_at(cumulative_discharge_kwh)
 
     window_start = now.timestamp() - MEASURE_WINDOW_DAYS * 86400
-    full = sorted((r for r in records if is_full_discharge(r)), key=lambda r: r["ts"])
+    every_full = sorted((r for r in records if is_full_discharge(r)), key=lambda r: r["ts"])
+
+    def impossible(r: dict[str, Any]) -> bool:
+        c = capacity_from_record(spec, r)
+        return c is not None and pct(c) > IMPOSSIBLE_PCT
+
+    # Impossible measurements are kept (history, report) but never counted.
+    full = [r for r in every_full if not impossible(r)]
+    bad = [r for r in every_full if impossible(r)]
+    last_bad = bool(every_full) and impossible(every_full[-1])
     charges = sorted((r for r in records if is_full_charge(r)), key=lambda r: r["ts"])
     recent = [r for r in full if r["ts"] >= window_start]
     caps = [
@@ -728,6 +745,9 @@ def evaluate(
     )
     if sure["display_state"] == "drop_unconfirmed":
         status = "unconfirmed"
+    if last_bad:
+        # The newest full discharge cannot be right: the power sensor first.
+        status = "check_power"
     # Red is reported (Repairs + phone) only once the last CONFIRM_N
     # measurements are all at or below the red line: one odd measurement
     # never sends anyone to Marstek.
@@ -778,10 +798,11 @@ def evaluate(
         )
 
     history = []
-    for r in reversed(full[-HISTORY_ITEMS:]):
+    for r in reversed(every_full[-HISTORY_ITEMS:]):
         cap = capacity_from_record(spec, r) or 0.0
         history.append(
             {
+                "impossible": impossible(r),
                 "date": datetime.fromtimestamp(r["ts"]).strftime("%Y-%m-%d"),
                 "kwh": round(cap, 3),
                 "pct": round(pct(cap), 1),
@@ -801,7 +822,7 @@ def evaluate(
         "loss_kwh": round(usable - measured_kwh, 3) if measured_kwh is not None else None,
         "measurement_count": len(caps),
         "last_measurement": datetime.fromtimestamp(recent[-1]["ts"]) if recent else None,
-        "last_full_discharge": _utc(full[-1]["ts"]) if full else None,
+        "last_full_discharge": _utc(every_full[-1]["ts"]) if every_full else None,
         "last_full_charge": _utc(charges[-1]["ts"]) if charges else None,
         "age_years": round(age_years(spec, today), 2) if spec.purchase_date else None,
         "cycles": round(cycles, 1),
@@ -817,6 +838,14 @@ def evaluate(
         "warranty_end": w_end,
         "in_warranty": w_end is None or today <= w_end,
         "status": status,
+        "impossible_count": len(bad),
+        "impossible_last_pct": (
+            round(pct(capacity_from_record(spec, bad[-1]) or 0.0), 1) if bad else None
+        ),
+        "impossible_last_kwh": (
+            round(capacity_from_record(spec, bad[-1]) or 0.0, 2) if bad else None
+        ),
+        "impossible_limit_pct": IMPOSSIBLE_PCT,
         **sure,
         "trend": trend,
         "history": history,

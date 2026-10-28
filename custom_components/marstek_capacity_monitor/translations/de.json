@@ -195,7 +195,8 @@
           "critical": "An Marstek melden",
           "no_measurement": "Noch keine vollständige Entladung gemessen",
           "check_model": "Modell prüfen",
-          "unconfirmed": "Noch nicht bestätigt"
+          "unconfirmed": "Noch nicht bestätigt",
+          "check_power": "Leistungssensor prüfen"
         }
       },
       "red_threshold": {
@@ -330,6 +331,7 @@
         "critical": "An Marstek melden (rot)",
         "critical_confirmed": "Bei Marstek melden, bestätigt (rot + Meldung)",
         "check_model": "Modell prüfen (etwa die Hälfte)",
+        "check_power": "Leistungssensor prüfen (Messung weit über 100 %)",
         "soc_letop": "SOC-Drift: Achtung",
         "soc_advies": "SOC-Drift: Empfehlung",
         "cells_letop": "Zellkalibrierung: Achtung",
@@ -384,6 +386,10 @@
     "critical": {
       "title": "{name}: Kapazität unter der roten Linie",
       "description": "Gemessene Kapazität: {pct} % vom Neuwert. Die letzten {count} vollständigen Entladungen lagen alle auf oder unter der roten Linie von {red} %, also keine einzelne seltsame Messung.\n\nWas tun: Karte öffnen, Bericht drücken und den Marstek-Bericht herunterladen (Englisch, ohne Namen oder Adresse). Über die Marstek-App melden und den Bericht anhängen. Danach ist es an Marstek, es weiter zu untersuchen.\n\nDiese Meldung verschwindet von selbst, wenn die Kapazität wieder über der roten Linie liegt. Ignorieren = für diese Reihe ausblenden."
+    },
+    "check_power": {
+      "title": "{name}: Messung kann nicht stimmen, Leistungssensor prüfen",
+      "description": "Die letzte vollständige Entladung ergab {pct} % von neu ({kwh} kWh). Mehr als {limit} % sind bei einer Batterie nicht möglich: Es wurde mehr Energie gezählt, als hineinpasst. Eine solche Messung zählt deshalb nicht mit (bisher {count}).\n\nMeist liegt es am Leistungssensor:\n- er bleibt nach dem Laden oder Entladen auf seinem letzten Wert stehen, statt auf 0 W zurückzufallen;\n- es wurde ein falscher Sensor gewählt (zum Beispiel die AC-Seite oder ein anderes Gerät);\n- die Integration meldet die Leistung mit einem falschen Faktor.\n\nPrüfe im Verlauf, ob der Leistungssensor während einer Entladung mit dem SOC mitgeht und auf 0 W zurückfällt, wenn die Batterie ruht. Wähle bei Bedarf einen anderen Sensor unter Einstellungen → Geräte & Dienste → Marstek Capacity Monitor → Konfigurieren. Sensor geändert? Beginne dann neu mit der Aktion **Messungen löschen** für diese Batterie.\n\nDiese Meldung verschwindet von selbst, sobald eine vollständige Entladung wieder ein glaubwürdiges Ergebnis liefert."
     }
   }
 }

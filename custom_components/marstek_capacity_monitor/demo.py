@@ -34,6 +34,8 @@ _CAPACITY: dict[str, list[float]] = {
     "critical": [76.0, 74.8, 74.2, 73.9, 73.5],
     "critical_confirmed": [76.0, 74.8, 74.2, 73.9, 73.5, 73.2],
     "check_model": [50.4, 49.8, 50.1],
+    # power sensor stuck / wrong: every full discharge about 13x too much
+    "check_power": [1302.4, 1299.1, 1300.8],
 }
 SCENARIOS = [
     "normal",
@@ -47,6 +49,7 @@ SCENARIOS = [
     "critical",
     "critical_confirmed",
     "check_model",
+    "check_power",
     "soc_letop",
     "soc_advies",
     "cells_letop",

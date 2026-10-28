@@ -29,7 +29,7 @@ from .const import CONF_BATTERY_ID, DOMAIN, KIND_CELLS, KIND_SOC, MONITOR_STATUS
 from .health import LEVELS
 from .monitor import BatteryMonitor
 
-STATUS_OPTIONS = ["good", "attention", "critical", "no_measurement", "check_model", "unconfirmed"]
+STATUS_OPTIONS = ["good", "attention", "critical", "no_measurement", "check_model", "unconfirmed", "check_power"]
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -89,6 +89,9 @@ SENSORS: tuple[CapacitySensorDescription, ...] = (
                 "confirm_count",
                 "confirm_needed",
                 "drop_ref_pct",
+                "impossible_count",
+                "impossible_last_pct",
+                "impossible_limit_pct",
             )
         },
     ),
@@ -219,7 +222,8 @@ STATUS_SENSOR = CapacitySensorDescription(
     icon="mdi:heart-pulse",
     status_only=True,
     value_fn=lambda m: m.status.get("state"),
-    attrs_fn=lambda m: {k: v for k, v in m.status.items() if k != "state"},
+    attrs_fn=lambda m: {k: v for k, v in m.status.items() if k != "state"}
+    | {"version": m.hass.data.get(f"{DOMAIN}_version")},
 )
 
 CELL_SENSOR = CapacitySensorDescription(

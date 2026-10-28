@@ -47,6 +47,7 @@ demo:
             - critical
             - critical_confirmed
             - check_model
+            - check_power
             - soc_letop
             - soc_advies
             - cells_letop

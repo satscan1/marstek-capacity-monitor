@@ -195,7 +195,8 @@
           "critical": "Report to Marstek",
           "no_measurement": "No full discharge measured yet",
           "check_model": "Check the model",
-          "unconfirmed": "Not confirmed yet"
+          "unconfirmed": "Not confirmed yet",
+          "check_power": "Check the power sensor"
         }
       },
       "red_threshold": {
@@ -330,6 +331,7 @@
         "critical": "Report to Marstek (red)",
         "critical_confirmed": "Report to Marstek, confirmed (red + message)",
         "check_model": "Check the model (about half)",
+        "check_power": "Check the power sensor (measurement far above 100 %)",
         "soc_letop": "SOC drift: attention",
         "soc_advies": "SOC drift: advice",
         "cells_letop": "Cell calibration: attention",
@@ -384,6 +386,10 @@
     "critical": {
       "title": "{name}: capacity below the red line",
       "description": "Measured capacity: {pct} % of new. The last {count} full discharges were all at or below the red line of {red} %, so this is not one odd measurement.\n\nWhat to do: open the card, press Report and download the Marstek report (English, without names or addresses). Report it via the Marstek app and attach the report. From there it is up to Marstek to look into it.\n\nThis message disappears by itself when the capacity is above the red line again. Ignore = dismiss it for this series."
+    },
+    "check_power": {
+      "title": "{name}: measurement cannot be right, check the power sensor",
+      "description": "The last full discharge came out at {pct} % of its rated capacity ({kwh} kWh). A battery cannot exceed {limit} %: more energy was counted than fits in it. Such a measurement therefore does not count ({count} so far).\n\nUsually the power sensor is the cause:\n- it stays on its last value after charging or discharging instead of falling back to 0 W;\n- the wrong sensor was chosen (for example the AC side or another device);\n- the integration reports the power with the wrong scaling factor.\n\nCheck in History whether the power sensor moves along with the SOC during a discharge and falls back to 0 W when the battery is idle. If needed, choose another sensor under Settings → Devices & services → Marstek Capacity Monitor → Configure. Changed the sensor? Then start over with the **Reset measurements** action for this battery.\n\nThis message disappears by itself as soon as a full discharge gives a credible result again."
     }
   }
 }

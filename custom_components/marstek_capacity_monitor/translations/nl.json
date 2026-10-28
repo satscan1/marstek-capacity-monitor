@@ -195,7 +195,8 @@
           "critical": "Melden bij Marstek",
           "no_measurement": "Nog geen volledige ontlading gemeten",
           "check_model": "Klopt het model?",
-          "unconfirmed": "Nog niet bevestigd"
+          "unconfirmed": "Nog niet bevestigd",
+          "check_power": "Vermogensensor nakijken"
         }
       },
       "red_threshold": {
@@ -330,6 +331,7 @@
         "critical": "Melden bij Marstek (rood)",
         "critical_confirmed": "Melden bij Marstek, bevestigd (rood + melding)",
         "check_model": "Klopt het model? (ongeveer de helft)",
+        "check_power": "Vermogensensor nakijken (meting ver boven 100 %)",
         "soc_letop": "SOC-drift: let op",
         "soc_advies": "SOC-drift: advies",
         "cells_letop": "Celkalibratie: let op",
@@ -384,6 +386,10 @@
     "critical": {
       "title": "{name}: capaciteit onder de rode lijn",
       "description": "Gemeten capaciteit: {pct} % van nieuw. De laatste {count} volledige ontladingen zaten allemaal op of onder de rode lijn van {red} %, dus dit is geen losse rare meting.\n\nWat te doen: open de kaart, druk op Rapport en download het Marstek-rapport (Engels, zonder namen of adres). Meld het via de Marstek-app en stuur het rapport mee. Daarna is het aan Marstek om het verder te onderzoeken.\n\nDeze melding verdwijnt vanzelf als de capaciteit weer boven de rode lijn komt. Negeren = wegklikken voor deze reeks."
+    },
+    "check_power": {
+      "title": "{name}: meting kan niet kloppen, vermogensensor nakijken",
+      "description": "De laatste volledige ontlading kwam uit op {pct} % van nieuw ({kwh} kWh). Meer dan {limit} % kan een batterij niet: er is dan meer energie geteld dan erin past. Zo'n meting telt daarom niet mee ({count} keer tot nu toe).\n\nMeestal ligt het aan de vermogensensor:\n- hij blijft na het laden of ontladen op zijn laatste waarde staan en valt niet terug naar 0 W;\n- er is een verkeerde sensor gekozen (bijvoorbeeld de AC-kant of een ander apparaat);\n- de koppeling geeft het vermogen met een verkeerde factor door.\n\nKijk in Geschiedenis of de vermogensensor tijdens een ontlading meebeweegt met de SOC en terugvalt naar 0 W als de batterij stilstaat. Kies zo nodig een andere sensor bij Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren. Is de sensor aangepast? Begin dan opnieuw met de actie **Metingen wissen** voor deze batterij.\n\nDeze melding verdwijnt vanzelf zodra een volledige ontlading weer een geloofwaardige uitkomst geeft."
     }
   }
 }
