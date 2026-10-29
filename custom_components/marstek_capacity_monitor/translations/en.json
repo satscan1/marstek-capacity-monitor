@@ -93,6 +93,7 @@
         "title": "Marstek Capacity Monitor",
         "menu_options": {
           "settings": "Settings",
+          "sensors": "Change sensors (SOC and power)",
           "restore": "Restore back-up"
         }
       },
@@ -145,6 +146,29 @@
           "file": "Back-up file",
           "mode": "How"
         }
+      },
+      "sensors": {
+        "title": "Change sensors",
+        "description": "Choose which sensors this battery uses. Each choice shows its value now: a power sensor that is not at (about) 0 W while the battery is idle is usually the wrong one. The scan found {count} other pair(s).\n\nYour measurements stay with this battery. A discharge in progress and the automatic plus/minus detection do start again.",
+        "data": {
+          "candidate": "Sensors",
+          "restart": "Start measuring again (delete the old measurements)"
+        },
+        "data_description": {
+          "restart": "Turn this on when the old measurements were made with a wrong sensor, for example after the message \"Check the power sensor\". Cannot be undone."
+        }
+      },
+      "sensors_manual": {
+        "title": "Choose sensors yourself",
+        "description": "The power must be measured on the battery (DC) side, not the AC / grid side. Whether charging is plus or minus is detected automatically.",
+        "data": {
+          "soc_entity": "State of charge sensor (%)",
+          "power_entity": "DC battery power sensor (W)",
+          "restart": "Start measuring again (delete the old measurements)"
+        },
+        "data_description": {
+          "restart": "Turn this on when the old measurements were made with a wrong sensor, for example after the message \"Check the power sensor\". Cannot be undone."
+        }
       }
     },
     "error": {
@@ -152,7 +176,8 @@
       "cells_both": "Fill in both the highest and the lowest cell voltage, or neither.",
       "same_entity": "SOC and power must be different sensors.",
       "restore_invalid": "This is not a back-up of Marstek Capacity Monitor, or it was made by a newer version.",
-      "restore_unreadable": "The file could not be read."
+      "restore_unreadable": "The file could not be read.",
+      "looks_like_ac": "This sensor looks like the AC / grid side, not the battery (DC) side. AC values include conversion losses and give a wrong capacity. Choose the battery power sensor, or submit again to use this one anyway."
     },
     "abort": {
       "restored": "Back-up restored: {records} swings, of which {full} full discharges. The card shows them within a minute."
@@ -381,7 +406,7 @@
     },
     "implausible_power": {
       "title": "{name}: power sensor reports impossible values",
-      "description": "The sensor {entity} reported {value} ({watts} W). No home battery charges or discharges that fast, so the monitor ignores these values.\n\nUsually the unit is wrong (kW while the value is in W), or a self-made sensor multiplies mA or mV instead of A and V. Fix the sensor, or choose another one under Settings → Devices & services → Marstek Capacity Monitor → Configure.\n\nDid the full cycles already jump up? Start counting again with the action Reset measurements for this battery.\n\nThis message goes away by itself after 24 hours without such values."
+      "description": "The sensor {entity} reported {value} ({watts} W). No home battery charges or discharges that fast, so the monitor ignores these values.\n\nUsually the unit is wrong (kW while the value is in W), or a self-made sensor multiplies mA or mV instead of A and V. Fix the sensor, or choose another one under Settings → Devices & services → Marstek Capacity Monitor → Configure → **Change sensors**.\n\nDid the full cycles already jump up? Start counting again with the action Reset measurements for this battery.\n\nThis message goes away by itself after 24 hours without such values."
     },
     "critical": {
       "title": "{name}: capacity below the red line",
@@ -389,7 +414,7 @@
     },
     "check_power": {
       "title": "{name}: measurement cannot be right, check the power sensor",
-      "description": "The last full discharge came out at {pct} % of its rated capacity ({kwh} kWh). A battery cannot exceed {limit} %: more energy was counted than fits in it. Such a measurement therefore does not count ({count} so far).\n\nUsually the power sensor is the cause:\n- it stays on its last value after charging or discharging instead of falling back to 0 W;\n- the wrong sensor was chosen (for example the AC side or another device);\n- the integration reports the power with the wrong scaling factor.\n\nCheck in History whether the power sensor moves along with the SOC during a discharge and falls back to 0 W when the battery is idle. If needed, choose another sensor under Settings → Devices & services → Marstek Capacity Monitor → Configure. Changed the sensor? Then start over with the **Reset measurements** action for this battery.\n\nThis message disappears by itself as soon as a full discharge gives a credible result again."
+      "description": "The last full discharge came out at {pct} % of its rated capacity ({kwh} kWh). A battery cannot exceed {limit} %: more energy was counted than fits in it. Such a measurement therefore does not count ({count} so far).\n\nUsually the power sensor is the cause:\n- it stays on its last value after charging or discharging instead of falling back to 0 W;\n- the wrong sensor was chosen (for example the AC side or another device);\n- the integration reports the power with the wrong scaling factor.\n\nCheck in History whether the power sensor moves along with the SOC during a discharge and falls back to 0 W when the battery is idle. If needed, choose another sensor under Settings → Devices & services → Marstek Capacity Monitor → Configure → **Change sensors**. Turn on **Start measuring again** there, so the old measurements no longer count.\n\nThis message disappears by itself as soon as a full discharge gives a credible result again."
     }
   }
 }

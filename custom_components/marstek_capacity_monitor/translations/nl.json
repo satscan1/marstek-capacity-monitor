@@ -93,6 +93,7 @@
         "title": "Marstek Capacity Monitor",
         "menu_options": {
           "settings": "Instellingen",
+          "sensors": "Sensoren wisselen (SOC en vermogen)",
           "restore": "Back-up terugzetten"
         }
       },
@@ -145,6 +146,29 @@
           "file": "Back-upbestand",
           "mode": "Hoe"
         }
+      },
+      "sensors": {
+        "title": "Sensoren wisselen",
+        "description": "Kies welke sensoren deze batterij gebruikt. Achter elke keuze staat de waarde van nu: een vermogensensor die niet op (bijna) 0 W staat terwijl de batterij stilstaat, is meestal de verkeerde. De scan vond {count} andere combinatie(s).\n\nJe metingen blijven bij deze batterij. Een ontlading die nu loopt en het automatisch herkennen van plus en min beginnen wel opnieuw.",
+        "data": {
+          "candidate": "Sensoren",
+          "restart": "Opnieuw beginnen met meten (oude metingen wissen)"
+        },
+        "data_description": {
+          "restart": "Zet dit aan als de oude metingen met een verkeerde sensor zijn gemaakt, bijvoorbeeld na de melding \"Vermogensensor nakijken\". Kan niet ongedaan worden gemaakt."
+        }
+      },
+      "sensors_manual": {
+        "title": "Zelf sensoren kiezen",
+        "description": "Het vermogen moet aan de batterijkant (DC) gemeten worden, niet aan de AC- of netkant. Of laden plus of min is, herkent de monitor zelf.",
+        "data": {
+          "soc_entity": "Laadtoestand-sensor (%)",
+          "power_entity": "DC-vermogen van de batterij (W)",
+          "restart": "Opnieuw beginnen met meten (oude metingen wissen)"
+        },
+        "data_description": {
+          "restart": "Zet dit aan als de oude metingen met een verkeerde sensor zijn gemaakt, bijvoorbeeld na de melding \"Vermogensensor nakijken\". Kan niet ongedaan worden gemaakt."
+        }
       }
     },
     "error": {
@@ -152,7 +176,8 @@
       "cells_both": "Vul zowel de hoogste als de laagste celspanning in, of geen van beide.",
       "same_entity": "SOC en vermogen moeten verschillende sensoren zijn.",
       "restore_invalid": "Dit is geen back-up van Marstek Capacity Monitor, of hij is gemaakt door een nieuwere versie.",
-      "restore_unreadable": "Het bestand kon niet worden gelezen."
+      "restore_unreadable": "Het bestand kon niet worden gelezen.",
+      "looks_like_ac": "Deze sensor lijkt de AC-/netkant te meten, niet de batterijkant (DC). AC-waarden bevatten omzetverlies en geven een verkeerde capaciteit. Kies de sensor voor het batterijvermogen, of verstuur nogmaals om deze toch te gebruiken."
     },
     "abort": {
       "restored": "Back-up teruggezet: {records} rondes, waarvan {full} volledige ontladingen. De kaart toont ze binnen een minuut."
@@ -381,7 +406,7 @@
     },
     "implausible_power": {
       "title": "{name}: vermogenssensor geeft onmogelijke waarden",
-      "description": "De sensor {entity} gaf {value} ({watts} W). Zo snel laadt of ontlaadt geen thuisbatterij, dus de monitor telt deze waarden niet mee.\n\nMeestal klopt de eenheid niet (kW terwijl de waarde in W is), of rekent een zelfgemaakte sensor met mA of mV in plaats van A en V. Pas de sensor aan, of kies een andere bij Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren.\n\nIs het aantal volle cycli al flink opgelopen? Begin dan opnieuw met tellen met de actie Metingen wissen voor deze batterij.\n\nDeze melding verdwijnt vanzelf na 24 uur zonder zulke waarden."
+      "description": "De sensor {entity} gaf {value} ({watts} W). Zo snel laadt of ontlaadt geen thuisbatterij, dus de monitor telt deze waarden niet mee.\n\nMeestal klopt de eenheid niet (kW terwijl de waarde in W is), of rekent een zelfgemaakte sensor met mA of mV in plaats van A en V. Pas de sensor aan, of kies een andere bij Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren → **Sensoren wisselen**.\n\nIs het aantal volle cycli al flink opgelopen? Begin dan opnieuw met tellen met de actie Metingen wissen voor deze batterij.\n\nDeze melding verdwijnt vanzelf na 24 uur zonder zulke waarden."
     },
     "critical": {
       "title": "{name}: capaciteit onder de rode lijn",
@@ -389,7 +414,7 @@
     },
     "check_power": {
       "title": "{name}: meting kan niet kloppen, vermogensensor nakijken",
-      "description": "De laatste volledige ontlading kwam uit op {pct} % van nieuw ({kwh} kWh). Meer dan {limit} % kan een batterij niet: er is dan meer energie geteld dan erin past. Zo'n meting telt daarom niet mee ({count} keer tot nu toe).\n\nMeestal ligt het aan de vermogensensor:\n- hij blijft na het laden of ontladen op zijn laatste waarde staan en valt niet terug naar 0 W;\n- er is een verkeerde sensor gekozen (bijvoorbeeld de AC-kant of een ander apparaat);\n- de koppeling geeft het vermogen met een verkeerde factor door.\n\nKijk in Geschiedenis of de vermogensensor tijdens een ontlading meebeweegt met de SOC en terugvalt naar 0 W als de batterij stilstaat. Kies zo nodig een andere sensor bij Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren. Is de sensor aangepast? Begin dan opnieuw met de actie **Metingen wissen** voor deze batterij.\n\nDeze melding verdwijnt vanzelf zodra een volledige ontlading weer een geloofwaardige uitkomst geeft."
+      "description": "De laatste volledige ontlading kwam uit op {pct} % van nieuw ({kwh} kWh). Meer dan {limit} % kan een batterij niet: er is dan meer energie geteld dan erin past. Zo'n meting telt daarom niet mee ({count} keer tot nu toe).\n\nMeestal ligt het aan de vermogensensor:\n- hij blijft na het laden of ontladen op zijn laatste waarde staan en valt niet terug naar 0 W;\n- er is een verkeerde sensor gekozen (bijvoorbeeld de AC-kant of een ander apparaat);\n- de koppeling geeft het vermogen met een verkeerde factor door.\n\nKijk in Geschiedenis of de vermogensensor tijdens een ontlading meebeweegt met de SOC en terugvalt naar 0 W als de batterij stilstaat. Kies zo nodig een andere sensor bij Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren → **Sensoren wisselen**. Zet daar **Opnieuw beginnen met meten** aan, dan tellen de oude metingen niet meer mee.\n\nDeze melding verdwijnt vanzelf zodra een volledige ontlading weer een geloofwaardige uitkomst geeft."
     }
   }
 }

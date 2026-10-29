@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.5.5-rc2 — release candidate (pre-release)
+
+**Change sensors without starting over.**
+
+- New under **Configure → Change sensors**: pick another state of charge or power sensor for a battery. The scan proposes the pairs it finds, each with its value now (a power sensor that is not at about 0 W while the battery is idle is usually the wrong one); or choose them yourself, with the same checks as when adding a battery (not twice the same sensor, a warning for an AC-side sensor).
+- The measurements stay with the battery. A discharge in progress and the automatic plus/minus detection start again, as they belonged to the old sensor. **Start measuring again** deletes the old measurements, for when they were made with a wrong sensor.
+- Fix: the messages *Check the power sensor* and *impossible power value*, and the guide, sent you to Configure to choose another sensor, but that choice was not there. They now point to **Configure → Change sensors**. Thanks to dannyro on Tweakers for spotting it.
+
 ## v0.5.5-rc1 — release candidate (pre-release)
 
 **Facts, only facts matter.** Everything since v0.5.2 in one version: v0.5.5-dev1 and dev2 below, plus:
