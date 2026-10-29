@@ -17,7 +17,7 @@ from aiohttp import web
 from homeassistant.components.http import HomeAssistantView, StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import Event, HomeAssistant, ServiceCall
+from homeassistant.core import CoreState, Event, HomeAssistant, ServiceCall
 from homeassistant.exceptions import ServiceValidationError
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType
@@ -61,6 +61,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     # The version that is installed now: the card compares it with its own and
     # offers a refresh when a page (phone app) still runs an older card.
     hass.data[f"{DOMAIN}_version"] = integration.version
+    # Loaded while Home Assistant was already running (first install, when the
+    # first battery is being added): pages that are open now do not have the
+    # card yet (0.5.5-rc4). The first battery then says: refresh once.
+    hass.data[f"{DOMAIN}_late"] = hass.state is CoreState.running
     await hass.http.async_register_static_paths(
         [StaticPathConfig(CARD_URL, str(Path(__file__).parent / "frontend"), True)]
     )
@@ -159,6 +163,32 @@ class ReportView(HomeAssistantView):
         return web.Response(text=html, content_type="text/html", charset="utf-8")
 
 
+REFRESH_NOTICE = {
+    "nl": ("Batterijcapaciteit: vernieuw de pagina",
+           "De monitor is net toegevoegd. Vernieuw de pagina één keer om **Batterijcapaciteit** te openen: "
+           "in een browser met **Ctrl+F5**, in de Home Assistant-app door de app helemaal te sluiten en opnieuw te openen. "
+           "Anders zie je de melding *Timeout waiting for strategy element*. Dit is alleen de eerste keer nodig."),
+    "de": ("Batteriekapazität: Seite neu laden",
+           "Der Monitor wurde gerade hinzugefügt. Lade die Seite einmal neu, um **Batteriekapazität** zu öffnen: "
+           "im Browser mit **Strg+F5**, in der Home-Assistant-App, indem du die App ganz schließt und neu öffnest. "
+           "Sonst erscheint die Meldung *Timeout waiting for strategy element*. Das ist nur beim ersten Mal nötig."),
+    "en": ("Battery capacity: refresh the page",
+           "The monitor was just added. Refresh the page once to open **Battery capacity**: "
+           "in a browser with **Ctrl+F5**, in the Home Assistant app by closing the app completely and opening it again. "
+           "Otherwise you see the message *Timeout waiting for strategy element*. This is only needed the first time."),
+}
+
+
+def _refresh_notice(hass: HomeAssistant) -> None:
+    from homeassistant.components import persistent_notification
+
+    lang = (hass.config.language or "en")[:2]
+    title, message = REFRESH_NOTICE.get(lang, REFRESH_NOTICE["en"])
+    persistent_notification.async_create(
+        hass, message, title=title, notification_id=f"{DOMAIN}_refresh"
+    )
+
+
 def _demo_entry_data() -> dict:
     from .const import MODEL_E_V12, preset_for
     from .demo import DEMO_CELL_MAX, DEMO_CELL_MIN, DEMO_ID, DEMO_POWER, DEMO_SOC, DEMO_TEMP_MAX
@@ -212,6 +242,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: MonitorConfigEntry) -> b
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_reload))
     async_update_sidebar(hass)
+    if hass.data.pop(f"{DOMAIN}_late", False):
+        _refresh_notice(hass)
 
     if not hass.services.has_service(DOMAIN, SERVICE_RESET):
 

@@ -410,8 +410,17 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
             **preset,
             **self._data,
         }
+        return self._entry(self._with_counter(data))
+
+    def _entry(self, data: dict[str, Any]) -> ConfigFlowResult:
+        # First battery while Home Assistant runs (0.5.5-rc4): the card is only
+        # loaded in pages opened after this, so say once: refresh the page.
+        # Not set up yet (first install) or set up while running without a battery
+        first = not self._async_current_entries() and (
+            f"{DOMAIN}_version" not in self.hass.data or bool(self.hass.data.get(f"{DOMAIN}_late"))
+        )
         return self.async_create_entry(
-            title=self._data[CONF_NAME], data=self._with_counter(data)
+            title=self._data[CONF_NAME], data=data, description="refresh" if first else None
         )
 
     async def async_step_specs(
@@ -422,10 +431,7 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             errors = _validate_spec(user_input)
             if not errors:
-                return self.async_create_entry(
-                    title=self._data[CONF_NAME],
-                    data=self._with_counter({**self._data, **user_input}),
-                )
+                return self._entry(self._with_counter({**self._data, **user_input}))
         values = {CONF_PURCHASE_DATE: self._data.get(CONF_PURCHASE_DATE), **(user_input or {})}
         return self.async_show_form(
             step_id="specs",

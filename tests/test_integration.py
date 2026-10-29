@@ -88,8 +88,32 @@ async def test_config_flow_other_model(hass: HomeAssistant) -> None:
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"]["battery_id"] == "mt1"
+    # First battery while HA runs: refresh the page once (0.5.5-rc4)
+    assert result["description"] == "refresh"
     await hass.async_block_till_done()
     assert hass.states.get("sensor.marstek_mt1_usable_capacity").state == "4.61"
+    from homeassistant.components import persistent_notification
+
+    notes = persistent_notification._async_get_or_create_notifications(hass)
+    assert f"{DOMAIN}_refresh" in notes and "Ctrl+F5" in notes[f"{DOMAIN}_refresh"]["message"]
+
+
+async def test_second_battery_needs_no_refresh(hass: HomeAssistant) -> None:
+    hass.states.async_set(SOC, 50, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W", "device_class": "power"})
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    from custom_components.marstek_capacity_monitor.config_flow import MarstekCapacityConfigFlow
+
+    f = MarstekCapacityConfigFlow()
+    f.hass = hass
+    f._data = {"battery_id": "mt2", "name": "MT2", "soc_entity": "sensor.b", "power_entity": "sensor.c"}
+    f.context = {"source": config_entries.SOURCE_USER}
+    f.handler = DOMAIN
+    result = f._create({})
+    assert result["description"] is None
 
 
 async def test_max_six_batteries(hass: HomeAssistant) -> None:

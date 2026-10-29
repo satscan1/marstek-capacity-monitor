@@ -85,6 +85,9 @@
     "abort": {
       "already_configured": "This battery id is already in use.",
       "max_batteries": "The maximum of 6 batteries has been reached."
+    },
+    "create_entry": {
+      "refresh": "Battery added. **Refresh the page once** before you open Battery capacity in the sidebar: in a browser with Ctrl+F5, in the Home Assistant app by closing the app completely and opening it again. This is only needed the first time."
     }
   },
   "options": {
