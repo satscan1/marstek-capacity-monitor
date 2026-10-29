@@ -85,6 +85,9 @@
     "abort": {
       "already_configured": "Deze code is al in gebruik.",
       "max_batteries": "Het maximum van 6 batterijen is bereikt."
+    },
+    "create_entry": {
+      "refresh": "Batterij toegevoegd. **Vernieuw de pagina één keer** voordat je Batterijcapaciteit in de zijbalk opent: in een browser met Ctrl+F5, in de Home Assistant-app door de app helemaal te sluiten en opnieuw te openen. Dit is alleen de eerste keer nodig."
     }
   },
   "options": {

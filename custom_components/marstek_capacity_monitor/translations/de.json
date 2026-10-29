@@ -85,6 +85,9 @@
     "abort": {
       "already_configured": "Dieser Code wird bereits verwendet.",
       "max_batteries": "Das Maximum von 6 Batterien ist erreicht."
+    },
+    "create_entry": {
+      "refresh": "Batterie hinzugefügt. **Lade die Seite einmal neu**, bevor du Batteriekapazität in der Seitenleiste öffnest: im Browser mit Strg+F5, in der Home-Assistant-App, indem du die App ganz schließt und neu öffnest. Das ist nur beim ersten Mal nötig."
     }
   },
   "options": {

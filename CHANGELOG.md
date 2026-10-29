@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.5.5-rc4 — release candidate (pre-release)
+
+**Just installed? Refresh once.**
+
+- Right after adding the first battery, *Battery capacity* is already in the sidebar, but a page that was open before does not have the card yet. Opening it gave *Timeout waiting for strategy element*, and the Home Assistant app kept that page. Now the window after adding the battery says to refresh the page once, and a notification says the same (it goes away when clicked away or at the next restart). No file to add yourself. Thanks to DeBeginner and Driek on Tweakers.
+- Guide (EN/NL/DE): new row under Troubleshooting for this message.
+
 ## v0.5.5-rc3 — release candidate (pre-release)
 
 **Settings in an own window, behind the gear on the card.**
