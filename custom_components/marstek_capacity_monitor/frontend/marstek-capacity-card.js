@@ -129,7 +129,7 @@ const MCW_TEXT = {
     sensors: "Sensoren", battery: "Batterij en garantie", limits: "Grenzen", notify: "Meldingen",
     sign: "Vermogensensor", cells: "Celspanning (optioneel)", temps: "Celtemperatuur (optioneel)", data: "Gegevens",
     soc: "Laadtoestand (SOC)", power: "Vermogen (DC, batterijkant)",
-    swap: "Wisselen", swapClose: "Sluiten", found: "Gevonden in Home Assistant", none: "Geen andere batterijsensoren gevonden.",
+    swap: "Wisselen", swapClose: "Sluiten", other: "Ander SOC- en vermogenpaar", count: (n) => n ? `${n} gevonden in Home Assistant, met de waarde van nu` : "Niets anders gevonden; zelf kiezen kan altijd", found: "Gevonden in Home Assistant (waarde van nu)", none: "Geen andere batterijsensoren gevonden.",
     manual: "Zelf kiezen", manualSub: "Zoek op naam of entity-id",
     restart: "Opnieuw beginnen met meten",
     restartSub: "Wist de metingen van deze batterij. Zonder dit blijven ze staan en gaat de meting verder met de nieuwe sensoren.",
@@ -155,7 +155,7 @@ const MCW_TEXT = {
     sensors: "Sensors", battery: "Battery and warranty", limits: "Limits", notify: "Messages",
     sign: "Power sensor", cells: "Cell voltage (optional)", temps: "Cell temperature (optional)", data: "Data",
     soc: "State of charge (SOC)", power: "Power (DC, battery side)",
-    swap: "Change", swapClose: "Close", found: "Found in Home Assistant", none: "No other battery sensors found.",
+    swap: "Change", swapClose: "Close", other: "Another SOC and power pair", count: (n) => n ? `${n} found in Home Assistant, with the value of now` : "Nothing else found; you can always choose yourself", found: "Found in Home Assistant (value of now)", none: "No other battery sensors found.",
     manual: "Choose yourself", manualSub: "Search by name or entity id",
     restart: "Start measuring over",
     restartSub: "Clears the measurements of this battery. Without this they stay, and measuring continues with the new sensors.",
@@ -181,7 +181,7 @@ const MCW_TEXT = {
     sensors: "Sensoren", battery: "Batterie und Garantie", limits: "Grenzen", notify: "Meldungen",
     sign: "Leistungssensor", cells: "Zellspannung (optional)", temps: "Zelltemperatur (optional)", data: "Daten",
     soc: "Ladezustand (SOC)", power: "Leistung (DC, Batterieseite)",
-    swap: "Wechseln", swapClose: "Schließen", found: "In Home Assistant gefunden", none: "Keine anderen Batteriesensoren gefunden.",
+    swap: "Wechseln", swapClose: "Schließen", other: "Anderes SOC- und Leistungspaar", count: (n) => n ? `${n} in Home Assistant gefunden, mit dem Wert von jetzt` : "Sonst nichts gefunden; selbst wählen geht immer", found: "In Home Assistant gefunden (Wert von jetzt)", none: "Keine anderen Batteriesensoren gefunden.",
     manual: "Selbst wählen", manualSub: "Suche nach Name oder Entity-ID",
     restart: "Messung neu beginnen",
     restartSub: "Löscht die Messungen dieser Batterie. Ohne dies bleiben sie erhalten und die Messung läuft mit den neuen Sensoren weiter.",
@@ -436,7 +436,31 @@ class MarstekSettingsWindow {
     if (!st) return { id, name: id, missing: true };
     const unit = (st.attributes && st.attributes.unit_of_measurement) || "";
     const ok = !["unknown", "unavailable"].includes(st.state);
-    return { id, name: (st.attributes && st.attributes.friendly_name) || id, value: ok ? `${st.state} ${unit}`.trim() : null };
+    return { id, name: (st.attributes && st.attributes.friendly_name) || id, value: ok ? this._value(st) : null };
+  }
+
+  // The value as Home Assistant itself shows it: its rounding (display
+  // precision) and the decimal comma of the language. A sensor that sends
+  // 3.16400003433228 V shows 3,164 V.
+  _value(st) {
+    const unit = (st.attributes && st.attributes.unit_of_measurement) || "";
+    try {
+      if (this.hass.formatEntityState) return this.hass.formatEntityState(st);
+    } catch (e) { /* older Home Assistant: round ourselves */ }
+    const n = Number(st.state);
+    if (st.state === "" || Number.isNaN(n)) return `${st.state} ${unit}`.trim();
+    const ent = this.hass.entities && this.hass.entities[st.entity_id];
+    let dec = ent && Number.isInteger(ent.display_precision) ? ent.display_precision : null;
+    if (dec == null) dec = { V: 3, mV: 0, "%": 0, W: 0, kW: 2, "°C": 1, "°F": 1 }[unit];
+    if (dec == null) dec = Number.isInteger(n) ? 0 : 2;
+    const txt = n.toLocaleString(this.lang === "en" ? "en-US" : this.lang, { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    return `${txt} ${unit}`.trim();
+  }
+
+  // Current sensors and found pairs: shown with the states of now
+  _shown(sensor) {
+    if (!sensor || !this.hass.states[sensor.id]) return sensor;
+    return { ...sensor, ...this._live(sensor.id), name: sensor.name };
   }
 
   _hits(kind) {
@@ -450,7 +474,7 @@ class MarstekSettingsWindow {
       const name = String((st.attributes && st.attributes.friendly_name) || "");
       if (q && !id.toLowerCase().includes(q) && !name.toLowerCase().includes(q)) continue;
       const hint = /soc|battery|batter|akku|state_of_charge|power|vermogen|leistung|cell|zell|temp/i.test(id) ? 0 : 1;
-      out.push({ id, name: name || id, value: `${st.state} ${unit}`, hint });
+      out.push({ id, name: name || id, value: this._value(st), hint });
     }
     out.sort((a, b) => a.hint - b.hint || a.id.localeCompare(b.id));
     const chosen = kind === "soc" || kind === "power" ? (this.s.manual || {})[kind] : this.vals[kind];
@@ -479,12 +503,12 @@ class MarstekSettingsWindow {
     const sw = this.s.swap;
     let html = `<div class="sec">${T.sensors}<button class="ib" data-a="info" data-k="_sensors" aria-expanded="${!!this.s.info._sensors}">i</button></div>${
       this.s.info._sensors ? `<div class="tip">${mcwInfo(T.sensorsInfo)}</div>` : ""}
-      <div class="f"><div class="nm"><span>${T.soc}</span></div>${this._sensorVal(d.sensors.soc)}</div>
-      <div class="f"><div class="nm"><span>${T.power}</span></div>${this._sensorVal(d.sensors.power)}</div>
-      <div class="f"><div class="nm"><span>${T.found}<small>${d.found.length}</small></span></div><div class="right"><button class="btn" data-a="swap">${sw ? T.swapClose : T.swap}</button></div></div>`;
+      <div class="f"><div class="nm"><span>${T.soc}</span></div>${this._sensorVal(this._shown(d.sensors.soc))}</div>
+      <div class="f"><div class="nm"><span>${T.power}</span></div>${this._sensorVal(this._shown(d.sensors.power))}</div>
+      <div class="f"><div class="nm"><span>${T.other}<small>${T.count(d.found.length)}</small></span></div><div class="right"><button class="btn" data-a="swap">${sw ? T.swapClose : T.swap}</button></div></div>`;
     if (!sw) return html;
     const pick = this.s.pick;
-    const pairs = d.found.map((c, i) => `<button class="opt${pick === String(i) ? " on" : ""}" data-a="pick" data-v="${i}"><b>${mcEsc(c.name)}</b><span>SOC ${mcEsc((c.soc && c.soc.value) || "?")} · ${mcEsc((c.power && c.power.value) || "?")}</span><span>${mcEsc(c.soc.id)} + ${mcEsc(c.power.id)}</span></button>`).join("");
+    const pairs = d.found.map((c, i) => `<button class="opt${pick === String(i) ? " on" : ""}" data-a="pick" data-v="${i}"><b>${mcEsc(c.name)}</b><span>SOC ${mcEsc((this._shown(c.soc) || {}).value || "?")} · ${mcEsc((this._shown(c.power) || {}).value || "?")}</span><span>${mcEsc(c.soc.id)} + ${mcEsc(c.power.id)}</span></button>`).join("");
     const man = pick === "manual";
     html += `<div class="box"><div class="lbl">${T.found}</div>${pairs || `<div class="lbl">${T.none}</div>`}
       <button class="opt${man ? " on" : ""}" data-a="pick" data-v="manual"><b>✎ ${T.manual}</b><span>${T.manualSub}</span></button>
