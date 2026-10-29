@@ -10,6 +10,8 @@
 - **Experiment**: cell temperature sensors, and a place for trials that are not finished yet (a weak cell, later). Off by default.
 - **Clear measurements** in the window itself (asks once more). Restoring a back-up still goes through the settings screen of Home Assistant; the window has a button for it. That screen (Configure) also stays available, as a fallback.
 - Only for an administrator; anyone else still goes to the screen of Home Assistant.
+- Two columns on a wide screen, one below the other on a phone. Sensor values are rounded as Home Assistant shows them. Cycles step per 1000, the warranty per whole year.
+- Back (Esc, the back button, the back gesture on a phone) goes one step back: first an open list or explanation, then the window. It never leaves the dashboard.
 - Messages under Repairs and the guide now point to the gear on the card.
 - Fix: removing a battery also removes its messages under **Settings → Repairs**, and the made-up sensors of the demo battery.
 
