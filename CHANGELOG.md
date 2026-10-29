@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.5-rc3 — release candidate (pre-release)
+
+**Settings in an own window, behind the gear on the card.**
+
+- The gear ⚙ on a battery card now opens an own settings window instead of the general forms of Home Assistant. Two tabs: **Standard** and **Experiment**. Own fields: −/+ for numbers (tap the number to type it), sliders for the limits, switches, choice buttons, and an ⓘ with the explanation per setting.
+- **Sensors**: the state of charge and power sensor with their value now, name and entity id. **Change** shows the pairs Home Assistant has, with their value of this moment, or search yourself by name or entity id. Same checks as before (not twice the same sensor, a warning for an AC-side sensor). **Start measuring over** clears the old measurements; without it they stay.
+- All other settings are in the same window: factory data and warranty, red limit and margin, messages, menu item, sensitivities, sign of the power sensor, cell voltage sensors. **Save** stores the changes at once, with the same checks as the form.
+- **Experiment**: cell temperature sensors, and a place for trials that are not finished yet (a weak cell, later). Off by default.
+- **Clear measurements** in the window itself (asks once more). Restoring a back-up still goes through the settings screen of Home Assistant; the window has a button for it. That screen (Configure) also stays available, as a fallback.
+- Only for an administrator; anyone else still goes to the screen of Home Assistant.
+- Messages under Repairs and the guide now point to the gear on the card.
+- Fix: removing a battery also removes its messages under **Settings → Repairs**, and the made-up sensors of the demo battery.
+
 ## v0.5.5-rc2 — release candidate (pre-release)
 
 **Change sensors without starting over.**

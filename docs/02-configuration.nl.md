@@ -4,7 +4,7 @@
 
 Alle waarden stel je in bij het toevoegen van een batterij. Later wijzigen kan via **Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren**.
 
-**Andere sensor nodig?** Kies bij Configureren **Sensoren wisselen** (vanaf 0.5.5). De scan stelt de sensoren voor die hij vindt, met hun waarde van nu; of kies ze zelf. Je metingen blijven bij de batterij. Waren ze met een verkeerde sensor gemaakt, zet dan **Opnieuw beginnen met meten** aan.
+**Andere sensor nodig?** Tik op het tandwiel ⚙ op de kaart van de batterij: **Sensoren** → **Wisselen** (vanaf 0.5.5). Daar staan ook alle andere instellingen, in een eigen venster met de tabbladen **Standaard** en **Experiment**. De scan stelt de sensoren voor die hij vindt, met hun waarde van nu; of kies ze zelf. Je metingen blijven bij de batterij. Waren ze met een verkeerde sensor gemaakt, zet dan **Opnieuw beginnen met meten** aan.
 
 | Instelling | Standaard | Betekenis |
 |---|---|---|

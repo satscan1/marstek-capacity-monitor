@@ -4,7 +4,7 @@
 
 All values are set when you add a battery. Change them later under **Settings → Devices & services → Marstek Capacity Monitor → Configure**.
 
-**Need another sensor?** Choose **Change sensors** under Configure (from 0.5.5). The scan proposes the sensors it finds, with their value now; or choose them yourself. Your measurements stay with the battery. Were they made with a wrong sensor, turn on **Start measuring again**.
+**Need another sensor?** Tap the gear ⚙ on the card of the battery: **Sensors** → **Change** (from 0.5.5). All other settings are there too, in an own window with the tabs **Standard** and **Experiment**. The scan proposes the sensors it finds, with their value now; or choose them yourself. Your measurements stay with the battery. Were they made with a wrong sensor, turn on **Start measuring over**.
 
 | Setting | Default | Meaning |
 |---|---|---|

@@ -128,6 +128,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     )
 
     hass.bus.async_listen("mobile_app_notification_action", _phone_action)
+    # The settings window of the card (0.5.5-rc3)
+    from .settings_ws import async_register as _register_settings
+
+    await _register_settings(hass)
     hass.http.register_view(ReportView())
     return True
 
@@ -237,7 +241,19 @@ async def async_unload_entry(hass: HomeAssistant, entry: MonitorConfigEntry) -> 
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Last battery removed: the menu item goes too."""
+    """Battery removed: its messages under Repairs go, the menu item goes
+    with the last battery, and the made-up inputs of the demo battery go."""
+    from homeassistant.helpers import issue_registry as ir
+
+    registry = ir.async_get(hass)
+    battery = entry.data.get("battery_id") or ""
+    for domain, issue_id in list(registry.issues):
+        if domain == DOMAIN and entry.entry_id in issue_id:
+            ir.async_delete_issue(hass, DOMAIN, issue_id)
+    if battery == "demo":
+        for entity_id in list(hass.states.async_entity_ids("sensor")):
+            if entity_id.startswith("sensor.marstek_demo_input_"):
+                hass.states.async_remove(entity_id)
     async_update_sidebar(hass)
 
 
