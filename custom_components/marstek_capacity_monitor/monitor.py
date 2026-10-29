@@ -468,6 +468,18 @@ class BatteryMonitor:
         self._recalculate()
         self._update_status(force=True)
 
+    async def async_sensors_changed(self, restart: bool = False) -> None:
+        """The SOC or power sensor was swapped under Configure (0.5.5-rc2).
+
+        restart: start over (as Reset measurements). Otherwise the
+        measurements stay, but a discharge in progress and the automatic
+        plus/minus detection start again: they belonged to the old sensor."""
+        if restart:
+            await self.async_reset()
+            return
+        self.tracker = self._new_tracker()
+        await self._store.async_save(self._data())
+
     # -- back-up, export, report (0.5.5) -----------------------------------
 
     def _battery_info(self) -> dict[str, Any]:

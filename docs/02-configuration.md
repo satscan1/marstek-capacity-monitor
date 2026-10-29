@@ -4,6 +4,8 @@
 
 All values are set when you add a battery. Change them later under **Settings → Devices & services → Marstek Capacity Monitor → Configure**.
 
+**Need another sensor?** Choose **Change sensors** under Configure (from 0.5.5). The scan proposes the sensors it finds, with their value now; or choose them yourself. Your measurements stay with the battery. Were they made with a wrong sensor, turn on **Start measuring again**.
+
 | Setting | Default | Meaning |
 |---|---|---|
 | Rated capacity | 5.12 kWh | Total in the cells per manufacturer |

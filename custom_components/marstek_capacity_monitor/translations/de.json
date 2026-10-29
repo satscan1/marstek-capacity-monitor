@@ -93,6 +93,7 @@
         "title": "Marstek Capacity Monitor",
         "menu_options": {
           "settings": "Einstellungen",
+          "sensors": "Sensoren wechseln (SOC und Leistung)",
           "restore": "Backup wiederherstellen"
         }
       },
@@ -145,6 +146,29 @@
           "file": "Backup-Datei",
           "mode": "Wie"
         }
+      },
+      "sensors": {
+        "title": "Sensoren wechseln",
+        "description": "Wähle, welche Sensoren diese Batterie nutzt. Hinter jeder Wahl steht der aktuelle Wert: Ein Leistungssensor, der bei ruhender Batterie nicht (fast) 0 W zeigt, ist meist der falsche. Die Suche hat {count} andere Kombination(en) gefunden.\n\nDeine Messungen bleiben bei dieser Batterie. Eine laufende Entladung und die automatische Erkennung von Plus und Minus beginnen aber neu.",
+        "data": {
+          "candidate": "Sensoren",
+          "restart": "Neu mit dem Messen beginnen (alte Messungen löschen)"
+        },
+        "data_description": {
+          "restart": "Einschalten, wenn die alten Messungen mit einem falschen Sensor entstanden sind, zum Beispiel nach der Meldung „Leistungssensor prüfen“. Kann nicht rückgängig gemacht werden."
+        }
+      },
+      "sensors_manual": {
+        "title": "Sensoren selbst wählen",
+        "description": "Die Leistung muss auf der Batterieseite (DC) gemessen werden, nicht auf der AC- oder Netzseite. Ob Laden Plus oder Minus ist, erkennt der Monitor selbst.",
+        "data": {
+          "soc_entity": "Ladezustand-Sensor (%)",
+          "power_entity": "DC-Leistung der Batterie (W)",
+          "restart": "Neu mit dem Messen beginnen (alte Messungen löschen)"
+        },
+        "data_description": {
+          "restart": "Einschalten, wenn die alten Messungen mit einem falschen Sensor entstanden sind, zum Beispiel nach der Meldung „Leistungssensor prüfen“. Kann nicht rückgängig gemacht werden."
+        }
       }
     },
     "error": {
@@ -152,7 +176,8 @@
       "cells_both": "Gib sowohl die höchste als auch die niedrigste Zellspannung an, oder keine von beiden.",
       "same_entity": "SOC und Leistung müssen verschiedene Sensoren sein.",
       "restore_invalid": "Das ist kein Backup des Marstek Capacity Monitor, oder es stammt von einer neueren Version.",
-      "restore_unreadable": "Die Datei konnte nicht gelesen werden."
+      "restore_unreadable": "Die Datei konnte nicht gelesen werden.",
+      "looks_like_ac": "Dieser Sensor scheint die AC- bzw. Netzseite zu messen, nicht die Batterieseite (DC). AC-Werte enthalten Wandlungsverluste und ergeben eine falsche Kapazität. Wähle den Sensor für die Batterieleistung oder klicke erneut auf „Absenden“, um ihn trotzdem zu verwenden."
     },
     "abort": {
       "restored": "Backup wiederhergestellt: {records} Zyklen, davon {full} vollständige Entladungen. Die Karte zeigt sie innerhalb einer Minute."
@@ -381,7 +406,7 @@
     },
     "implausible_power": {
       "title": "{name}: Leistungssensor liefert unmögliche Werte",
-      "description": "Der Sensor {entity} hat {value} ({watts} W) gemeldet. So schnell lädt oder entlädt kein Heimspeicher, deshalb ignoriert der Monitor diese Werte.\n\nMeist stimmt die Einheit nicht (kW, obwohl der Wert in W ist), oder ein selbst gebauter Sensor rechnet mit mA oder mV statt A und V. Korrigiere den Sensor oder wähle einen anderen unter Einstellungen → Geräte & Dienste → Marstek Capacity Monitor → Konfigurieren.\n\nSind die Vollzyklen schon stark gestiegen? Dann starte die Zählung neu mit der Aktion Messungen löschen für diese Batterie.\n\nDiese Meldung verschwindet von selbst nach 24 Stunden ohne solche Werte."
+      "description": "Der Sensor {entity} hat {value} ({watts} W) gemeldet. So schnell lädt oder entlädt kein Heimspeicher, deshalb ignoriert der Monitor diese Werte.\n\nMeist stimmt die Einheit nicht (kW, obwohl der Wert in W ist), oder ein selbst gebauter Sensor rechnet mit mA oder mV statt A und V. Korrigiere den Sensor oder wähle einen anderen unter Einstellungen → Geräte & Dienste → Marstek Capacity Monitor → Konfigurieren → **Sensoren wechseln**.\n\nSind die Vollzyklen schon stark gestiegen? Dann starte die Zählung neu mit der Aktion Messungen löschen für diese Batterie.\n\nDiese Meldung verschwindet von selbst nach 24 Stunden ohne solche Werte."
     },
     "critical": {
       "title": "{name}: Kapazität unter der roten Linie",
@@ -389,7 +414,7 @@
     },
     "check_power": {
       "title": "{name}: Messung kann nicht stimmen, Leistungssensor prüfen",
-      "description": "Die letzte vollständige Entladung ergab {pct} % von neu ({kwh} kWh). Mehr als {limit} % sind bei einer Batterie nicht möglich: Es wurde mehr Energie gezählt, als hineinpasst. Eine solche Messung zählt deshalb nicht mit (bisher {count}).\n\nMeist liegt es am Leistungssensor:\n- er bleibt nach dem Laden oder Entladen auf seinem letzten Wert stehen, statt auf 0 W zurückzufallen;\n- es wurde ein falscher Sensor gewählt (zum Beispiel die AC-Seite oder ein anderes Gerät);\n- die Integration meldet die Leistung mit einem falschen Faktor.\n\nPrüfe im Verlauf, ob der Leistungssensor während einer Entladung mit dem SOC mitgeht und auf 0 W zurückfällt, wenn die Batterie ruht. Wähle bei Bedarf einen anderen Sensor unter Einstellungen → Geräte & Dienste → Marstek Capacity Monitor → Konfigurieren. Sensor geändert? Beginne dann neu mit der Aktion **Messungen löschen** für diese Batterie.\n\nDiese Meldung verschwindet von selbst, sobald eine vollständige Entladung wieder ein glaubwürdiges Ergebnis liefert."
+      "description": "Die letzte vollständige Entladung ergab {pct} % von neu ({kwh} kWh). Mehr als {limit} % sind bei einer Batterie nicht möglich: Es wurde mehr Energie gezählt, als hineinpasst. Eine solche Messung zählt deshalb nicht mit (bisher {count}).\n\nMeist liegt es am Leistungssensor:\n- er bleibt nach dem Laden oder Entladen auf seinem letzten Wert stehen, statt auf 0 W zurückzufallen;\n- es wurde ein falscher Sensor gewählt (zum Beispiel die AC-Seite oder ein anderes Gerät);\n- die Integration meldet die Leistung mit einem falschen Faktor.\n\nPrüfe im Verlauf, ob der Leistungssensor während einer Entladung mit dem SOC mitgeht und auf 0 W zurückfällt, wenn die Batterie ruht. Wähle bei Bedarf einen anderen Sensor unter Einstellungen → Geräte & Dienste → Marstek Capacity Monitor → Konfigurieren → **Sensoren wechseln**. Schalte dort **Neu mit dem Messen beginnen** ein, dann zählen die alten Messungen nicht mehr.\n\nDiese Meldung verschwindet von selbst, sobald eine vollständige Entladung wieder ein glaubwürdiges Ergebnis liefert."
     }
   }
 }

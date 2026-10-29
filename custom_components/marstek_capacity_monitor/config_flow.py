@@ -76,6 +76,14 @@ MANUAL_LABEL = {
     "de": "✎ Sensoren selbst wählen",
 }
 
+CURRENT = "current"
+CURRENT_LABEL = {
+    "en": "✓ Keep the current sensors: ",
+    "nl": "✓ Huidige sensoren houden: ",
+    "de": "✓ Aktuelle Sensoren behalten: ",
+}
+CONF_RESTART = "restart"
+
 SLUG_RE = re.compile(r"^[a-z0-9_]{1,20}$")
 
 
@@ -453,7 +461,139 @@ class MarstekCapacityOptionsFlow(OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return self.async_show_menu(step_id="init", menu_options=["settings", "restore"])
+        return self.async_show_menu(
+            step_id="init", menu_options=["settings", "sensors", "restore"]
+        )
+
+    # -- change the SOC / power sensor later (0.5.5-rc2) --------------------
+
+    def _sensor_label(self, name: str, soc: str, power: str) -> str:
+        """Name plus both sensors with their value now, so the right pair is
+        easy to recognise (a power sensor that never shows 0 W stands out)."""
+
+        def now(entity_id: str) -> str:
+            st = self.hass.states.get(entity_id)
+            if st is None or st.state in ("unknown", "unavailable"):
+                return "?"
+            unit = st.attributes.get("unit_of_measurement") or ""
+            return f"{st.state} {unit}".strip()
+
+        return f"{name}  ({soc}: {now(soc)} · {power}: {now(power)})"
+
+    async def async_step_sensors(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Choose another SOC / power pair: the current one, one the scan
+        finds, or choose yourself. Measurements stay with the battery unless
+        the user starts over."""
+        entry = self.config_entry
+        cur_soc, cur_power = entry.data[CONF_SOC_ENTITY], entry.data[CONF_POWER_ENTITY]
+        if user_input is not None:
+            choice = user_input[CONF_CANDIDATE]
+            restart = bool(user_input.get(CONF_RESTART))
+            if choice == MANUAL:
+                self._restart = restart
+                return await self.async_step_sensors_manual()
+            if choice == CURRENT:
+                return await self._apply_sensors(cur_soc, cur_power, restart)
+            cand = self._found[int(choice)]
+            return await self._apply_sensors(cand.soc_entity, cand.power_entity, restart)
+
+        others = {
+            e.data.get(CONF_SOC_ENTITY)
+            for e in self.hass.config_entries.async_entries(DOMAIN)
+            if e.entry_id != entry.entry_id
+        }
+        self._found = [
+            c
+            for c in find_candidates(self.hass, exclude_soc=others)
+            if (c.soc_entity, c.power_entity) != (cur_soc, cur_power)
+        ]
+        lang = (self.hass.config.language or "en")[:2]
+        options = [
+            selector.SelectOptionDict(
+                value=CURRENT,
+                label=CURRENT_LABEL.get(lang, CURRENT_LABEL["en"])
+                + self._sensor_label("", cur_soc, cur_power).strip(),
+            )
+        ]
+        options += [
+            selector.SelectOptionDict(
+                value=str(i), label=self._sensor_label(c.name, c.soc_entity, c.power_entity)
+            )
+            for i, c in enumerate(self._found)
+        ]
+        options.append(
+            selector.SelectOptionDict(value=MANUAL, label=MANUAL_LABEL.get(lang, MANUAL_LABEL["en"]))
+        )
+        schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_CANDIDATE, default="0" if self._found else MANUAL
+                ): selector.SelectSelector(
+                    selector.SelectSelectorConfig(options=options, mode=selector.SelectSelectorMode.LIST)
+                ),
+                vol.Required(CONF_RESTART, default=False): selector.BooleanSelector(),
+            }
+        )
+        return self.async_show_form(
+            step_id="sensors",
+            data_schema=schema,
+            description_placeholders={"count": str(len(self._found))},
+        )
+
+    async def async_step_sensors_manual(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        entry = self.config_entry
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            soc, power = user_input[CONF_SOC_ENTITY], user_input[CONF_POWER_ENTITY]
+            restart = bool(user_input.get(CONF_RESTART))
+            if soc == power:
+                errors[CONF_POWER_ENTITY] = "same_entity"
+            elif looks_like_ac(self.hass, power) and getattr(self, "_ac_confirmed", None) != power:
+                # Warn once; submitting again with the same sensor accepts it.
+                self._ac_confirmed = power
+                errors[CONF_POWER_ENTITY] = "looks_like_ac"
+            else:
+                return await self._apply_sensors(soc, power, restart)
+        defaults = {
+            CONF_SOC_ENTITY: entry.data[CONF_SOC_ENTITY],
+            CONF_POWER_ENTITY: entry.data[CONF_POWER_ENTITY],
+            CONF_RESTART: getattr(self, "_restart", False),
+            **(user_input or {}),
+        }
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_SOC_ENTITY): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="sensor")
+                ),
+                vol.Required(CONF_POWER_ENTITY): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="sensor", device_class="power")
+                ),
+                vol.Required(CONF_RESTART): selector.BooleanSelector(),
+            }
+        )
+        return self.async_show_form(
+            step_id="sensors_manual",
+            data_schema=self.add_suggested_values_to_schema(schema, defaults),
+            errors=errors,
+        )
+
+    async def _apply_sensors(self, soc: str, power: str, restart: bool) -> ConfigFlowResult:
+        entry = self.config_entry
+        changed = (soc, power) != (entry.data[CONF_SOC_ENTITY], entry.data[CONF_POWER_ENTITY])
+        monitor = getattr(entry, "runtime_data", None)
+        if monitor is not None and (changed or restart):
+            await monitor.async_sensors_changed(restart=restart)
+        if changed:
+            # Same battery, same entities, same stored measurements; only the
+            # source changes. The update reloads the battery with the new pair.
+            self.hass.config_entries.async_update_entry(
+                entry, data={**entry.data, CONF_SOC_ENTITY: soc, CONF_POWER_ENTITY: power}
+            )
+        return self.async_create_entry(data=dict(entry.options))
 
     async def async_step_restore(
         self, user_input: dict[str, Any] | None = None

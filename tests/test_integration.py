@@ -1087,3 +1087,83 @@ async def test_impossible_power_is_ignored_and_reported(hass: HomeAssistant, fre
     async_fire_time_changed(hass, dt_util.utcnow())
     await hass.async_block_till_done()
     assert ir.async_get(hass).async_get_issue(DOMAIN, issue_id) is None
+
+
+# --- 0.5.5-rc2: change the SOC / power sensor under Configure ---------------
+
+async def _setup_with_one_record(hass: HomeAssistant):
+    hass.states.async_set(SOC, 60, {"unit_of_measurement": "%"})
+    hass.states.async_set(POWER, 0, {"unit_of_measurement": "W"})
+    entry = _entry()
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    m = entry.runtime_data
+    m.records.append({"ts": dt_util.utcnow().timestamp() - 86400, "direction": "discharge",
+                      "soc_start": 100, "soc_end": 10, "delta_soc": 90,
+                      "e_dc_kwh": 4.1, "valid": True})
+    await m._store.async_save(m._data())
+    return entry
+
+
+async def test_change_sensors_found_by_the_scan_keeps_measurements(hass: HomeAssistant) -> None:
+    """Configure → Change sensors proposes what the scan finds, with the value
+    now; picking one swaps the sensors and keeps the measurements."""
+    entry = await _setup_with_one_record(hass)
+    W = {"unit_of_measurement": "W", "device_class": "power"}
+    P = {"unit_of_measurement": "%", "device_class": "battery"}
+    hass.states.async_set("sensor.venus_veranda_marstek_battery_state_of_charge", 60, P)
+    hass.states.async_set("sensor.venus_veranda_marstek_battery_power", 0, W)
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert "sensors" in result["menu_options"]
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {"next_step_id": "sensors"})
+    assert result["step_id"] == "sensors"
+    assert result["description_placeholders"]["count"] == "1"
+    labels = result["data_schema"].schema["candidate"].config["options"]
+    assert labels[0]["value"] == "current" and "0 W" in labels[0]["label"]
+    assert "venus_veranda_marstek_battery_power: 0 W" in labels[1]["label"]
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {"candidate": "0", "restart": False}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+    assert entry.data["power_entity"] == "sensor.venus_veranda_marstek_battery_power"
+    assert entry.data["soc_entity"] == "sensor.venus_veranda_marstek_battery_state_of_charge"
+    assert len(entry.runtime_data.records) == 1  # measurements stay
+
+
+async def test_change_sensors_yourself_checks_and_can_start_over(hass: HomeAssistant) -> None:
+    entry = await _setup_with_one_record(hass)
+    hass.states.async_set("sensor.new_power", 0, {"unit_of_measurement": "W", "device_class": "power"})
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {"next_step_id": "sensors"})
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {"candidate": "manual", "restart": True}
+    )
+    assert result["step_id"] == "sensors_manual"
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {"soc_entity": SOC, "power_entity": SOC, "restart": True}
+    )
+    assert result["errors"] == {"power_entity": "same_entity"}
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {"soc_entity": SOC, "power_entity": "sensor.new_power", "restart": True}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+    assert entry.data["power_entity"] == "sensor.new_power"
+    assert entry.runtime_data.records == []  # started over
+    assert entry.runtime_data.power_entity == "sensor.new_power"
+
+
+async def test_keep_current_sensors_changes_nothing(hass: HomeAssistant) -> None:
+    entry = await _setup_with_one_record(hass)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {"next_step_id": "sensors"})
+    assert result["data_schema"].schema["candidate"].config["options"][0]["value"] == "current"
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {"candidate": "current", "restart": False}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+    assert entry.data["power_entity"] == POWER and len(entry.runtime_data.records) == 1
