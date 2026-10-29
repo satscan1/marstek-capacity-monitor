@@ -85,6 +85,11 @@ const MCW_TEXT = {
   },
 };
 
+// −/+ step where it differs from the finest step of the form
+const MCW_BIG_STEP = { cycle_life: 1000, warranty_years: 1, initial_cycles: 1 };
+// Always shown and stepped as whole numbers (a part of a cycle says nothing)
+const MCW_WHOLE = { initial_cycles: true };
+
 // Which sensors the search offers, by unit
 const MCW_UNITS = {
   soc: ["%"], power: ["W", "kW"],
@@ -265,7 +270,9 @@ class MarstekSettingsWindow {
 
   _fmt(key, v) {
     const step = this.d.numbers[key][2];
-    const dec = step < 0.1 ? 2 : step < 1 ? 1 : 0;
+    let dec = step < 0.1 ? 2 : step < 1 ? 1 : 0;
+    // Whole years read as whole years (10 jaar); half a year stays 10,5
+    if (MCW_WHOLE[key] || (MCW_BIG_STEP[key] && Number.isInteger(Number(v)))) dec = 0;
     return Number(v).toLocaleString(this.lang === "en" ? "en-US" : this.lang, { minimumFractionDigits: dec, maximumFractionDigits: dec });
   }
 
@@ -526,8 +533,12 @@ class MarstekSettingsWindow {
       case "tab": this.s.tab = v; break;
       case "info": this.s.info[k] = !this.s.info[k]; break;
       case "inc": case "dec": {
-        const [lo, hi, step] = this.d.numbers[k];
-        const n = Math.round((Number(this.vals[k]) + (a === "inc" ? step : -step)) / step) * step;
+        const [lo, hi, fine] = this.d.numbers[k];
+        // −/+ in big steps where small ones make no sense (cycles per 1000);
+        // typing the number still allows any value.
+        const step = MCW_BIG_STEP[k] || fine;
+        const grid = MCW_WHOLE[k] ? 1 : fine;
+        const n = Math.round((Number(this.vals[k]) + (a === "inc" ? step : -step)) / grid) * grid;
         this._set(k, Math.min(hi, Math.max(lo, Number(n.toFixed(4)))));
         break;
       }
