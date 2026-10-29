@@ -327,8 +327,15 @@ class MarstekSettingsWindow {
     this.root.addEventListener("change", (e) => this._change(e));
     this.root.addEventListener("keydown", (e) => this._key(e));
     this.root.addEventListener("focusout", (e) => { if (e.target.dataset && e.target.dataset.e) this._commitEdit(e.target); });
-    this._esc = (e) => { if (e.key === "Escape") this.close(); };
+    // Back (Esc, the back button of the browser, the back gesture of a
+    // phone) goes one step back: first an open part of the window, then
+    // the window itself. The window has its own place in the history, so
+    // back never leaves the dashboard while the window is open.
+    this._esc = (e) => { if (e.key === "Escape") this._back(false); };
     document.addEventListener("keydown", this._esc);
+    history.pushState({ mcSettings: true }, "", location.href);
+    this._pop = () => this._back(true);
+    window.addEventListener("popstate", this._pop);
     document.body.appendChild(this.host);
     this._render();
     this._load();
@@ -350,15 +357,42 @@ class MarstekSettingsWindow {
     this._render();
   }
 
-  close(force) {
+  // One step back: close the innermost open part. True when there was one.
+  _stepBack() {
+    const s = this.s;
+    if (s.edit) { s.edit = null; return true; }
+    if (s.choose) { s.choose = null; return true; }
+    if (s.acAsk) { s.acAsk = false; return true; }
+    if (s.wipeAsk) { s.wipeAsk = false; return true; }
+    if (s.swap && s.pick === "manual") { s.pick = null; return true; }
+    if (s.swap) { s.swap = false; s.pick = null; return true; }
+    const open = Object.keys(s.info).filter((k) => s.info[k]);
+    if (open.length) { s.info = {}; return true; }
+    return false;
+  }
+
+  _back(fromHistory) {
+    if (this._stepBack()) {
+      if (fromHistory) history.pushState({ mcSettings: true }, "", location.href);
+      this._render();
+      return;
+    }
+    this.close(false, fromHistory);
+  }
+
+  close(force, fromHistory) {
     if (!force && this._dirty() && !this.s.closeAsk) {
       this.s.closeAsk = true;
+      if (fromHistory) history.pushState({ mcSettings: true }, "", location.href);
       this._say(this.T.unsaved, true);
       return;
     }
     document.removeEventListener("keydown", this._esc);
+    window.removeEventListener("popstate", this._pop);
     this.host.remove();
     if (window.__mcSettings === this) window.__mcSettings = null;
+    // Closed with ✕ or Esc: take our own step out of the history again
+    if (!fromHistory && history.state && history.state.mcSettings) history.back();
   }
 
   _dirty() { return !!this.vals && JSON.stringify(this.vals) !== JSON.stringify(this.orig); }
@@ -677,9 +711,10 @@ class MarstekSettingsWindow {
       case "save": return this._save();
       case "wipe": return this._wipe();
       case "ha": {
-        this.close(true);
+        this.close(true, true);
         mcRememberBack(this.haUrl);
-        history.pushState(null, "", this.haUrl);
+        // Our own step in the history becomes the settings screen of HA
+        history.replaceState(null, "", this.haUrl);
         window.dispatchEvent(new CustomEvent("location-changed"));
         return;
       }
