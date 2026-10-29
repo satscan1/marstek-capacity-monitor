@@ -107,7 +107,7 @@ button:disabled{opacity:.45;cursor:default}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:center;
   padding:40px 16px 24px;z-index:999;overflow:auto;box-sizing:border-box}
 .win{background:var(--ha-card-background,var(--card-background-color,#1c1c1c));color:var(--primary-text-color);border:1px solid var(--line);
-  border-radius:14px;width:100%;max-width:640px;padding:16px 18px 20px;display:grid;gap:12px;box-sizing:border-box;min-width:0;container-type:inline-size}
+  border-radius:14px;width:100%;max-width:1120px;padding:16px 18px 20px;display:grid;gap:12px;box-sizing:border-box;min-width:0;container-type:inline-size}
 header{display:flex;align-items:center;gap:10px}
 h3{margin:0;font-size:17px;font-weight:500}h3 small{color:var(--muted);font-weight:400;font-size:14px}
 .x{margin-left:auto;background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer;width:36px;height:36px;border-radius:50%}
@@ -117,7 +117,12 @@ h3{margin:0;font-size:17px;font-weight:500}h3 small{color:var(--muted);font-weig
 .tab.on{background:var(--primary-color);color:var(--text-primary-color,#fff);font-weight:600}
 .intro{margin:0;color:var(--muted);font-size:14px;line-height:1.45}
 .sec{font-size:15px;font-weight:500;margin:10px 0 0;padding-top:12px;border-top:2px solid var(--line);display:flex;align-items:center;gap:8px}
-.sec:first-of-type{border-top:0;padding-top:0;margin-top:0}.intro+.sec{margin-top:6px}.sec .ib{margin-left:auto}
+.sec .ib{margin-left:auto}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+.col{display:grid;gap:12px;min-width:0}.cols>.intro{grid-column:1/-1}
+.grp{border:1px solid var(--line);border-radius:12px;padding:12px 14px 4px;min-width:0}
+.grp>.sec{border-top:0;padding-top:0;margin:0 0 2px}
+@container (max-width:760px){.cols{grid-template-columns:minmax(0,1fr)}}
 .f{display:grid;grid-template-columns:minmax(110px,1fr) minmax(0,auto);gap:6px 16px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
 .sec+.f,.sec+.tip+.f{border-top:0}
 .f>.nm{font-size:14px;line-height:1.3;display:flex;gap:8px;align-items:flex-start}.f>.nm>span{flex:1;min-width:0}
@@ -371,34 +376,41 @@ class MarstekSettingsWindow {
     return html;
   }
 
+  _grp(html) { return `<section class="grp">${html}</section>`; }
+
   _std() {
     const T = this.T;
     const tx = this.d.texts;
     const hasCells = !!(this.vals.cell_max_entity && this.vals.cell_min_entity);
-    return `${this._sensorsBlock()}
-      <div class="sec">${T.battery}</div>
-      ${this._stepper("nominal_kwh")}${this._stepper("reserve_kwh")}${this._date("purchase_date")}${this._stepper("warranty_years")}
-      ${this._stepper("cycle_life")}${this._stepper("cycle_eol_pct")}${this._stepper("initial_cycles")}
-      <div class="sec">${T.limits}</div>
-      ${this._slider("red_pct")}${this._slider("tolerance_pct")}
-      <div class="sec">${T.notify}</div>
-      ${this._toggle("notify")}${this._toggle("sidebar")}${this._chips("soc_sensitivity", tx.choices.sensitivity)}
-      <div class="sec">${T.sign}</div>
-      ${this._chips("power_sign", tx.choices.power_sign)}
-      <div class="sec">${T.cells}</div>
-      ${this._optSensor("cell_max_entity")}${this._optSensor("cell_min_entity")}${this._chips("cell_sensitivity", tx.choices.sensitivity, !hasCells)}
-      <div class="sec">${T.data}</div>
+    const left = [
+      this._sensorsBlock(),
+      `<div class="sec">${T.sign}</div>${this._chips("power_sign", tx.choices.power_sign)}`,
+      `<div class="sec">${T.cells}</div>${this._optSensor("cell_max_entity")}${this._optSensor("cell_min_entity")}${this._chips("cell_sensitivity", tx.choices.sensitivity, !hasCells)}`,
+      `<div class="sec">${T.data}</div>
       <div class="f"><div class="nm"><span>${T.restore}<small>${T.restoreSub}</small></span></div><div class="right"><button class="btn" data-a="ha">${T.restoreBtn}</button></div></div>
-      <div class="f"><div class="nm"><span>${T.wipe}<small>${T.wipeSub}</small></span></div><div class="right"><button class="btn${this.s.wipeAsk ? " bad" : ""}" data-a="wipe">${this.s.wipeAsk ? T.wipeAsk : T.apply}</button></div></div>`;
+      <div class="f"><div class="nm"><span>${T.wipe}<small>${T.wipeSub}</small></span></div><div class="right"><button class="btn${this.s.wipeAsk ? " bad" : ""}" data-a="wipe">${this.s.wipeAsk ? T.wipeAsk : T.apply}</button></div></div>`,
+    ];
+    const right = [
+      `<div class="sec">${T.battery}</div>${this._stepper("nominal_kwh")}${this._stepper("reserve_kwh")}${this._date("purchase_date")}${this._stepper("warranty_years")}${this._stepper("cycle_life")}${this._stepper("cycle_eol_pct")}${this._stepper("initial_cycles")}`,
+      `<div class="sec">${T.limits}</div>${this._slider("red_pct")}${this._slider("tolerance_pct")}`,
+      `<div class="sec">${T.notify}</div>${this._toggle("notify")}${this._toggle("sidebar")}${this._chips("soc_sensitivity", tx.choices.sensitivity)}`,
+    ];
+    return this._cols(left, right);
+  }
+
+  _cols(left, right, intro) {
+    const col = (list) => `<div class="col">${list.map((g) => this._grp(g)).join("")}</div>`;
+    return `<div class="cols">${intro || ""}${col(left)}${col(right)}</div>`;
   }
 
   _exp() {
     const T = this.T;
-    return `<p class="intro">${T.expIntro}</p>
-      <div class="sec">${T.temps}</div>
-      ${this._optSensor("temp_max_entity")}${this._optSensor("temp_min_entity")}
-      <div class="sec">${T.weak}</div>
-      <div class="f na"><div class="nm"><span>${T.weak}<small>${T.weakSub}</small></span></div><div class="right"><span class="tag">${T.later}</span><button class="tg" disabled role="switch" aria-checked="false"></button></div></div>`;
+    return this._cols(
+      [`<div class="sec">${T.temps}</div>${this._optSensor("temp_max_entity")}${this._optSensor("temp_min_entity")}`],
+      [`<div class="sec">${T.weak}</div>
+      <div class="f na"><div class="nm"><span>${T.weak}<small>${T.weakSub}</small></span></div><div class="right"><span class="tag">${T.later}</span><button class="tg" disabled role="switch" aria-checked="false"></button></div></div>`],
+      `<p class="intro">${T.expIntro}</p>`,
+    );
   }
 
   _render() {
