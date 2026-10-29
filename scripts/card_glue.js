@@ -117,6 +117,8 @@ function mcRememberBack(target) {
   window.addEventListener("popstate", later);
 }
 
+/*__SETTINGS_WINDOW__*/
+
 function batteryBody(states, variables, ctx) {
 /*__BATTERY_BODY__*/
 }
@@ -229,6 +231,16 @@ class MarstekCapacityCard extends MarstekCapacityBase {
   _action(act) {
     const nav = /pushState\(null,'','([^']+)'\)/.exec(act);
     if (nav) {
+      // The gear (0.5.5-rc3): the own settings window, for an administrator.
+      // Anyone else, or a page without the window, goes to the HA screen.
+      const user = this._hass && this._hass.user;
+      if (nav[1].startsWith(MC_SETTINGS_PATH) && user && user.is_admin) {
+        const entry = (/config_entry=([^&]+)/.exec(nav[1]) || [])[1] || this._entryId(this._battery().id);
+        if (entry) {
+          mcOpenSettings(this, entry, mcLang(this._hass, this._config), nav[1]);
+          return;
+        }
+      }
       mcRememberBack(nav[1]);
       history.pushState(null, "", nav[1]);
       window.dispatchEvent(new CustomEvent("location-changed"));

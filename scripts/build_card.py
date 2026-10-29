@@ -80,6 +80,7 @@ def build() -> str:
         .replace("__VERSION__", version)
         .replace("/*__BATTERY_BODY__*/", battery_body())
         .replace("/*__OVERVIEW_BODY__*/", overview_body())
+        .replace("/*__SETTINGS_WINDOW__*/", (ROOT / "scripts" / "settings_window.js").read_text(encoding="utf-8").strip("\n"))
     )
 
 
