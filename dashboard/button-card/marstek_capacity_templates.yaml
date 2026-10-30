@@ -84,6 +84,7 @@ button_card_templates:
               waiting_full_charge: s => `Nächster Schritt: auf 95 % oder mehr voll laden (jetzt ${s} %)`,
               ready: s => `Batterie voll (${s} %): eine Entladung auf 15 % oder weniger ergibt eine Messung`,
               full_discharge_running: (f, s) => `Vollständige Entladung läuft: von ${f} % auf jetzt ${s} %, Messung bei 15 % oder weniger`,
+              full_discharge_reached: (f, s) => `Vollständige Entladung erreicht: von ${f} % auf ${s} %. Die Messung wird gespeichert, sobald die Batterie wieder lädt.`,
               interrupted: 'letzte Entladung zählte nicht (unterbrochen)'
             },
             chart: 'Diagramm', win3: 'jüngste 3 Jahre der Garantiezeit', chartTitle: 'Noch verfügbar pro Monat (%)', noData: 'Noch keine Messungen in diesem Zeitraum. Das Diagramm füllt sich nach der ersten vollständigen Entladung.',
@@ -146,6 +147,7 @@ button_card_templates:
               waiting_full_charge: s => `Volgende stap: volledig laden tot 95 % of meer (nu ${s} %)`,
               ready: s => `Batterij vol (${s} %): een ontlading tot 15 % of lager geeft een meting`,
               full_discharge_running: (f, s) => `Volledige ontlading bezig: van ${f} % naar nu ${s} %, meting bij 15 % of lager`,
+              full_discharge_reached: (f, s) => `Volledige ontlading gehaald: van ${f} % naar ${s} %. De meting wordt opgeslagen zodra de batterij weer gaat laden.`,
               interrupted: 'vorige ontlading telde niet mee (onderbroken)'
             },
             chart: 'Grafiek', win3: 'recente 3 jaar van garantieperiode', chartTitle: 'Nog beschikbaar per maand (%)', noData: 'Nog geen metingen in deze periode. De grafiek vult zich na de eerste volledige ontlading.',
@@ -208,6 +210,7 @@ button_card_templates:
               waiting_full_charge: s => `Next step: charge fully to 95 % or more (now ${s} %)`,
               ready: s => `Battery full (${s} %): a discharge to 15 % or lower gives a measurement`,
               full_discharge_running: (f, s) => `Full discharge running: from ${f} % to now ${s} %, measured at 15 % or lower`,
+              full_discharge_reached: (f, s) => `Full discharge reached: from ${f} % to ${s} %. The measurement is saved as soon as the battery charges again.`,
               interrupted: 'last discharge did not count (interrupted)'
             },
             chart: 'Chart', win3: 'recent 3 years of warranty', chartTitle: 'Remaining per month (%)', noData: 'No measurements in this period yet. The chart fills after the first full discharge.',
@@ -337,7 +340,7 @@ button_card_templates:
               : M.collecting;
             const soc = sa.soc ?? '–';
             const step = ['measuring', 'collecting'].includes(ms.state)
-              ? (sa.phase === 'full_discharge_running' ? M.full_discharge_running(f(sa.from_soc, 0), soc)
+              ? (sa.phase === 'full_discharge_running' ? (Number(soc) <= 15 ? M.full_discharge_reached : M.full_discharge_running)(f(sa.from_soc, 0), soc)
                 : sa.phase === 'ready' ? M.ready(soc) : M.waiting_full_charge(soc)) : '';
             const intr = sa.interrupted ? ` · ${M.interrupted}` : '';
             const showStep = step && (ms.state !== 'measuring' || sa.phase === 'full_discharge_running' || sa.interrupted);
