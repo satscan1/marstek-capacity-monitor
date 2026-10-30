@@ -19,7 +19,7 @@ Integraties zoals [marstek_venus_modbus](https://github.com/ViperRNMC/marstek_ve
 
 ## Fabrieksgegevens per model
 
-Bij het toevoegen kies je het model; deze waarden worden dan ingevuld. Je kunt ze later aanpassen via **Configureer**.
+Bij het toevoegen kies je het model; deze waarden worden dan ingevuld. Je kunt ze later aanpassen met het tandwiel ⚙ op de kaart.
 
 | Model | Opgegeven capaciteit | Reserve (ontlaaddiepte) | Cycli · capaciteit daarna | Garantietermijn |
 |---|---|---|---|---|
@@ -79,4 +79,4 @@ Geraadpleegd op 20-10-2026 (nieuwe modellen op 22-10-2026). Waar bronnen elkaar 
 | Venus E Pro | 2.080 Wh per pakket (41,6 V), basis plus maximaal 5 extra pakketten · 90 % ontlaaddiepte · meer dan 10.000 cycli (25 °C) · LAN met Modbus | [Marstek – brochure Venus E Pro (pdf)](https://cdn.shopify.com/s/files/1/0746/1575/0952/files/VENUS_E_Pro_EU_EN.pdf), [productpagina](https://marstekenergy.com/de-de/products/venus-e-pro) |
 | Garantie | Materiaal- en fabricagefouten; geen capaciteitspercentage; normale slijtage en aansluiting op hardware/software van derden uitgesloten | [Marstek – Garantiebeleid](https://marstekenergy.com/nl-nl/pages/warranty) |
 
-Controleer je eigen voorwaarden. Je past de waarden aan via **Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren**.
+Controleer je eigen voorwaarden. Je past de waarden aan met het tandwiel ⚙ op de kaart (of via Instellingen → Apparaten en diensten → Marstek Capacity Monitor → Configureren).

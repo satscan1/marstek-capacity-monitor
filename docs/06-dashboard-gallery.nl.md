@@ -31,7 +31,7 @@ Zelf indelen? Gebruik hiervoor de standaardindeling van Home Assistant met **sec
 1. **Status**: *Goed*, *Onder specificatie*, *Melden bij Marstek (app)* of *Verzamelt data*. De kleur volgt de laatste meting.
 2. **Werkt de meting?** Groen: de meting werkt en zoveel volledige ontladingen zijn gemeten. Blauw: nog data aan het verzamelen. Oranje of rood: geen nieuwe gegevens of een sensor ontbreekt. Tijdens het verzamelen of een volledige ontlading staat de volgende stap eronder; anders zie je die bij aanwijzen.
 3. **Grafiek · SOC · Cellen**: *Grafiek* toont de grafiek op de plek van de capaciteiten (nog eens drukken = terug); de kaart blijft even hoog. *SOC* en *Cellen* openen een venster midden op het scherm; ✕ of klikken ernaast sluit het. Een ⚠ (let op) of 🔧 (advies) op *SOC* of *Cellen* betekent: kijk even. *Cellen* staat er alleen als de celspanningen zijn ingevuld.
-4. **Instellingen** (tandwiel): brengt je naar deze batterij onder Instellingen → Apparaten en diensten; het tandwiel daar opent *Configureren*.
+4. **Instellingen** (tandwiel): opent het instellingenvenster van deze batterij, met de tabbladen Standaard en Experiment (vanaf 1.0.0). Zie [Instellingen](02-configuration.nl.md).
 5. **Drie capaciteiten**: *Opgegeven* (op het typeplaatje), *Bruikbaar* (opgegeven min de reserve die de batterij zelf vasthoudt) en *Gemeten* (wat er nu echt uitkomt, en hoeveel procent van bruikbaar dat is).
 6. **Balk**: de gemeten capaciteit, met een wit streepje voor de specificatie van de fabrikant en een rood streepje bij 75 %.
 7. **Marge**: hoeveel je boven (+) of onder (−) de specificatie zit, met het aantal cycli en de leeftijd. Wijs aan voor de specificatie in kWh en waar de cycli van vóór de monitoring vandaan komen.

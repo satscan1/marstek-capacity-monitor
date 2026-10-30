@@ -41,7 +41,7 @@ Gehe zu **Einstellungen → Geräte & Dienste → Integration hinzufügen → Ma
 3. Wähle das Modell und gib das Datum der Inbetriebnahme ein. Bei einem bekannten Modell (Venus E v1/v2, v3, 4.0, Max oder Pro, Venus C oder Venus D) werden die Herstellerdaten für dich ausgefüllt (Venus D und Venus E Pro: auch die Anzahl der Packs). Bei einem anderen Modell gibst du die Herstellerdaten selbst ein.
    Eine **Venus C** kann sich mit demselben Code melden wie eine Venus E v1/v2. Wähle dann selbst **Venus C**, auch wenn Venus E v1 / v2 schon ausgewählt ist.
 
-Alle Herstellerdaten kannst du später unter **Konfigurieren** ändern.
+Alle Herstellerdaten kannst du später über das Zahnrad ⚙ auf der Karte ändern.
 
 Beim Hinzufügen schaut die Integration im Verlauf von Home Assistant (meist die letzten 10 Tage) nach, ob es schon eine vollständige Entladung gab. Wenn ja, gibt es sofort eine erste Messung. Sonst zeigt die Batterie **sammelt Daten** bis zur ersten vollständigen Entladung (≥ 95 % → ≤ 15 %). Die Statuszeile auf der Karte zeigt dir den nächsten Schritt.
 
@@ -53,7 +53,7 @@ Ab Version 0.4.0 bringt die Integration ihre eigenen Karten mit. Du musst nichts
 
 Nach dem Hinzufügen der ersten Batterie und einem Neustart steht **Batteriekapazität** von selbst in der Seitenleiste, mit allen deinen Batterien (1 bis 6, in der [Aufteilung](06-dashboard-gallery.de.md) der Galerie). Du musst nichts einstellen. Dieses Dashboard änderst du nicht; für eine eigene Aufteilung erstellst du selbst ein Dashboard wie unten beschrieben.
 
-- **Ausschalten:** Einstellungen → Geräte & Dienste → Marstek Capacity Monitor → **Konfigurieren** → **Menüeintrag in der Seitenleiste**. Ist er bei einer Batterie aus, verschwindet der ganze Menüeintrag.
+- **Ausschalten:** Zahnrad ⚙ auf der Karte → **Menüeintrag in der Seitenleiste**. Ist er bei einer Batterie aus, verschwindet der ganze Menüeintrag.
 - **Ausgeblendet oder an der falschen Stelle?** Halte **Home Assistant** oben in der Seitenleiste gedrückt (oder gehe in dein Profil → Seitenleiste anpassen). Dort blendest du Einträge wieder ein, aus oder verschiebst sie. Das gilt pro Gerät: auf dem Handy stellst du es separat ein.
 - Hast du schon ein eigenes Dashboard unter `/marstek-capacity`, lässt der Monitor es in Ruhe.
 

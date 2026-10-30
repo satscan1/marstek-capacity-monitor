@@ -1,6 +1,38 @@
 # Changelog
 
-## v0.5.5-rc5 — release candidate (pre-release)
+## v1.0.0 — 2026-10-30
+
+**One layout. Every project. Facts, only facts matter.** Everything since v0.5.2 in one version. The test versions v0.5.5-dev1 to rc5 below show each step.
+
+**Settings on the card.**
+
+- The gear ⚙ on a battery card opens an own settings window: tabs **Standard** and **Experiment**, columns by subject (sensors · battery · messages and data), own fields (−/+, sliders, switches, choice buttons) and an ⓘ with the explanation for every setting. Only for an administrator; the settings screen of Home Assistant stays as a fallback.
+- **Sensors, plug and play:** your state of charge and power sensor with their value of now; choose another pair from what Home Assistant has, or search yourself. Your measurements stay with the battery; **Start measuring over** clears them.
+- **Make a back-up** and **restore a back-up** in the window. **Clear measurements** asks twice, in red, and offers a back-up first.
+
+**Facts, only facts matter.**
+
+- Above 100 % stays *provisional* and a sudden drop stays *not confirmed yet*, until 5 measurements in a row show the same. A small line shows the change since monitoring began.
+- **Red only when it is sure:** after 5 full discharges in a row at or below 75 %, one message under Repairs and on the phone, with the Marstek report to attach.
+- A measurement above **130 %** of new cannot be right and never counts: status *Check the power sensor*, with what to check.
+
+**Report, back-up and sharing.**
+
+- Button **Report** on the card: full, anonymous to share, or for Marstek (English). Share your anonymous report on GitHub via the issue form **Share data (anonymous)**, so batteries can be compared.
+- One versioned data format: a newer monitor always reads an older back-up.
+
+**Smooth updates and installs.**
+
+- After an update the card offers one tap to load the new card; before the restart it says to restart Home Assistant.
+- Right after adding the first battery the monitor says to refresh the page once (no more *Timeout waiting for strategy element*).
+- Removing a battery also removes its messages under Repairs.
+- The card says when a full discharge has been reached and that the measurement is saved as soon as the battery charges again.
+
+**Demo of every situation** (action `marstek_capacity_monitor.demo`) and a guide in English, Dutch and German, with the new page *How the monitor measures*.
+
+Thanks to everyone on Tweakers and the Home Assistant forum who tested and reported, among them dannyro, amvolleb, 3DWim, DeBeginner and Driek.
+
+## v0.5.5-rc5 — release candidate (not released, became v1.0.0)
 
 **Settings window, polished.**
 
@@ -8,6 +40,7 @@
 - **Make a back-up right in the window:** one file with all measurements of the battery, downloaded to your device and also kept in Home Assistant (folder `marstek_capacity_monitor/backup`). A report (button Report on the card) stays something else: for reading and sharing.
 - **Restore a back-up right in the window:** choose the report or back-up file, pick **Merge** or **Replace**, then **Run**. A full back-up of the current data is always made first. No more detour through the settings screen of Home Assistant.
 - Every sensor button now says **Choose**.
+- **Clear measurements** asks twice, in red: what will be cleared, whether you made a back-up (with a button to make one), a switch *I know all measurements will be gone*, and only then **Yes, clear everything**.
 - **Margin below spec** goes from 0 to 25 % (was 50 %), also in the settings screen of Home Assistant.
 - Tab Experiment: "Experiments that are not finished yet."
 - Card: once a full discharge has gone down to 15 % or lower, it says **Full discharge reached** and that the measurement is saved as soon as the battery charges again.

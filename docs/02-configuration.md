@@ -2,9 +2,9 @@
 
 *[Nederlands](02-configuration.nl.md)*
 
-All values are set when you add a battery. Change them later under **Settings → Devices & services → Marstek Capacity Monitor → Configure**.
+All values are set when you add a battery. Change them later with the **gear ⚙ on the card** of the battery (from 1.0.0). An own window opens with the tabs **Standard** and **Experiment**, in columns by subject: sensors · battery · messages and data. Every setting has an ⓘ with its explanation; **Save** stores everything at once. Only an administrator can open the window. The screen of Home Assistant (**Settings → Devices & services → Marstek Capacity Monitor → Configure**) keeps working.
 
-**Need another sensor?** Tap the gear ⚙ on the card of the battery: **Sensors** → **Change** (from 0.5.5). All other settings are there too, in an own window with the tabs **Standard** and **Experiment**. The scan proposes the sensors it finds, with their value now; or choose them yourself. Your measurements stay with the battery. Were they made with a wrong sensor, turn on **Start measuring over**.
+**Need another sensor?** Gear ⚙ → **Sensors** → **Choose**. The scan proposes the sensors it finds, with their value now; or choose them yourself. Your measurements stay with the battery. Were they made with a wrong sensor, turn on **Start measuring over**.
 
 | Setting | Default | Meaning |
 |---|---|---|
@@ -17,9 +17,9 @@ All values are set when you add a battery. Change them later under **Settings �
 | Capacity after rated cycle life | 80 % | Manufacturer spec; together with cycle life this is the spec line |
 | Cycles before monitoring | 0 | For a battery already in use: total discharged kWh ÷ usable capacity. If the battery has a *total discharged* counter (Modbus, ESPHome), the monitor fills this in itself. That counter measures on the AC side: an estimate, less exact than the cycles the monitor counts itself on the DC side. See [Extra sensors found](#extra-sensors-found) |
 | Red threshold | 75 % | At or below this percentage: report via the Marstek app |
-| Tolerance below spec | 5 points | While the measurement is at most this far below the spec, the status stays green |
+| Tolerance below spec | 5 points (0–25) | While the measurement is at most this far below the spec, the status stays green |
 | Sign of the power sensor | Automatic | Only change if automatic detection gets it wrong |
-| Highest / lowest cell temperature | empty | Optional, experimental. Stored with every measurement as context (a cold battery gives less). Only cell temperatures, never MOS / board temperatures |
+| Highest / lowest cell temperature | empty | Optional, experimental (tab **Experiment**). Stored with every measurement as context (a cold battery gives less). Only cell temperatures, never MOS / board temperatures |
 | Highest / lowest cell voltage | empty | Optional, for the cell balance check. Fill in both or neither. Only cell **voltages**: some connections report MOSFET temperatures as "cell temperature" |
 | Sensitivity SOC drift / cell calibration | Normal | Off (only on the card), Relaxed (SOC 8 %, cells 3× normal), Normal (5 %, 2×) or Strict (3 %, 1.5×). See [How it works](03-how-it-works.md#messages-and-dismissing-from-05) |
 | Notifications | on | Message on your phone and under Repairs for SOC drift or cell calibration, only for a pattern. Off = no messages; the card still shows it. See [How it works](03-how-it-works.md#messages-and-dismissing-from-05) |
@@ -58,14 +58,23 @@ If a battery's device has sensors the monitor does not use yet, it says so under
 * **Highest and lowest cell voltage**, if not filled in yet. With these the monitor follows the cell balance.
 * **Total discharged counter**, if *Cycles before monitoring* is still 0. The monitor works out: (counter − what it already counted itself) ÷ usable capacity. That counter measures on the AC side, so this is an estimate, less exact than the cycles the monitor counts itself on the DC side. A value you entered yourself is never overwritten.
 
-Open the message, tick what you want to add and press **Submit**. Leave something unticked and it will not ask again; you can always add it later under **Configure**. For a new battery this happens right when you add it.
+Open the message, tick what you want to add and press **Submit**. Leave something unticked and it will not ask again; you can always add it later with the gear ⚙ on the card. For a new battery this happens right when you add it.
 
 ## Dismissing a message
 
 The action `marstek_capacity_monitor.dismiss_advice` with `battery` (e.g. `mt1`) and `kind` (`soc` or `cells`) does the same as **Dismiss** on the card: the message disappears everywhere and only comes back with a new series.
 
+## Making and restoring a back-up
+
+In the window behind the gear, block **Data**:
+
+* **Make a back-up**: all measurements of the battery in one file (.html). It is downloaded to the device you use the window on and also kept in Home Assistant, in the folder `marstek_capacity_monitor/backup`.
+* **Restore a back-up**: choose the file, then **Merge** (keep everything from both) or **Replace** (the file wins), and **Run**. A back-up of the current data is always made first.
+
+A **report** (button **Report** on the card) is something else: for reading and sharing, anonymous or for Marstek.
+
 ## Resetting measurements
 
-Use the action `marstek_capacity_monitor.reset_measurements` with the battery as target. This cannot be undone.
+In the window behind the gear: **Data** → **Clear measurements** (asks once more). Or the action `marstek_capacity_monitor.reset_measurements` with the battery as target. This cannot be undone; make a back-up first.
 
 If you remove a battery from the integration, its measurements stay in `.storage/`. They may be needed as evidence when you report a problem to Marstek.

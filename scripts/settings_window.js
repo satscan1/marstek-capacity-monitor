@@ -24,6 +24,7 @@ const MCW_TEXT = {
     restore: "Back-up terugzetten", restoreSub: "Een back-upbestand van deze monitor (.html). Eerst wordt automatisch een back-up van de huidige gegevens gemaakt.", backup: "Back-up maken", backupSub: "Alle metingen van deze batterij in één bestand. Het wordt gedownload naar dit apparaat en ook bewaard in Home Assistant (map marstek_capacity_monitor/backup).", backupDone: (f) => `Back-up gemaakt: ${f}`, restoreBtn: "Kiezen", restoreBusy: "Bezig met terugzetten…",
     wipe: "Metingen wissen", wipeSub: "Begint de meting van deze batterij opnieuw. Maak eerst een back-up (hierboven).",
     wipeAsk: "Zeker weten? Wissen", wiped: "Metingen gewist.",
+    wipeWarn: "Weet je het zeker? Alle metingen van deze batterij worden gewist: de capaciteit, de grafiek en de geschiedenis. Dit kan niet ongedaan worden gemaakt.", wipeNoBackup: "Je hebt in dit venster nog geen back-up gemaakt.", wipeBackupOk: (f) => `✓ Back-up gemaakt: ${f}`, wipeSure: "Ik weet dat alle metingen weg zijn", wipeYes: "Ja, alles wissen", cancel: "Annuleren",
     ha: "Instelscherm van Home Assistant",
     expIntro: "Experimenten die nog niet af zijn. Ze staan standaard uit en tellen niet mee voor de status van de batterij.",
     weak: "Zwakke cel herkennen", weakSub: "Herkent een cel die eerder leeg is dan de rest.", later: "komt later",
@@ -50,6 +51,7 @@ const MCW_TEXT = {
     restore: "Restore a back-up", restoreSub: "A back-up file of this monitor (.html). A back-up of the current data is always made first.", backup: "Make a back-up", backupSub: "All measurements of this battery in one file. It is downloaded to this device and also kept in Home Assistant (folder marstek_capacity_monitor/backup).", backupDone: (f) => `Back-up made: ${f}`, restoreBtn: "Choose", restoreBusy: "Restoring…",
     wipe: "Clear measurements", wipeSub: "Starts measuring this battery over. Make a back-up first (above).",
     wipeAsk: "Sure? Clear", wiped: "Measurements cleared.",
+    wipeWarn: "Are you sure? All measurements of this battery are cleared: the capacity, the chart and the history. This cannot be undone.", wipeNoBackup: "You have not made a back-up in this window yet.", wipeBackupOk: (f) => `✓ Back-up made: ${f}`, wipeSure: "I know all measurements will be gone", wipeYes: "Yes, clear everything", cancel: "Cancel",
     ha: "Settings screen of Home Assistant",
     expIntro: "Experiments that are not finished yet. They are off by default and do not count for the status of the battery.",
     weak: "Detect a weak cell", weakSub: "Spots a cell that runs empty before the rest.", later: "coming later",
@@ -76,6 +78,7 @@ const MCW_TEXT = {
     restore: "Back-up zurückspielen", restoreSub: "Eine Back-up-Datei dieses Monitors (.html). Vorher wird automatisch ein Back-up der aktuellen Daten erstellt.", backup: "Back-up erstellen", backupSub: "Alle Messungen dieser Batterie in einer Datei. Sie wird auf dieses Gerät heruntergeladen und auch in Home Assistant aufbewahrt (Ordner marstek_capacity_monitor/backup).", backupDone: (f) => `Back-up erstellt: ${f}`, restoreBtn: "Wählen", restoreBusy: "Wird zurückgespielt…",
     wipe: "Messungen löschen", wipeSub: "Beginnt die Messung dieser Batterie neu. Erst ein Back-up erstellen (oben).",
     wipeAsk: "Sicher? Löschen", wiped: "Messungen gelöscht.",
+    wipeWarn: "Bist du sicher? Alle Messungen dieser Batterie werden gelöscht: die Kapazität, das Diagramm und der Verlauf. Das kann nicht rückgängig gemacht werden.", wipeNoBackup: "Du hast in diesem Fenster noch kein Back-up erstellt.", wipeBackupOk: (f) => `✓ Back-up erstellt: ${f}`, wipeSure: "Mir ist klar, dass alle Messungen weg sind", wipeYes: "Ja, alles löschen", cancel: "Abbrechen",
     ha: "Einstellungsfenster von Home Assistant",
     expIntro: "Experimente, die noch nicht fertig sind. Sie sind standardmäßig aus und zählen nicht für den Status der Batterie.",
     weak: "Schwache Zelle erkennen", weakSub: "Erkennt eine Zelle, die früher leer ist als der Rest.", later: "kommt später",
@@ -176,6 +179,10 @@ h3{margin:0;font-size:17px;font-weight:500}h3 small{color:var(--muted);font-weig
 .hit{font:inherit;text-align:left;border:0;border-radius:10px;background:none;color:var(--primary-text-color);padding:7px 10px;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px}
 .hit:hover,.hit.on{background:color-mix(in srgb,var(--c) 22%,transparent)}
 .hit small{grid-column:1;color:var(--muted);font-size:12px;overflow-wrap:anywhere}.hit i{font-style:normal;font-weight:600;grid-row:1/3;grid-column:2;align-self:center}
+.danger{display:grid;gap:10px;border:1.5px solid var(--bad);background:color-mix(in srgb,var(--bad) 14%,transparent);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.45}
+.danger .okline{color:#66bb6a}
+.btn.bad.fill{background:var(--bad);color:#fff;font-weight:600}
+.tg.on.bad{background:var(--bad)}
 .warn{border-left:3px solid var(--dot);background:color-mix(in srgb,var(--dot) 12%,transparent);border-radius:8px;padding:8px 12px;font-size:13px;line-height:1.4}
 .bar{position:sticky;bottom:-20px;margin:4px -18px -20px;padding:12px 18px;background:var(--ha-card-background,var(--card-background-color,#1c1c1c));
   border-top:1px solid var(--line);border-radius:0 0 14px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -246,7 +253,7 @@ class MarstekSettingsWindow {
     if (s.edit) { s.edit = null; return true; }
     if (s.choose) { s.choose = null; return true; }
     if (s.acAsk) { s.acAsk = false; return true; }
-    if (s.wipeAsk) { s.wipeAsk = false; return true; }
+    if (s.wipeAsk) { s.wipeAsk = false; s.wipeSure = false; return true; }
     if (s.restore && !s.restore.busy) { s.restore = null; return true; }
     if (s.swap && s.pick === "manual") { s.pick = null; return true; }
     if (s.swap) { s.swap = false; s.pick = null; return true; }
@@ -464,7 +471,7 @@ class MarstekSettingsWindow {
       `<div class="sec">${T.notify}</div>${this._toggle("notify")}${this._toggle("sidebar")}${this._chips("soc_sensitivity", tx.choices.sensitivity)}`,
       `<div class="sec">${T.data}</div>
       <div class="f"><div class="nm"><span>${T.backup}<small>${T.backupSub}</small></span></div><div class="right"><button class="btn" data-a="backup">${T.apply}</button></div></div>${this._restoreRow()}
-      <div class="f"><div class="nm"><span>${T.wipe}<small>${T.wipeSub}</small></span></div><div class="right"><button class="btn${this.s.wipeAsk ? " bad" : ""}" data-a="wipe">${this.s.wipeAsk ? T.wipeAsk : T.apply}</button></div></div>`,
+      ${this._wipeRow()}`,
     ];
     return this._cols([sensors, battery, rest]);
   }
@@ -622,7 +629,10 @@ class MarstekSettingsWindow {
       case "restore": return this._restore();
       case "backup": return this._backup();
       case "save": return this._save();
-      case "wipe": return this._wipe();
+      case "wipe": this.s.wipeAsk = true; this.s.wipeSure = false; break;
+      case "wipesure": this.s.wipeSure = !this.s.wipeSure; break;
+      case "wipecancel": this.s.wipeAsk = false; this.s.wipeSure = false; break;
+      case "wipeyes": if (this.s.wipeSure) return this._wipe(); return;
       case "ha": {
         this.close(true, true);
         mcRememberBack(this.haUrl);
@@ -702,7 +712,9 @@ class MarstekSettingsWindow {
       a.href = url; a.download = name;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 10000);
-      this._say(T.backupDone(name));
+      this.s.backupFile = name;
+      this.s.msg = T.backupDone(name); this.s.bad = false;
+      this._render();
     } catch (err) {
       this._say(T.fail + ((err && err.message) || err), true);
     }
@@ -739,10 +751,27 @@ class MarstekSettingsWindow {
     this._render();
   }
 
+  // Clear measurements: a red double check, with a back-up first
+  _wipeRow() {
+    const T = this.T;
+    let html = `<div class="f"><div class="nm"><span>${T.wipe}<small>${T.wipeSub}</small></span></div><div class="right"><button class="btn bad" data-a="wipe"${this.s.wipeAsk ? " disabled" : ""}>${T.apply}</button></div>`;
+    if (this.s.wipeAsk) {
+      const done = this.s.backupFile;
+      html += `<div class="danger" style="grid-column:1/-1">
+        <b>${T.wipeWarn}</b>
+        <div class="${done ? "okline" : ""}">${done ? mcEsc(T.wipeBackupOk(done)) : T.wipeNoBackup}</div>
+        ${done ? "" : `<div class="right" style="justify-content:flex-start"><button class="btn" data-a="backup">${T.backup}</button></div>`}
+        <div class="f" style="border-top:0;padding:4px 0"><div class="nm"><span>${T.wipeSure}</span></div><div class="right"><button class="tg${this.s.wipeSure ? " on bad" : ""}" data-a="wipesure" role="switch" aria-checked="${!!this.s.wipeSure}"></button></div></div>
+        <div class="right"><button class="btn" data-a="wipecancel">${T.cancel}</button><button class="btn bad fill" data-a="wipeyes"${this.s.wipeSure ? "" : " disabled"}>${T.wipeYes}</button></div>
+      </div>`;
+    }
+    return html + "</div>";
+  }
+
   async _wipe() {
     const T = this.T;
-    if (!this.s.wipeAsk) { this.s.wipeAsk = true; this._render(); return; }
     this.s.wipeAsk = false;
+    this.s.wipeSure = false;
     try {
       await this.hass.callService(MC_DOMAIN, "reset_measurements", { config_entry_id: this.entryId });
       this.s.msg = T.wiped; this.s.bad = false;
