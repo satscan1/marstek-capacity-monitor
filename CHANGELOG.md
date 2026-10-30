@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.5-rc5 — release candidate (pre-release)
+
+**Settings window, polished.**
+
+- Three columns on a wide screen, grouped by subject: **sensors** (state of charge and power, sign of the power sensor, cell voltage) · **battery** (factory data, warranty, limits) · **messages and data**. Two columns on a medium screen, one on a phone.
+- **Restore a back-up right in the window:** choose the report or back-up file, pick **Merge** or **Replace**, then **Run**. A full back-up of the current data is always made first. No more detour through the settings screen of Home Assistant.
+- Every sensor button now says **Choose**.
+- **Margin below spec** goes from 0 to 25 % (was 50 %), also in the settings screen of Home Assistant.
+- Tab Experiment: "Experiments that are not finished yet."
+- Card: once a full discharge has gone down to 15 % or lower, it says **Full discharge reached** and that the measurement is saved as soon as the battery charges again.
+
 ## v0.5.5-rc4 — release candidate (pre-release)
 
 **Just installed? Refresh once.**

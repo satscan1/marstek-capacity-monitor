@@ -129,7 +129,7 @@ def _spec_schema(values: dict[str, Any]) -> vol.Schema:
             ),
             vol.Required(CONF_RED_PCT, default=d(CONF_RED_PCT)): _num(1, 100, 1, "%"),
             vol.Required(CONF_TOLERANCE_PCT, default=d(CONF_TOLERANCE_PCT)): _num(
-                0, 50, 0.5, "%"
+                0, 25, 0.5, "%"
             ),
         }
     )

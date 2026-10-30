@@ -44,6 +44,7 @@ from .const import (
     DEFAULTS,
     DOMAIN,
     HIDDEN_OPTIONS,
+    RESTORE_MODES,
     SENSITIVITIES,
     SIGN_MODES,
 )
@@ -58,7 +59,7 @@ NUMBERS: dict[str, tuple[float, float, float]] = {
     CONF_CYCLE_EOL: (1, 100, 1),
     CONF_INITIAL_CYCLES: (0, 20000, 0.1),
     CONF_RED_PCT: (1, 100, 1),
-    CONF_TOLERANCE_PCT: (0, 50, 0.5),
+    CONF_TOLERANCE_PCT: (0, 25, 0.5),
 }
 CELL_SENSORS = (CONF_CELL_MAX_ENTITY, CONF_CELL_MIN_ENTITY, CONF_TEMP_MAX_ENTITY, CONF_TEMP_MIN_ENTITY)
 BOOLS = (CONF_NOTIFY, CONF_SIDEBAR)
@@ -83,6 +84,9 @@ def _load_texts() -> None:
             "label": step.get("data", {}),
             "help": step.get("data_description", {}),
             "errors": data["options"].get("error", {}),
+            "restored": data["options"].get("abort", {}).get("restored", ""),
+            "restore": data["options"]["step"].get("restore", {}).get("description", ""),
+            "modes": data["selector"].get("restore_mode", {}).get("options", {}),
             "choices": {
                 CONF_POWER_SIGN: data["selector"]["power_sign"]["options"],
                 "sensitivity": data["selector"]["sensitivity"]["options"],
@@ -282,9 +286,50 @@ async def ws_sensors(hass: HomeAssistant, connection, msg: dict[str, Any]) -> No
     connection.send_result(msg["id"], {"error": None, "changed": changed, "restarted": restart})
 
 
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/restore",
+        vol.Required("entry_id"): str,
+        vol.Required("file_id"): str,
+        vol.Required("mode"): vol.In(RESTORE_MODES),
+    }
+)
+@websocket_api.require_admin
+@websocket_api.async_response
+async def ws_restore(hass: HomeAssistant, connection, msg: dict[str, Any]) -> None:
+    """Restore a back-up from the window (0.5.5): the file is uploaded first
+    (file_upload, as the form does), then read and merged or replaced.
+    A full back-up of the current data is always written first."""
+    from homeassistant.components.file_upload import process_uploaded_file
+
+    from .export import ExportError
+
+    entry = _entry(hass, msg["entry_id"])
+    monitor = getattr(entry, "runtime_data", None) if entry else None
+    if monitor is None:
+        connection.send_error(msg["id"], "not_found", "Unknown battery")
+        return
+
+    def _read() -> str:
+        with process_uploaded_file(hass, msg["file_id"]) as path:
+            return path.read_text(encoding="utf-8")
+
+    try:
+        text = await hass.async_add_executor_job(_read)
+        done = await monitor.async_restore(text, msg["mode"])
+    except ExportError:
+        connection.send_result(msg["id"], {"error": "restore_invalid"})
+        return
+    except (OSError, UnicodeDecodeError, ValueError):
+        connection.send_result(msg["id"], {"error": "restore_unreadable"})
+        return
+    connection.send_result(msg["id"], {"error": None, "records": done["records"], "full": done["full"]})
+
+
 async def async_register(hass: HomeAssistant) -> None:
     if not _TEXTS:
         await hass.async_add_executor_job(_load_texts)
     websocket_api.async_register_command(hass, ws_get)
     websocket_api.async_register_command(hass, ws_save)
     websocket_api.async_register_command(hass, ws_sensors)
+    websocket_api.async_register_command(hass, ws_restore)

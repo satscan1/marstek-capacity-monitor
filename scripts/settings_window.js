@@ -10,7 +10,7 @@ const MCW_TEXT = {
     sensors: "Sensoren", battery: "Batterij en garantie", limits: "Grenzen", notify: "Meldingen",
     sign: "Vermogensensor", cells: "Celspanning (optioneel)", temps: "Celtemperatuur (optioneel)", data: "Gegevens",
     soc: "Laadtoestand (SOC)", power: "Vermogen (DC, batterijkant)",
-    swap: "Wisselen", swapClose: "Sluiten", other: "Ander SOC- en vermogenpaar", count: (n) => n ? `${n} gevonden in Home Assistant, met de waarde van nu` : "Niets anders gevonden; zelf kiezen kan altijd", found: "Gevonden in Home Assistant (waarde van nu)", none: "Geen andere batterijsensoren gevonden.",
+    swap: "Kiezen", swapClose: "Sluiten", other: "Ander SOC- en vermogenpaar", count: (n) => n ? `${n} gevonden in Home Assistant, met de waarde van nu` : "Niets anders gevonden; zelf kiezen kan altijd", found: "Gevonden in Home Assistant (waarde van nu)", none: "Geen andere batterijsensoren gevonden.",
     manual: "Zelf kiezen", manualSub: "Zoek op naam of entity-id",
     restart: "Opnieuw beginnen met meten",
     restartSub: "Wist de metingen van deze batterij. Zonder dit blijven ze staan en gaat de meting verder met de nieuwe sensoren.",
@@ -21,11 +21,11 @@ const MCW_TEXT = {
     missing: "niet gevonden", noValue: "geen waarde",
     save: "Opslaan", saved: "Opgeslagen. De batterij wordt opnieuw geladen.", nothing: "Niets gewijzigd.",
     unsaved: "Niet opgeslagen. Nog een keer ✕ om toch te sluiten.",
-    restore: "Back-up terugzetten", restoreSub: "In het instelscherm van Home Assistant: Configureren → Back-up terugzetten.", restoreBtn: "Instelscherm",
+    restore: "Back-up terugzetten", restoreSub: "Een rapport of back-upbestand van deze monitor (.html of .json). Eerst wordt automatisch een volledige back-up van de huidige gegevens gemaakt.", restoreBtn: "Kiezen", restoreBusy: "Bezig met terugzetten…",
     wipe: "Metingen wissen", wipeSub: "Begint de meting van deze batterij opnieuw. Maak eerst een back-up via Rapport.",
     wipeAsk: "Zeker weten? Wissen", wiped: "Metingen gewist.",
     ha: "Instelscherm van Home Assistant",
-    expIntro: "Proeven die nog niet af zijn. Ze staan standaard uit en tellen niet mee voor de status van de batterij.",
+    expIntro: "Experimenten die nog niet af zijn. Ze staan standaard uit en tellen niet mee voor de status van de batterij.",
     weak: "Zwakke cel herkennen", weakSub: "Herkent een cel die eerder leeg is dan de rest.", later: "komt later",
     fail: "Lukt niet: ", years: "jaar",
     errors: { out_of_range: "Buiten het bereik.", not_a_number: "Geen getal.", not_a_date: "Geen datum.", not_found: "Sensor niet gevonden." },
@@ -36,7 +36,7 @@ const MCW_TEXT = {
     sensors: "Sensors", battery: "Battery and warranty", limits: "Limits", notify: "Messages",
     sign: "Power sensor", cells: "Cell voltage (optional)", temps: "Cell temperature (optional)", data: "Data",
     soc: "State of charge (SOC)", power: "Power (DC, battery side)",
-    swap: "Change", swapClose: "Close", other: "Another SOC and power pair", count: (n) => n ? `${n} found in Home Assistant, with the value of now` : "Nothing else found; you can always choose yourself", found: "Found in Home Assistant (value of now)", none: "No other battery sensors found.",
+    swap: "Choose", swapClose: "Close", other: "Another SOC and power pair", count: (n) => n ? `${n} found in Home Assistant, with the value of now` : "Nothing else found; you can always choose yourself", found: "Found in Home Assistant (value of now)", none: "No other battery sensors found.",
     manual: "Choose yourself", manualSub: "Search by name or entity id",
     restart: "Start measuring over",
     restartSub: "Clears the measurements of this battery. Without this they stay, and measuring continues with the new sensors.",
@@ -47,11 +47,11 @@ const MCW_TEXT = {
     missing: "not found", noValue: "no value",
     save: "Save", saved: "Saved. The battery is reloaded.", nothing: "Nothing changed.",
     unsaved: "Not saved. Press ✕ again to close anyway.",
-    restore: "Restore a back-up", restoreSub: "In the settings screen of Home Assistant: Configure → Restore a back-up.", restoreBtn: "Settings screen",
+    restore: "Restore a back-up", restoreSub: "A report or back-up file of this monitor (.html or .json). A full back-up of the current data is always made first.", restoreBtn: "Choose", restoreBusy: "Restoring…",
     wipe: "Clear measurements", wipeSub: "Starts measuring this battery over. Make a back-up first via Report.",
     wipeAsk: "Sure? Clear", wiped: "Measurements cleared.",
     ha: "Settings screen of Home Assistant",
-    expIntro: "Trials that are not finished yet. They are off by default and do not count for the status of the battery.",
+    expIntro: "Experiments that are not finished yet. They are off by default and do not count for the status of the battery.",
     weak: "Detect a weak cell", weakSub: "Spots a cell that runs empty before the rest.", later: "coming later",
     fail: "Did not work: ", years: "years",
     errors: { out_of_range: "Out of range.", not_a_number: "Not a number.", not_a_date: "Not a date.", not_found: "Sensor not found." },
@@ -62,7 +62,7 @@ const MCW_TEXT = {
     sensors: "Sensoren", battery: "Batterie und Garantie", limits: "Grenzen", notify: "Meldungen",
     sign: "Leistungssensor", cells: "Zellspannung (optional)", temps: "Zelltemperatur (optional)", data: "Daten",
     soc: "Ladezustand (SOC)", power: "Leistung (DC, Batterieseite)",
-    swap: "Wechseln", swapClose: "Schließen", other: "Anderes SOC- und Leistungspaar", count: (n) => n ? `${n} in Home Assistant gefunden, mit dem Wert von jetzt` : "Sonst nichts gefunden; selbst wählen geht immer", found: "In Home Assistant gefunden (Wert von jetzt)", none: "Keine anderen Batteriesensoren gefunden.",
+    swap: "Wählen", swapClose: "Schließen", other: "Anderes SOC- und Leistungspaar", count: (n) => n ? `${n} in Home Assistant gefunden, mit dem Wert von jetzt` : "Sonst nichts gefunden; selbst wählen geht immer", found: "In Home Assistant gefunden (Wert von jetzt)", none: "Keine anderen Batteriesensoren gefunden.",
     manual: "Selbst wählen", manualSub: "Suche nach Name oder Entity-ID",
     restart: "Messung neu beginnen",
     restartSub: "Löscht die Messungen dieser Batterie. Ohne dies bleiben sie erhalten und die Messung läuft mit den neuen Sensoren weiter.",
@@ -73,11 +73,11 @@ const MCW_TEXT = {
     missing: "nicht gefunden", noValue: "kein Wert",
     save: "Speichern", saved: "Gespeichert. Die Batterie wird neu geladen.", nothing: "Nichts geändert.",
     unsaved: "Nicht gespeichert. Noch einmal ✕, um trotzdem zu schließen.",
-    restore: "Back-up zurückspielen", restoreSub: "Im Einstellungsfenster von Home Assistant: Konfigurieren → Back-up zurückspielen.", restoreBtn: "Einstellungsfenster",
+    restore: "Back-up zurückspielen", restoreSub: "Ein Bericht oder eine Back-up-Datei dieses Monitors (.html oder .json). Vorher wird automatisch ein vollständiges Back-up der aktuellen Daten erstellt.", restoreBtn: "Wählen", restoreBusy: "Wird zurückgespielt…",
     wipe: "Messungen löschen", wipeSub: "Beginnt die Messung dieser Batterie neu. Erst ein Back-up über Bericht machen.",
     wipeAsk: "Sicher? Löschen", wiped: "Messungen gelöscht.",
     ha: "Einstellungsfenster von Home Assistant",
-    expIntro: "Versuche, die noch nicht fertig sind. Sie sind standardmäßig aus und zählen nicht für den Status der Batterie.",
+    expIntro: "Experimente, die noch nicht fertig sind. Sie sind standardmäßig aus und zählen nicht für den Status der Batterie.",
     weak: "Schwache Zelle erkennen", weakSub: "Erkennt eine Zelle, die früher leer ist als der Rest.", later: "kommt später",
     fail: "Hat nicht geklappt: ", years: "Jahre",
     errors: { out_of_range: "Außerhalb des Bereichs.", not_a_number: "Keine Zahl.", not_a_date: "Kein Datum.", not_found: "Sensor nicht gefunden." },
@@ -112,7 +112,7 @@ button:disabled{opacity:.45;cursor:default}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:center;
   padding:40px 16px 24px;z-index:999;overflow:auto;box-sizing:border-box}
 .win{background:var(--ha-card-background,var(--card-background-color,#1c1c1c));color:var(--primary-text-color);border:1px solid var(--line);
-  border-radius:14px;width:100%;max-width:1120px;padding:16px 18px 20px;display:grid;gap:12px;box-sizing:border-box;min-width:0;container-type:inline-size}
+  border-radius:14px;width:100%;max-width:1640px;padding:16px 18px 20px;display:grid;gap:12px;box-sizing:border-box;min-width:0;container-type:inline-size}
 header{display:flex;align-items:center;gap:10px}
 h3{margin:0;font-size:17px;font-weight:500}h3 small{color:var(--muted);font-weight:400;font-size:14px}
 .x{margin-left:auto;background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer;width:36px;height:36px;border-radius:50%}
@@ -123,11 +123,13 @@ h3{margin:0;font-size:17px;font-weight:500}h3 small{color:var(--muted);font-weig
 .intro{margin:0;color:var(--muted);font-size:14px;line-height:1.45}
 .sec{font-size:15px;font-weight:500;margin:10px 0 0;padding-top:12px;border-top:2px solid var(--line);display:flex;align-items:center;gap:8px}
 .sec .ib{margin-left:auto}
-.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+.cols{display:grid;grid-template-columns:repeat(var(--n,2),minmax(0,1fr));gap:12px;align-items:start}
 .col{display:grid;gap:12px;min-width:0}.cols>.intro{grid-column:1/-1}
 .grp{border:1px solid var(--line);border-radius:12px;padding:12px 14px 4px;min-width:0}
 .grp>.sec{border-top:0;padding-top:0;margin:0 0 2px}
+@container (max-width:1180px){.cols{--n:2!important}}
 @container (max-width:760px){.cols{grid-template-columns:minmax(0,1fr)}}
+.file{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
 .f{display:grid;grid-template-columns:minmax(110px,1fr) minmax(0,auto);gap:6px 16px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
 .sec+.f,.sec+.tip+.f{border-top:0}
 .f>.nm{font-size:14px;line-height:1.3;display:flex;gap:8px;align-items:flex-start}.f>.nm>span{flex:1;min-width:0}
@@ -245,6 +247,7 @@ class MarstekSettingsWindow {
     if (s.choose) { s.choose = null; return true; }
     if (s.acAsk) { s.acAsk = false; return true; }
     if (s.wipeAsk) { s.wipeAsk = false; return true; }
+    if (s.restore && !s.restore.busy) { s.restore = null; return true; }
     if (s.swap && s.pick === "manual") { s.pick = null; return true; }
     if (s.swap) { s.swap = false; s.pick = null; return true; }
     const open = Object.keys(s.info).filter((k) => s.info[k]);
@@ -447,33 +450,50 @@ class MarstekSettingsWindow {
     const T = this.T;
     const tx = this.d.texts;
     const hasCells = !!(this.vals.cell_max_entity && this.vals.cell_min_entity);
-    const left = [
+    // Three columns, by subject: sensors · battery · messages and data
+    const sensors = [
       this._sensorsBlock(),
       `<div class="sec">${T.sign}</div>${this._chips("power_sign", tx.choices.power_sign)}`,
       `<div class="sec">${T.cells}</div>${this._optSensor("cell_max_entity")}${this._optSensor("cell_min_entity")}${this._chips("cell_sensitivity", tx.choices.sensitivity, !hasCells)}`,
-      `<div class="sec">${T.data}</div>
-      <div class="f"><div class="nm"><span>${T.restore}<small>${T.restoreSub}</small></span></div><div class="right"><button class="btn" data-a="ha">${T.restoreBtn}</button></div></div>
-      <div class="f"><div class="nm"><span>${T.wipe}<small>${T.wipeSub}</small></span></div><div class="right"><button class="btn${this.s.wipeAsk ? " bad" : ""}" data-a="wipe">${this.s.wipeAsk ? T.wipeAsk : T.apply}</button></div></div>`,
     ];
-    const right = [
+    const battery = [
       `<div class="sec">${T.battery}</div>${this._stepper("nominal_kwh")}${this._stepper("reserve_kwh")}${this._date("purchase_date")}${this._stepper("warranty_years")}${this._stepper("cycle_life")}${this._stepper("cycle_eol_pct")}${this._stepper("initial_cycles")}`,
       `<div class="sec">${T.limits}</div>${this._slider("red_pct")}${this._slider("tolerance_pct")}`,
-      `<div class="sec">${T.notify}</div>${this._toggle("notify")}${this._toggle("sidebar")}${this._chips("soc_sensitivity", tx.choices.sensitivity)}`,
     ];
-    return this._cols(left, right);
+    const rest = [
+      `<div class="sec">${T.notify}</div>${this._toggle("notify")}${this._toggle("sidebar")}${this._chips("soc_sensitivity", tx.choices.sensitivity)}`,
+      `<div class="sec">${T.data}</div>${this._restoreRow()}
+      <div class="f"><div class="nm"><span>${T.wipe}<small>${T.wipeSub}</small></span></div><div class="right"><button class="btn${this.s.wipeAsk ? " bad" : ""}" data-a="wipe">${this.s.wipeAsk ? T.wipeAsk : T.apply}</button></div></div>`,
+    ];
+    return this._cols([sensors, battery, rest]);
   }
 
-  _cols(left, right, intro) {
+  // Restore a back-up right here: choose the file, merge or replace, run
+  _restoreRow() {
+    const T = this.T;
+    const r = this.s.restore || {};
+    const modes = this.d.texts.modes || {};
+    const label = (m) => mcEsc(String(modes[m] || m).split(":")[0]);
+    let html = `<div class="f"><div class="nm"><span>${T.restore}<small>${T.restoreSub}</small></span></div><div class="right"><input type="file" data-file accept=".html,.htm,.json" hidden><button class="btn" data-a="pickfile">${T.restoreBtn}</button></div>`;
+    if (r.file) {
+      html += `<div class="box" style="grid-column:1/-1"><div class="file">${mcEsc(r.file.name)}</div>
+        <div class="chips" style="justify-content:flex-start">${["merge", "replace"].map((m) => `<button class="chip${(r.mode || "merge") === m ? " on" : ""}" data-a="rmode" data-v="${m}">${label(m)}</button>`).join("")}</div>
+        <div class="right"><button class="btn pri" data-a="restore"${r.busy ? " disabled" : ""}>${r.busy ? T.restoreBusy : T.apply}</button></div></div>`;
+    }
+    return html + "</div>";
+  }
+
+  _cols(columns, intro) {
     const col = (list) => `<div class="col">${list.map((g) => this._grp(g)).join("")}</div>`;
-    return `<div class="cols">${intro || ""}${col(left)}${col(right)}</div>`;
+    return `<div class="cols" style="--n:${columns.length}">${intro || ""}${columns.map(col).join("")}</div>`;
   }
 
   _exp() {
     const T = this.T;
-    return this._cols(
+    return this._cols([
       [`<div class="sec">${T.temps}</div>${this._optSensor("temp_max_entity")}${this._optSensor("temp_min_entity")}`],
       [`<div class="sec">${T.weak}</div>
-      <div class="f na"><div class="nm"><span>${T.weak}<small>${T.weakSub}</small></span></div><div class="right"><span class="tag">${T.later}</span><button class="tg" disabled role="switch" aria-checked="false"></button></div></div>`],
+      <div class="f na"><div class="nm"><span>${T.weak}<small>${T.weakSub}</small></span></div><div class="right"><span class="tag">${T.later}</span><button class="tg" disabled role="switch" aria-checked="false"></button></div></div>`]],
       `<p class="intro">${T.expIntro}</p>`,
     );
   }
@@ -551,6 +571,13 @@ class MarstekSettingsWindow {
 
   _change(e) {
     const t = e.target;
+    if (t.dataset && "file" in t.dataset) {
+      const file = t.files && t.files[0];
+      this.s.restore = file ? { file, mode: "merge" } : null;
+      this.s.msg = "";
+      this._render();
+      return;
+    }
     if (t.classList.contains("date")) { this._set(t.dataset.k, t.value); this._render(); }
   }
 
@@ -589,6 +616,9 @@ class MarstekSettingsWindow {
         else { this._set(k, v); this.s.choose = null; }
         break;
       case "apply": return this._applySensors();
+      case "pickfile": { const f = this.root.querySelector("input[data-file]"); if (f) f.click(); return; }
+      case "rmode": this.s.restore = { ...this.s.restore, mode: v }; break;
+      case "restore": return this._restore();
       case "save": return this._save();
       case "wipe": return this._wipe();
       case "ha": {
@@ -655,6 +685,37 @@ class MarstekSettingsWindow {
     } catch (err) {
       this._say(T.fail + ((err && err.message) || err), true);
     }
+  }
+
+  async _restore() {
+    const T = this.T;
+    const r = this.s.restore;
+    if (!r || !r.file || r.busy) return;
+    this.s.restore = { ...r, busy: true };
+    this._render();
+    try {
+      // Upload as the form of Home Assistant does (file_upload), then restore
+      const form = new FormData();
+      form.append("file", r.file);
+      const resp = await this.hass.fetchWithAuth("/api/file_upload", { method: "POST", body: form });
+      if (!resp.ok) throw new Error(`upload ${resp.status}`);
+      const { file_id: fileId } = await resp.json();
+      const res = await this.hass.callWS({ type: `${MC_DOMAIN}/restore`, entry_id: this.entryId, file_id: fileId, mode: r.mode || "merge" });
+      if (res.error) {
+        this.s.restore = { ...r, busy: false };
+        this._say(((this.d.texts.errors || {})[res.error]) || res.error, true);
+        this._render();
+        return;
+      }
+      this.s.restore = null;
+      this.s.msg = String(this.d.texts.restored || "").replace("{records}", res.records).replace("{full}", res.full);
+      this.s.bad = false;
+    } catch (err) {
+      this.s.restore = { ...r, busy: false };
+      this.s.msg = T.fail + ((err && err.message) || err);
+      this.s.bad = true;
+    }
+    this._render();
   }
 
   async _wipe() {
