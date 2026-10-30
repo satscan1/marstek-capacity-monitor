@@ -190,4 +190,5 @@ DASHBOARD_TITLE = {"nl": "Batterijcapaciteit", "de": "Batteriekapazität", "en":
 # Back-up and report (0.5.5): served behind the login, opened by the card with
 # a short-lived signed link.
 REPORT_URL = f"/api/{DOMAIN}/report"
+BACKUP_URL = f"/api/{DOMAIN}/backup"
 RESTORE_MODES = ["merge", "replace"]

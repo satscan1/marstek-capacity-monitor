@@ -5,6 +5,7 @@
 **Settings window, polished.**
 
 - Three columns on a wide screen, grouped by subject: **sensors** (state of charge and power, sign of the power sensor, cell voltage) · **battery** (factory data, warranty, limits) · **messages and data**. Two columns on a medium screen, one on a phone.
+- **Make a back-up right in the window:** one file with all measurements of the battery, downloaded to your device and also kept in Home Assistant (folder `marstek_capacity_monitor/backup`). A report (button Report on the card) stays something else: for reading and sharing.
 - **Restore a back-up right in the window:** choose the report or back-up file, pick **Merge** or **Replace**, then **Run**. A full back-up of the current data is always made first. No more detour through the settings screen of Home Assistant.
 - Every sensor button now says **Choose**.
 - **Margin below spec** goes from 0 to 25 % (was 50 %), also in the settings screen of Home Assistant.

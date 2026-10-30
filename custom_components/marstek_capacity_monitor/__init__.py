@@ -25,7 +25,7 @@ from homeassistant.loader import async_get_integration
 
 from homeassistant.helpers.http import KEY_HASS
 
-from .const import DOMAIN, KIND_CELLS, KIND_SOC, NOTIFY_ACTION_PREFIX, REPORT_URL
+from .const import BACKUP_URL, DOMAIN, KIND_CELLS, KIND_SOC, NOTIFY_ACTION_PREFIX, REPORT_URL
 from .export import VARIANTS
 from .dashboard import async_update_sidebar
 from .monitor import BatteryMonitor
@@ -137,6 +137,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     await _register_settings(hass)
     hass.http.register_view(ReportView())
+    hass.http.register_view(BackupView())
     return True
 
 
@@ -187,6 +188,34 @@ def _refresh_notice(hass: HomeAssistant) -> None:
     persistent_notification.async_create(
         hass, message, title=title, notification_id=f"{DOMAIN}_refresh"
     )
+
+
+class BackupView(HomeAssistantView):
+    """Make a back-up (0.5.5): a full back-up of one battery, kept in
+    /config/marstek_capacity_monitor/backup/ and downloaded to the device.
+    Only for an administrator; opened by the settings window with a
+    short-lived signed link."""
+
+    url = BACKUP_URL + "/{entry_id}"
+    name = f"api:{DOMAIN}:backup"
+    requires_auth = True
+
+    async def get(self, request: web.Request, entry_id: str) -> web.Response:
+        hass: HomeAssistant = request.app[KEY_HASS]
+        user = request.get("hass_user")
+        if user is None or not user.is_admin:
+            return web.Response(status=403, text="Only an administrator can make a back-up.")
+        monitor = _find_monitor(hass, entry_id, None)
+        if monitor is None:
+            return web.Response(status=404)
+        path = await monitor.async_write_backup(None, "backup")
+        html = await hass.async_add_executor_job(path.read_text, "utf-8")
+        return web.Response(
+            text=html,
+            content_type="text/html",
+            charset="utf-8",
+            headers={"Content-Disposition": f'attachment; filename="{path.name}"'},
+        )
 
 
 def _demo_entry_data() -> dict:
