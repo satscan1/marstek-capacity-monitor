@@ -63,6 +63,8 @@ SENSORS: tuple[CapacitySensorDescription, ...] = (
                 "usable_kwh",
                 "usable_band_pct",
                 "trend",
+                "trend_2w",
+                "first_measurement",
                 "history",
             )
         },
@@ -330,7 +332,7 @@ class CapacitySensor(SensorEntity):
     _attr_should_poll = False
     # Lists are only needed live by the cards; keep them out of the recorder
     # database (lower write load).
-    _unrecorded_attributes = frozenset({"trend", "history", "last_data_minutes"})
+    _unrecorded_attributes = frozenset({"trend", "trend_2w", "history", "last_data_minutes"})
 
     def __init__(
         self, monitor: BatteryMonitor, description: CapacitySensorDescription

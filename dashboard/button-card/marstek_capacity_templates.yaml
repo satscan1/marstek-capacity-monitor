@@ -87,9 +87,9 @@ button_card_templates:
               full_discharge_reached: (f, s) => `Vollständige Entladung erreicht: von ${f} % auf ${s} %. Die Messung wird gespeichert, sobald die Batterie wieder lädt.`,
               interrupted: 'letzte Entladung zählte nicht (unterbrochen)'
             },
-            chart: 'Diagramm', win3: 'jüngste 3 Jahre der Garantiezeit', chartTitle: 'Noch verfügbar pro Monat (%)', noData: 'Noch keine Messungen in diesem Zeitraum. Das Diagramm füllt sich nach der ersten vollständigen Entladung.',
+            chart: 'Diagramm', win3: 'jüngste 3 Jahre der Garantiezeit', winFirst: 'erstes halbes Jahr', chartTitle2w: 'Noch verfügbar pro 2 Wochen (%)', per2w: (d, n) => `2 Wochen ab ${d} (${n} ${n === 1 ? 'Messung' : 'Messungen'})`, chartTitle: 'Noch verfügbar pro Monat (%)', noData: 'Noch keine Messungen in diesem Zeitraum. Das Diagramm füllt sich nach der ersten vollständigen Entladung.',
             legCap: 'gemessen, kalibriert', legOpen: 'weniger zuverlässig', legSpec: 'erwartet laut Herstellerangabe', legRed: 'an Marstek melden',
-            less: 'weniger zuverlässig', why: {no_calibration: 'in den 14 Tagen vor der Messung nicht ganz voll', cold: 'Zellen kälter als 5 °C', soc_edge: 'die SOC-Anzeige lief am Anfang oder Ende der Entladung nicht mit'},
+            less: 'weniger zuverlässig', why: {no_calibration: 'in den 14 Tagen vor der Messung nicht ganz voll', cold: 'Zellen kälter als 5 °C', soc_edge: 'die SOC-Anzeige lief am Anfang oder Ende der Entladung nicht mit', few: 'weniger als 3 Messungen'},
             spread: s => ` Jetzt liegen die letzten 5 Messungen ${s} Punkte auseinander (höchstens 3).`, high: n => `vorläufig ${n}/5`, highTip: 'Höher als neu. Oft stimmt das: neue Zellen liefern oft etwas mehr, als auf dem Typenschild steht, und die Batterie arbeitet mit etwas höherer Spannung, als das Typenschild annimmt. Es kann auch an der SOC-Anzeige der Batterie liegen. Nach 5 Messungen, die nah beieinander liegen (höchstens 3 Punkte Unterschied), wird es grün.',
             highOk: 'über neu', highOkTip: '5 Messungen hintereinander über 100 % und nah beieinander: diese Batterie liefert mehr, als auf dem Typenschild steht. Neue Zellen tun das oft, und die Batterie arbeitet mit etwas höherer Spannung, als das Typenschild annimmt.',
             drop: 'noch nicht bestätigt', dropTip: (ref, n) => `Die Messungen liegen plötzlich mehr als 5 Punkte tiefer als vorher (vorher ${ref} %). Echter Verschleiß geht langsam; so ein Sprung kommt fast immer daher, dass sich die SOC-Anzeige der Batterie vorübergehend verschiebt, zum Beispiel bei Kälte oder wenn die Batterie lange nicht ganz voll war. Tipp: entlade die Batterie einmal bis zur Entladegrenze und lade sie danach in einem Zug voll. Bleibt der Wert 5 Messungen lang tief (jetzt ${n} von 5), gilt er als echt.`,
@@ -150,9 +150,9 @@ button_card_templates:
               full_discharge_reached: (f, s) => `Volledige ontlading gehaald: van ${f} % naar ${s} %. De meting wordt opgeslagen zodra de batterij weer gaat laden.`,
               interrupted: 'vorige ontlading telde niet mee (onderbroken)'
             },
-            chart: 'Grafiek', win3: 'recente 3 jaar van garantieperiode', chartTitle: 'Nog beschikbaar per maand (%)', noData: 'Nog geen metingen in deze periode. De grafiek vult zich na de eerste volledige ontlading.',
+            chart: 'Grafiek', win3: 'recente 3 jaar van garantieperiode', winFirst: 'eerste half jaar', chartTitle2w: 'Nog beschikbaar per 2 weken (%)', per2w: (d, n) => `2 weken vanaf ${d} (${n} ${n === 1 ? 'meting' : 'metingen'})`, chartTitle: 'Nog beschikbaar per maand (%)', noData: 'Nog geen metingen in deze periode. De grafiek vult zich na de eerste volledige ontlading.',
             legCap: 'gemeten, geijkt', legOpen: 'minder betrouwbaar', legSpec: 'verwacht volgens specificatie', legRed: 'melden bij Marstek',
-            less: 'minder betrouwbaar', why: {no_calibration: 'in de 14 dagen vóór de meting niet helemaal vol', cold: 'cellen kouder dan 5 °C', soc_edge: 'de SOC-meter liep aan het begin of eind van de ontlading niet gelijk op'},
+            less: 'minder betrouwbaar', why: {no_calibration: 'in de 14 dagen vóór de meting niet helemaal vol', cold: 'cellen kouder dan 5 °C', soc_edge: 'de SOC-meter liep aan het begin of eind van de ontlading niet gelijk op', few: 'minder dan 3 metingen'},
             spread: s => ` Nu liggen de laatste 5 metingen ${s} punten uit elkaar (maximaal 3).`, high: n => `voorlopig ${n}/5`, highTip: 'Hoger dan nieuw. Vaak klopt dat: nieuwe cellen leveren vaak iets meer dan op het typeplaatje staat, en de batterij werkt op een iets hogere spanning dan waarmee het typeplaatje rekent. Het kan ook door de SOC-meter van de batterij komen. Na 5 metingen die dicht bij elkaar liggen (niet meer dan 3 punten verschil) wordt het groen.',
             highOk: 'boven nieuw', highOkTip: '5 metingen achter elkaar boven 100 % en dicht bij elkaar: deze batterij levert meer dan op het typeplaatje staat. Nieuwe cellen doen dat vaak, en de batterij werkt op een iets hogere spanning dan waarmee het typeplaatje rekent.',
             drop: 'nog niet bevestigd', dropTip: (ref, n) => `De metingen zijn ineens meer dan 5 punten lager dan daarvoor (eerst ${ref} %). Echte slijtage gaat langzaam; zo'n sprong komt bijna altijd doordat de SOC-meter van de batterij tijdelijk verschuift, bijvoorbeeld bij kou of als de batterij lang niet helemaal vol is geweest. Tip: ontlaad de batterij één keer tot de ontlaadgrens en laad hem daarna in één keer vol. Blijft de waarde 5 metingen laag (nu ${n} van 5), dan telt hij als echt.`,
@@ -213,9 +213,9 @@ button_card_templates:
               full_discharge_reached: (f, s) => `Full discharge reached: from ${f} % to ${s} %. The measurement is saved as soon as the battery charges again.`,
               interrupted: 'last discharge did not count (interrupted)'
             },
-            chart: 'Chart', win3: 'recent 3 years of warranty', chartTitle: 'Remaining per month (%)', noData: 'No measurements in this period yet. The chart fills after the first full discharge.',
+            chart: 'Chart', win3: 'recent 3 years of warranty', winFirst: 'first half year', chartTitle2w: 'Remaining per 2 weeks (%)', per2w: (d, n) => `2 weeks from ${d} (${n} ${n === 1 ? 'measurement' : 'measurements'})`, chartTitle: 'Remaining per month (%)', noData: 'No measurements in this period yet. The chart fills after the first full discharge.',
             legCap: 'measured, calibrated', legOpen: 'less reliable', legSpec: 'expected per spec', legRed: 'report to Marstek',
-            less: 'less reliable', why: {no_calibration: 'not completely full in the 14 days before the measurement', cold: 'cells colder than 5 °C', soc_edge: 'the SOC meter did not keep pace at the start or end of the discharge'},
+            less: 'less reliable', why: {no_calibration: 'not completely full in the 14 days before the measurement', cold: 'cells colder than 5 °C', soc_edge: 'the SOC meter did not keep pace at the start or end of the discharge', few: 'fewer than 3 measurements'},
             spread: s => ` Now the last 5 measurements are ${s} points apart (at most 3).`, high: n => `provisional ${n}/5`, highTip: 'Higher than new. Often that is right: new cells often deliver a little more than the rating plate says, and the battery works at a slightly higher voltage than the rating plate assumes. It can also come from the battery\'s SOC meter. After 5 measurements close together (no more than 3 points apart) it turns green.',
             highOk: 'above new', highOkTip: '5 measurements in a row above 100 % and close together: this battery delivers more than its rating plate says. New cells often do, and the battery works at a slightly higher voltage than the rating plate assumes.',
             drop: 'not confirmed yet', dropTip: (ref, n) => `The measurements are suddenly more than 5 points lower than before (was ${ref} %). Real wear is slow; a jump like this is nearly always the battery\'s SOC meter shifting for a while, for example in the cold or when the battery has not been completely full for a long time. Tip: discharge the battery once to the discharge limit and then charge it fully in one go. If the value stays low for 5 measurements (now ${n} of 5), it counts as real.`,
@@ -445,11 +445,17 @@ button_card_templates:
           let chart = '';
           {
             const km = k => { const [yy, mm] = k.split('-').map(Number); return yy * 12 + mm - 1; };
-            const nd = new Date(), nowI = nd.getFullYear() * 12 + nd.getMonth();
+            const nd = new Date();
+            // First half year: a point per 2 weeks, x axis in days; after that per month.
+            const w2 = (a.trend_2w || []).length > 0;
+            const dayOf = k => Math.floor(Date.UTC(...k.split('-').map((v, i) => Number(v) - (i === 1 ? 1 : 0))) / 864e5);
+            const today = Math.floor(Date.UTC(nd.getFullYear(), nd.getMonth(), nd.getDate()) / 864e5);
+            const nowI = w2 ? today : nd.getFullYear() * 12 + nd.getMonth();
             const startI = nowI - Math.round((ea.age_years ?? 0) * 12);
-            const x0 = Math.max(startI, nowI - 35), x1 = nowI;
+            const x0 = w2 ? dayOf(a.first_measurement || a.trend_2w[a.trend_2w.length - 1].start) : Math.max(startI, nowI - 35), x1 = w2 ? Math.max(nowI, x0 + 28) : nowI;
             const span = Math.max(1, x1 - x0);
-            const pts = (a.trend || []).filter(t => km(t.month) >= x0 && km(t.month) <= x1).slice().reverse();
+            const pts = w2 ? a.trend_2w.map(t => ({...t, x: Math.min(dayOf(t.start) + 7, x1)})).reverse()
+              : (a.trend || []).filter(t => km(t.month) >= x0 && km(t.month) <= x1).map(t => ({...t, x: km(t.month)})).reverse();
             // drawn in real pixels: the card is on screen once the button was pressed
             const W = Math.max(260, Math.round(((this && this.offsetWidth) || 360) - 50)), H = 120, L = 28, R = 30, Tp = 10, B = 18;
             const lo = Math.min(70, Math.floor((Math.min(floor, ...pts.map(t => t.pct)) - 5) / 10) * 10);
@@ -460,24 +466,33 @@ button_card_templates:
             let svg = '';
             for (let v = lo; v <= hi; v += 10)
               svg += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="${P.grid}" stroke-width="1"/><text x="${L - 5}" y="${Y(v) + 3.5}" font-size="10" fill="${dim}" text-anchor="end">${v}</text>`;
-            const y0 = Math.ceil(x0 / 12), y1 = Math.floor(x1 / 12), stepY = (y1 - y0) > 6 ? 2 : 1;
-            for (let yy = y0; yy <= y1; yy += stepY) {
-              if (yy * 12 < x0 || yy * 12 > x1) continue;
-              svg += `<line x1="${X(yy * 12)}" x2="${X(yy * 12)}" y1="${H - B}" y2="${H - B + 4}" stroke="${dim}" stroke-width="1"/><text x="${X(yy * 12)}" y="${H - 3}" font-size="10" fill="${dim}" text-anchor="middle">${yy}</text>`;
+            const tick = (i, label) => `<line x1="${X(i)}" x2="${X(i)}" y1="${H - B}" y2="${H - B + 4}" stroke="${dim}" stroke-width="1"/><text x="${X(i)}" y="${H - 3}" font-size="10" fill="${dim}" text-anchor="middle">${label}</text>`;
+            if (w2) {
+              // a tick at the start of every month in the period
+              const d = new Date(x0 * 864e5);
+              for (let m = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1)); m.getTime() / 864e5 <= x1; m = new Date(Date.UTC(m.getUTCFullYear(), m.getUTCMonth() + 1, 1)))
+                svg += tick(m.getTime() / 864e5, monS(m.toISOString().slice(0, 7)));
+            } else {
+              const y0 = Math.ceil(x0 / 12), y1 = Math.floor(x1 / 12), stepY = (y1 - y0) > 6 ? 2 : 1;
+              for (let yy = y0; yy <= y1; yy += stepY) {
+                if (yy * 12 < x0 || yy * 12 > x1) continue;
+                svg += tick(yy * 12, yy);
+              }
             }
             svg += `<line x1="${L}" x2="${W - R}" y1="${Y(floor)}" y2="${Y(floor)}" stroke="${P.red}" stroke-opacity="0.55" stroke-width="1" stroke-dasharray="4 4"/><text x="${W - R + 3}" y="${Y(floor) + 3.5}" font-size="10" fill="${P.red}" fill-opacity="0.7">${f(floor, 0)}%</text>`;
-            const sp = pts.map(t => [km(t.month), t.expected_pct]);
+            const sp = pts.map(t => [t.x, t.expected_pct]);
             if (!isNaN(exp) && (!sp.length || sp[sp.length - 1][0] < nowI)) sp.push([nowI, exp]);
             if (sp.length > 1) svg += `<polyline points="${sp.map(([i, v]) => `${X(i)},${Y(v)}`).join(' ')}" fill="none" stroke="${P.muted}" stroke-opacity="0.7" stroke-width="1" stroke-dasharray="4 3"/>`;
-            if (pts.length > 1) svg += `<polyline points="${pts.map(t => `${X(km(t.month))},${Y(t.pct)}`).join(' ')}" fill="none" stroke="${P.green}" stroke-opacity="0.45" stroke-width="1.2"/>`;
+            if (pts.length > 1) svg += `<polyline points="${pts.map(t => `${X(t.x)},${Y(t.pct)}`).join(' ')}" fill="none" stroke="${P.green}" stroke-opacity="0.45" stroke-width="1.2"/>`;
             const why = t => (t.why === 'both' ? 'no_calibration,cold' : String(t.why || '')).split(',').map(k => T.why[k]).filter(Boolean).join(', ');
-            const tip = t => `${monL(t.month)}: ${f(t.pct, 1)} % (${T.legSpec} ${f(t.expected_pct, 0)} %${t.temp_c != null ? `, ${f(t.temp_c, 0)} °C` : ''})`
+            const per = t => t.month ? monL(t.month) : T.per2w(new Date(t.start + 'T12:00').toLocaleDateString(T.loc, {day: 'numeric', month: 'short'}), t.n);
+            const tip = t => `${per(t)}: ${f(t.pct, 1)} % (${T.legSpec} ${f(t.expected_pct, 0)} %${t.temp_c != null ? `, ${f(t.temp_c, 0)} °C` : ''})`
               + (t.reliable === false ? `\n${T.less}: ${why(t)}` : '') + (t.ref_age_d != null ? `\n${T.refAge(f(t.ref_age_d, 0))}` : '');
             svg += pts.map(t => { const c = col(t.pct, t.expected_pct);
-              return `<circle cx="${X(km(t.month))}" cy="${Y(t.pct)}" r="${pts.length > 40 ? 2.2 : 3}" fill="${t.reliable === false ? P.panel : c}" stroke="${c}" stroke-width="1.4"><title>${tip(t)}</title></circle>`; }).join('');
-            if (pts.length) { const t = pts[pts.length - 1]; svg += `<text x="${X(km(t.month))}" y="${Y(t.pct) - 6}" font-size="10" fill="${P.text}" text-anchor="middle">${f(t.pct, 0)}</text>`; }
+              return `<circle cx="${X(t.x)}" cy="${Y(t.pct)}" r="${pts.length > 40 ? 2.2 : 3}" fill="${t.reliable === false ? P.panel : c}" stroke="${c}" stroke-width="1.4"><title>${tip(t)}</title></circle>`; }).join('');
+            if (pts.length) { const t = pts[pts.length - 1]; svg += `<text x="${X(t.x)}" y="${Y(t.pct) - 6}" font-size="10" fill="${P.text}" text-anchor="middle">${f(t.pct, 0)}</text>`; }
             chart = `<div style="${panelS}">
-                <div style="display:flex;flex-wrap:wrap;justify-content:space-between;column-gap:10px;font-size:11px;${muted}"><span>${T.chartTitle}</span><span>${T.win3}</span></div>
+                <div style="display:flex;flex-wrap:wrap;justify-content:space-between;column-gap:10px;font-size:11px;${muted}"><span>${w2 ? T.chartTitle2w : T.chartTitle}</span><span>${w2 ? T.winFirst : T.win3}</span></div>
                 ${pts.length ? `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:100%;height:auto;display:block;margin-top:4px">${svg}</svg>` : ''}
                 ${pts.length ? '' : `<div style="font-size:11px;${muted};margin:4px 0">${T.noData}</div>`}
                 <div style="font-size:10.5px;${muted};margin-top:2px"><span style="color:${P.green}">●</span> ${T.legCap} · <span style="color:${P.green}">○</span> ${T.legOpen} · <span style="color:${P.muted}">┄</span> ${T.legSpec} · <span style="color:${P.red}">┄</span> ${T.legRed}</div>
