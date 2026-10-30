@@ -10,6 +10,7 @@
 - **Margin below spec** goes from 0 to 25 % (was 50 %), also in the settings screen of Home Assistant.
 - Tab Experiment: "Experiments that are not finished yet."
 - Card: once a full discharge has gone down to 15 % or lower, it says **Full discharge reached** and that the measurement is saved as soon as the battery charges again.
+- Card: right after an update, before Home Assistant has been restarted, the card no longer gives the advice about the app cache. It now says: **New version installed, restart Home Assistant to finish it.** The cache advice stays for a page that really runs an old card.
 
 ## v0.5.5-rc4 — release candidate (pre-release)
 
