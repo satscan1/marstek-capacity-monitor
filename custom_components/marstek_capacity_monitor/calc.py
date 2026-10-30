@@ -180,6 +180,7 @@ def confidence(pcts: list[float], measured_pct: float | None) -> dict[str, Any]:
         "confirm_needed": CONFIRM_N,
         "confirm_count": None,
         "drop_ref_pct": None,
+        "spread_pts": None,
     }
     if len(pcts) >= BASELINE_N:
         base = median(pcts[:BASELINE_N])
@@ -203,10 +204,13 @@ def confidence(pcts: list[float], measured_pct: float | None) -> dict[str, Any]:
         return out
     if measured_pct is not None and measured_pct > 100:
         last = pcts[-CONFIRM_N:]
-        above = 0
-        for p in reversed(pcts):
-            if p > 100:
-                above += 1
+        # Count the latest measurements that are above 100 % AND within
+        # STABLE_PTS of each other: that is what "x/5" on the card means.
+        close = 0
+        for k in range(1, min(len(pcts), CONFIRM_N) + 1):
+            run = pcts[-k:]
+            if all(p > 100 for p in run) and max(run) - min(run) <= STABLE_PTS:
+                close = k
             else:
                 break
         stable = (
@@ -216,7 +220,8 @@ def confidence(pcts: list[float], measured_pct: float | None) -> dict[str, Any]:
         )
         out.update(
             display_state="high_confirmed" if stable else "high_provisional",
-            confirm_count=min(above, CONFIRM_N),
+            confirm_count=close,
+            spread_pts=round(max(last) - min(last), 1) if len(last) == CONFIRM_N else None,
         )
     return out
 

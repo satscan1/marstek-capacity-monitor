@@ -89,6 +89,7 @@ SENSORS: tuple[CapacitySensorDescription, ...] = (
                 "confirm_count",
                 "confirm_needed",
                 "drop_ref_pct",
+                "spread_pts",
                 "impossible_count",
                 "impossible_last_pct",
                 "impossible_limit_pct",
