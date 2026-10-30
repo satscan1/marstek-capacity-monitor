@@ -12,7 +12,7 @@
 
 **Facts, only facts matter.**
 
-- Above 100 % stays *provisional* and a sudden drop stays *not confirmed yet*, until 5 measurements in a row show the same. A small line shows the change since monitoring began.
+- Above 100 % stays *provisional* and a sudden drop stays *not confirmed yet*, until 5 measurements in a row show the same. *Provisional x/5* counts only measurements above 100 % that lie within 3 points of each other; the ⓘ shows how far apart the last 5 are. A small line shows the change since monitoring began.
 - **Red only when it is sure:** after 5 full discharges in a row at or below 75 %, one message under Repairs and on the phone, with the Marstek report to attach.
 - A measurement above **130 %** of new cannot be right and never counts: status *Check the power sensor*, with what to check.
 

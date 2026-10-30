@@ -549,6 +549,12 @@ def test_above_100_provisional_until_five_stable():
     assert c["display_state"] == "high_confirmed"
     # jumping more than 3 points: stays provisional
     assert calc.confidence([101.0, 106.0, 102.0, 105.0, 103.0], 103.0)["display_state"] == "high_provisional"
+    # the counter only counts measurements close together (MT2, Oct 2026)
+    c = calc.confidence([106.8, 104.4, 102.9, 102.0, 103.4], 103.4)
+    assert c["display_state"] == "high_provisional"
+    assert c["confirm_count"] == 4 and c["spread_pts"] == 4.8
+    c = calc.confidence([102.0, 106.0], 106.0)
+    assert c["confirm_count"] == 1
     # one of the last five not above 100: provisional
     assert calc.confidence([99.5, 102.0, 101.0, 102.5, 101.5], 101.5)["display_state"] == "high_provisional"
 
