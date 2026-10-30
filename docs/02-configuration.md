@@ -69,7 +69,7 @@ The action `marstek_capacity_monitor.dismiss_advice` with `battery` (e.g. `mt1`)
 In the window behind the gear, block **Data**:
 
 * **Make a back-up**: all measurements of the battery in one file (.html). It is downloaded to the device you use the window on and also kept in Home Assistant, in the folder `marstek_capacity_monitor/backup`.
-* **Restore a back-up**: choose the file, then **Merge** (keep everything from both) or **Replace** (the file wins), and **Run**. A back-up of the current data is always made first.
+* **Restore a back-up**: **Run** and choose the file, then **Merge** (keep everything from both) or **Replace** (the file wins), and **Restore**. A back-up of the current data is always made first.
 
 A **report** (button **Report** on the card) is something else: for reading and sharing, anonymous or for Marstek.
 

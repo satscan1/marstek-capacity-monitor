@@ -69,7 +69,7 @@ De actie `marstek_capacity_monitor.dismiss_advice` met `battery` (bijv. `mt1`) e
 In het venster achter het tandwiel, blok **Gegevens**:
 
 * **Back-up maken**: alle metingen van de batterij in één bestand (.html). Het wordt gedownload naar het apparaat waarop je het venster gebruikt en ook bewaard in Home Assistant, in de map `marstek_capacity_monitor/backup`.
-* **Back-up terugzetten**: kies het bestand, dan **Samenvoegen** (alles van beide houden) of **Vervangen** (het bestand wint), en **Uitvoeren**. Eerst wordt automatisch een back-up van de huidige gegevens gemaakt.
+* **Back-up terugzetten**: **Uitvoeren** en kies het bestand, dan **Samenvoegen** (alles van beide houden) of **Vervangen** (het bestand wint), en **Terugzetten**. Eerst wordt automatisch een back-up van de huidige gegevens gemaakt.
 
 Een **rapport** (knop **Rapport** op de kaart) is iets anders: om te lezen en te delen, anoniem of voor Marstek.
 
