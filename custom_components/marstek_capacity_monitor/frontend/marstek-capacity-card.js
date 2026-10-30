@@ -162,7 +162,7 @@ const MCW_TEXT = {
     missing: "niet gevonden", noValue: "geen waarde",
     save: "Opslaan", saved: "Opgeslagen. De batterij wordt opnieuw geladen.", nothing: "Niets gewijzigd.",
     unsaved: "Niet opgeslagen. Nog een keer ✕ om toch te sluiten.",
-    restore: "Back-up terugzetten", restoreSub: "Een back-upbestand van deze monitor (.html). Eerst wordt automatisch een back-up van de huidige gegevens gemaakt.", backup: "Back-up maken", backupSub: "Alle metingen van deze batterij in één bestand. Het wordt gedownload naar dit apparaat en ook bewaard in Home Assistant (map marstek_capacity_monitor/backup).", backupDone: (f) => `Back-up gemaakt: ${f}`, restoreBtn: "Kiezen", restoreBusy: "Bezig met terugzetten…",
+    restore: "Back-up terugzetten", restoreSub: "Een back-upbestand van deze monitor (.html). Eerst wordt automatisch een back-up van de huidige gegevens gemaakt.", backup: "Back-up maken", backupSub: "Alle metingen van deze batterij in één bestand. Het wordt gedownload naar dit apparaat en ook bewaard in Home Assistant (map marstek_capacity_monitor/backup).", backupDone: (f) => `Back-up gemaakt: ${f}`, restoreBtn: "Uitvoeren", restoreGo: "Terugzetten", restoreBusy: "Bezig met terugzetten…",
     wipe: "Metingen wissen", wipeSub: "Begint de meting van deze batterij opnieuw. Maak eerst een back-up (hierboven).",
     wipeAsk: "Zeker weten? Wissen", wiped: "Metingen gewist.",
     wipeWarn: "Weet je het zeker? Alle metingen van deze batterij worden gewist: de capaciteit, de grafiek en de geschiedenis. Dit kan niet ongedaan worden gemaakt.", wipeNoBackup: "Je hebt in dit venster nog geen back-up gemaakt.", wipeBackupOk: (f) => `✓ Back-up gemaakt: ${f}`, wipeSure: "Ik weet dat alle metingen weg zijn", wipeYes: "Ja, alles wissen", cancel: "Annuleren",
@@ -189,7 +189,7 @@ const MCW_TEXT = {
     missing: "not found", noValue: "no value",
     save: "Save", saved: "Saved. The battery is reloaded.", nothing: "Nothing changed.",
     unsaved: "Not saved. Press ✕ again to close anyway.",
-    restore: "Restore a back-up", restoreSub: "A back-up file of this monitor (.html). A back-up of the current data is always made first.", backup: "Make a back-up", backupSub: "All measurements of this battery in one file. It is downloaded to this device and also kept in Home Assistant (folder marstek_capacity_monitor/backup).", backupDone: (f) => `Back-up made: ${f}`, restoreBtn: "Choose", restoreBusy: "Restoring…",
+    restore: "Restore a back-up", restoreSub: "A back-up file of this monitor (.html). A back-up of the current data is always made first.", backup: "Make a back-up", backupSub: "All measurements of this battery in one file. It is downloaded to this device and also kept in Home Assistant (folder marstek_capacity_monitor/backup).", backupDone: (f) => `Back-up made: ${f}`, restoreBtn: "Run", restoreGo: "Restore", restoreBusy: "Restoring…",
     wipe: "Clear measurements", wipeSub: "Starts measuring this battery over. Make a back-up first (above).",
     wipeAsk: "Sure? Clear", wiped: "Measurements cleared.",
     wipeWarn: "Are you sure? All measurements of this battery are cleared: the capacity, the chart and the history. This cannot be undone.", wipeNoBackup: "You have not made a back-up in this window yet.", wipeBackupOk: (f) => `✓ Back-up made: ${f}`, wipeSure: "I know all measurements will be gone", wipeYes: "Yes, clear everything", cancel: "Cancel",
@@ -216,7 +216,7 @@ const MCW_TEXT = {
     missing: "nicht gefunden", noValue: "kein Wert",
     save: "Speichern", saved: "Gespeichert. Die Batterie wird neu geladen.", nothing: "Nichts geändert.",
     unsaved: "Nicht gespeichert. Noch einmal ✕, um trotzdem zu schließen.",
-    restore: "Back-up zurückspielen", restoreSub: "Eine Back-up-Datei dieses Monitors (.html). Vorher wird automatisch ein Back-up der aktuellen Daten erstellt.", backup: "Back-up erstellen", backupSub: "Alle Messungen dieser Batterie in einer Datei. Sie wird auf dieses Gerät heruntergeladen und auch in Home Assistant aufbewahrt (Ordner marstek_capacity_monitor/backup).", backupDone: (f) => `Back-up erstellt: ${f}`, restoreBtn: "Wählen", restoreBusy: "Wird zurückgespielt…",
+    restore: "Back-up zurückspielen", restoreSub: "Eine Back-up-Datei dieses Monitors (.html). Vorher wird automatisch ein Back-up der aktuellen Daten erstellt.", backup: "Back-up erstellen", backupSub: "Alle Messungen dieser Batterie in einer Datei. Sie wird auf dieses Gerät heruntergeladen und auch in Home Assistant aufbewahrt (Ordner marstek_capacity_monitor/backup).", backupDone: (f) => `Back-up erstellt: ${f}`, restoreBtn: "Ausführen", restoreGo: "Zurückspielen", restoreBusy: "Wird zurückgespielt…",
     wipe: "Messungen löschen", wipeSub: "Beginnt die Messung dieser Batterie neu. Erst ein Back-up erstellen (oben).",
     wipeAsk: "Sicher? Löschen", wiped: "Messungen gelöscht.",
     wipeWarn: "Bist du sicher? Alle Messungen dieser Batterie werden gelöscht: die Kapazität, das Diagramm und der Verlauf. Das kann nicht rückgängig gemacht werden.", wipeNoBackup: "Du hast in diesem Fenster noch kein Back-up erstellt.", wipeBackupOk: (f) => `✓ Back-up erstellt: ${f}`, wipeSure: "Mir ist klar, dass alle Messungen weg sind", wipeYes: "Ja, alles löschen", cancel: "Abbrechen",
@@ -627,7 +627,7 @@ class MarstekSettingsWindow {
     if (r.file) {
       html += `<div class="box" style="grid-column:1/-1"><div class="file">${mcEsc(r.file.name)}</div>
         <div class="chips" style="justify-content:flex-start">${["merge", "replace"].map((m) => `<button class="chip${(r.mode || "merge") === m ? " on" : ""}" data-a="rmode" data-v="${m}">${label(m)}</button>`).join("")}</div>
-        <div class="right"><button class="btn pri" data-a="restore"${r.busy ? " disabled" : ""}>${r.busy ? T.restoreBusy : T.apply}</button></div></div>`;
+        <div class="right"><button class="btn pri" data-a="restore"${r.busy ? " disabled" : ""}>${r.busy ? T.restoreBusy : T.restoreGo}</button></div></div>`;
     }
     return html + "</div>";
   }
