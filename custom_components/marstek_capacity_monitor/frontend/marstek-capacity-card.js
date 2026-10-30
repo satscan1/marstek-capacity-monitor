@@ -34,9 +34,31 @@ function mcInstalledVersion(hass) {
   return null;
 }
 
+// Compare two versions like 0.5.5, 0.5.5-rc4: >0 when a is newer than b.
+// A release candidate comes before its release (0.5.5-rc5 < 0.5.5).
+function mcCmpVersion(a, b) {
+  const parse = (v) => {
+    const m = /^(\d+)\.(\d+)\.(\d+)(?:-(?:rc|dev|b)?(\d+))?/.exec(String(v)) || [];
+    return [+m[1] || 0, +m[2] || 0, +m[3] || 0, m[4] === undefined ? Infinity : +m[4]];
+  };
+  const x = parse(a), y = parse(b);
+  for (let i = 0; i < 4; i++) if (x[i] !== y[i]) return x[i] > y[i] ? 1 : -1;
+  return 0;
+}
+
 function mcUpdateBanner(hass, lang) {
   const v = mcInstalledVersion(hass);
   if (!v || v === MC_VERSION) return "";
+  // The card is newer than the monitor that runs: the files are in place,
+  // Home Assistant has not been restarted yet. Nothing to do in the page.
+  if (mcCmpVersion(MC_VERSION, v) > 0) {
+    const R = {
+      nl: `Nieuwe versie geïnstalleerd (${mcEsc(MC_VERSION)}). Herstart Home Assistant om hem af te maken.`,
+      de: `Neue Version installiert (${mcEsc(MC_VERSION)}). Starte Home Assistant neu, um sie abzuschließen.`,
+      en: `New version installed (${mcEsc(MC_VERSION)}). Restart Home Assistant to finish it.`,
+    };
+    return `<div style="margin:-4px 0 10px;padding:8px 10px;border-radius:8px;background:rgba(66,165,245,.15);color:#42a5f5;font-size:12px;line-height:1.4">⟳ ${R[lang] || R.en}</div>`;
+  }
   let tried = false;
   try { tried = sessionStorage.getItem("mc_reload") === v; } catch (e) { /* no storage */ }
   const T = {

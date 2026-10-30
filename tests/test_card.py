@@ -300,6 +300,7 @@ const out = {
   same: B.mcUpdateBanner(hass(B.MC_VERSION), "nl"),
   newer: B.mcUpdateBanner(hass("9.9.9"), "nl"),
   de: B.mcUpdateBanner(hass("9.9.9"), "de"),
+  older: B.mcUpdateBanner(hass("0.0.1-rc1"), "nl"),
 };
 store.mc_reload = "9.9.9";  // tapped once, still the old card
 out.tried = B.mcUpdateBanner(hass("9.9.9"), "en");
@@ -320,6 +321,9 @@ def test_card_offers_a_refresh_after_an_update(tmp_path):
     assert 'data-mc="mc-reload"' in out["newer"] and "9.9.9" in out["newer"]
     assert "Tik hier" in out["newer"]
     assert "Hier tippen" in out["de"]
+    # card newer than the monitor that runs: restart, no cache advice
+    assert "Herstart Home Assistant" in out["older"] and "mc-reload" not in out["older"]
+    assert "cache" not in out["older"]
     # after one tap the old card is still there: explain the app's own button
     assert "mc-reload" not in out["tried"] and "Reset frontend cache" in out["tried"]
     version = json.loads((ROOT / "custom_components/marstek_capacity_monitor/manifest.json").read_text())["version"]
