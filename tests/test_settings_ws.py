@@ -125,3 +125,19 @@ async def test_window_restores_a_backup(hass: HomeAssistant, hass_ws_client) -> 
     with patch("homeassistant.components.file_upload.process_uploaded_file", fake):
         r = await _ws(hass, hass_ws_client, {"type": f"{DOMAIN}/restore", "entry_id": entry.entry_id, "file_id": "x", "mode": "merge"})
     assert r["result"]["error"] == "restore_invalid"
+
+
+async def test_make_a_backup_downloads_and_keeps_a_copy(hass: HomeAssistant, hass_client) -> None:
+    entry = await _setup_with_one_record(hass)
+    client = await hass_client()
+    resp = await client.get(f"/api/{DOMAIN}/backup/{entry.entry_id}")
+    assert resp.status == 200
+    assert "attachment" in resp.headers["Content-Disposition"] and "mt1-backup-" in resp.headers["Content-Disposition"]
+    text = await resp.text()
+    from custom_components.marstek_capacity_monitor import export
+
+    assert len(export.parse(text)["data"]["records"]) == 1
+    from pathlib import Path
+
+    kept = list(Path(hass.config.path("marstek_capacity_monitor/backup")).glob("mt1-backup-*.html"))
+    assert kept

@@ -162,7 +162,7 @@ const MCW_TEXT = {
     missing: "niet gevonden", noValue: "geen waarde",
     save: "Opslaan", saved: "Opgeslagen. De batterij wordt opnieuw geladen.", nothing: "Niets gewijzigd.",
     unsaved: "Niet opgeslagen. Nog een keer ✕ om toch te sluiten.",
-    restore: "Back-up terugzetten", restoreSub: "Een rapport of back-upbestand van deze monitor (.html of .json). Eerst wordt automatisch een volledige back-up van de huidige gegevens gemaakt.", restoreBtn: "Kiezen", restoreBusy: "Bezig met terugzetten…",
+    restore: "Back-up terugzetten", restoreSub: "Een back-upbestand van deze monitor (.html). Eerst wordt automatisch een back-up van de huidige gegevens gemaakt.", backup: "Back-up maken", backupSub: "Alle metingen van deze batterij in één bestand. Het wordt gedownload naar dit apparaat en ook bewaard in Home Assistant (map marstek_capacity_monitor/backup).", backupDone: (f) => `Back-up gemaakt: ${f}`, restoreBtn: "Kiezen", restoreBusy: "Bezig met terugzetten…",
     wipe: "Metingen wissen", wipeSub: "Begint de meting van deze batterij opnieuw. Maak eerst een back-up via Rapport.",
     wipeAsk: "Zeker weten? Wissen", wiped: "Metingen gewist.",
     ha: "Instelscherm van Home Assistant",
@@ -188,7 +188,7 @@ const MCW_TEXT = {
     missing: "not found", noValue: "no value",
     save: "Save", saved: "Saved. The battery is reloaded.", nothing: "Nothing changed.",
     unsaved: "Not saved. Press ✕ again to close anyway.",
-    restore: "Restore a back-up", restoreSub: "A report or back-up file of this monitor (.html or .json). A full back-up of the current data is always made first.", restoreBtn: "Choose", restoreBusy: "Restoring…",
+    restore: "Restore a back-up", restoreSub: "A back-up file of this monitor (.html). A back-up of the current data is always made first.", backup: "Make a back-up", backupSub: "All measurements of this battery in one file. It is downloaded to this device and also kept in Home Assistant (folder marstek_capacity_monitor/backup).", backupDone: (f) => `Back-up made: ${f}`, restoreBtn: "Choose", restoreBusy: "Restoring…",
     wipe: "Clear measurements", wipeSub: "Starts measuring this battery over. Make a back-up first via Report.",
     wipeAsk: "Sure? Clear", wiped: "Measurements cleared.",
     ha: "Settings screen of Home Assistant",
@@ -214,7 +214,7 @@ const MCW_TEXT = {
     missing: "nicht gefunden", noValue: "kein Wert",
     save: "Speichern", saved: "Gespeichert. Die Batterie wird neu geladen.", nothing: "Nichts geändert.",
     unsaved: "Nicht gespeichert. Noch einmal ✕, um trotzdem zu schließen.",
-    restore: "Back-up zurückspielen", restoreSub: "Ein Bericht oder eine Back-up-Datei dieses Monitors (.html oder .json). Vorher wird automatisch ein vollständiges Back-up der aktuellen Daten erstellt.", restoreBtn: "Wählen", restoreBusy: "Wird zurückgespielt…",
+    restore: "Back-up zurückspielen", restoreSub: "Eine Back-up-Datei dieses Monitors (.html). Vorher wird automatisch ein Back-up der aktuellen Daten erstellt.", backup: "Back-up erstellen", backupSub: "Alle Messungen dieser Batterie in einer Datei. Sie wird auf dieses Gerät heruntergeladen und auch in Home Assistant aufbewahrt (Ordner marstek_capacity_monitor/backup).", backupDone: (f) => `Back-up erstellt: ${f}`, restoreBtn: "Wählen", restoreBusy: "Wird zurückgespielt…",
     wipe: "Messungen löschen", wipeSub: "Beginnt die Messung dieser Batterie neu. Erst ein Back-up über Bericht machen.",
     wipeAsk: "Sicher? Löschen", wiped: "Messungen gelöscht.",
     ha: "Einstellungsfenster von Home Assistant",
@@ -603,7 +603,8 @@ class MarstekSettingsWindow {
     ];
     const rest = [
       `<div class="sec">${T.notify}</div>${this._toggle("notify")}${this._toggle("sidebar")}${this._chips("soc_sensitivity", tx.choices.sensitivity)}`,
-      `<div class="sec">${T.data}</div>${this._restoreRow()}
+      `<div class="sec">${T.data}</div>
+      <div class="f"><div class="nm"><span>${T.backup}<small>${T.backupSub}</small></span></div><div class="right"><button class="btn" data-a="backup">${T.apply}</button></div></div>${this._restoreRow()}
       <div class="f"><div class="nm"><span>${T.wipe}<small>${T.wipeSub}</small></span></div><div class="right"><button class="btn${this.s.wipeAsk ? " bad" : ""}" data-a="wipe">${this.s.wipeAsk ? T.wipeAsk : T.apply}</button></div></div>`,
     ];
     return this._cols([sensors, battery, rest]);
@@ -760,6 +761,7 @@ class MarstekSettingsWindow {
       case "pickfile": { const f = this.root.querySelector("input[data-file]"); if (f) f.click(); return; }
       case "rmode": this.s.restore = { ...this.s.restore, mode: v }; break;
       case "restore": return this._restore();
+      case "backup": return this._backup();
       case "save": return this._save();
       case "wipe": return this._wipe();
       case "ha": {
@@ -823,6 +825,25 @@ class MarstekSettingsWindow {
       this.s.msg = T.saved; this.s.bad = false;
       this._render();
       setTimeout(() => this._load(), 2000);
+    } catch (err) {
+      this._say(T.fail + ((err && err.message) || err), true);
+    }
+  }
+
+  // Make a back-up: kept in Home Assistant and downloaded to this device
+  async _backup() {
+    const T = this.T;
+    try {
+      const r = await this.hass.callWS({ type: "auth/sign_path", path: `/api/${MC_DOMAIN}/backup/${this.entryId}`, expires: 120 });
+      const resp = await fetch(r.path);
+      if (!resp.ok) throw new Error(`${resp.status}`);
+      const name = (/filename="([^"]+)"/.exec(resp.headers.get("Content-Disposition") || "") || [])[1] || "backup.html";
+      const url = URL.createObjectURL(await resp.blob());
+      const a = document.createElement("a");
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      this._say(T.backupDone(name));
     } catch (err) {
       this._say(T.fail + ((err && err.message) || err), true);
     }
