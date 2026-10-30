@@ -18,7 +18,7 @@ energy integration) -> Result (one session record per completed swing).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from statistics import median
 from typing import Any
 
@@ -50,6 +50,7 @@ MAX_BRIDGE_S = 600.0
 MAX_RECORDS = 500  # other swings kept (recent context only)
 MAX_FULL_RECORDS = 3000  # full discharges are kept for the whole warranty period
 TREND_MONTHS = 120  # monthly trend over 10 years (warranty period)
+FIRST_PERIOD_DAYS = 183  # first half year: chart per 2 weeks
 HISTORY_ITEMS = 10
 # SOC meter at the edges (0.5.1): energy per SOC point in the first or last
 # 3 points of a swing compared with the middle (30-80 %). A battery whose SOC
@@ -764,16 +765,11 @@ def evaluate(
     red_since = full[-red_count]["ts"] if red_count else None
     red_confirmed = status == "critical" and red_count >= CONFIRM_N
 
-    # Monthly trend, newest month first
-    by_month: dict[str, list[dict[str, Any]]] = {}
-    for r in full:
-        by_month.setdefault(datetime.fromtimestamp(r["ts"]).strftime("%Y-%m"), []).append(r)
-    trend = []
-    for key in sorted(by_month, reverse=True)[:TREND_MONTHS]:
-        recs = by_month[key]
+    def summary(recs: list[dict[str, Any]]) -> dict[str, Any] | None:
+        """One chart point: the middle of the measurements in a period."""
         mc = [c for c in (capacity_from_record(spec, r) for r in recs) if c]
         if not mc:
-            continue
+            return None
         mid = recs[len(recs) // 2]
         m_exp = expected_pct(
             spec,
@@ -786,9 +782,7 @@ def evaluate(
         good = sum(1 for x in rel if x["reliable"])
         whys = [x["why"] for x in rel if not x["reliable"]]
         ages = [x["ref_age_d"] for x in rel if x.get("ref_age_d") is not None]
-        trend.append(
-            {
-                "month": key,
+        return {
                 "kwh": round(median(mc), 2),
                 "pct": round(m_pct, 1),
                 "expected_pct": round(m_exp, 1),
@@ -800,7 +794,32 @@ def evaluate(
                 "why": max(set(whys), key=whys.count) if whys and good * 2 < len(rel) else None,
                 "ref_age_d": round(median(ages), 1) if ages else None,
             }
-        )
+
+    # Monthly trend, newest month first
+    by_month: dict[str, list[dict[str, Any]]] = {}
+    for r in full:
+        by_month.setdefault(datetime.fromtimestamp(r["ts"]).strftime("%Y-%m"), []).append(r)
+    trend = []
+    for key in sorted(by_month, reverse=True)[:TREND_MONTHS]:
+        point = summary(by_month[key])
+        if point:
+            trend.append({"month": key, **point})
+
+    # The first half year: a point per 2 weeks, so the chart fills sooner.
+    # Fewer than 3 measurements in a point = less reliable (open dot).
+    trend_2w = []
+    if full:
+        first = datetime.fromtimestamp(full[0]["ts"]).replace(hour=0, minute=0, second=0, microsecond=0)
+        if (datetime.fromtimestamp(now.timestamp()) - first).days < FIRST_PERIOD_DAYS:
+            by_2w: dict[int, list[dict[str, Any]]] = {}
+            for r in full:
+                by_2w.setdefault((datetime.fromtimestamp(r["ts"]) - first).days // 14, []).append(r)
+            for k in sorted(by_2w, reverse=True):
+                point = summary(by_2w[k])
+                if point:
+                    if point["n"] < 3 and point["reliable"]:
+                        point.update(reliable=False, why="few")
+                    trend_2w.append({"start": (first + timedelta(days=14 * k)).strftime("%Y-%m-%d"), **point})
 
     history = []
     for r in reversed(every_full[-HISTORY_ITEMS:]):
@@ -853,6 +872,10 @@ def evaluate(
         "impossible_limit_pct": IMPOSSIBLE_PCT,
         **sure,
         "trend": trend,
+        "trend_2w": trend_2w,
+        "first_measurement": (
+            datetime.fromtimestamp(full[0]["ts"]).strftime("%Y-%m-%d") if full else None
+        ),
         "history": history,
     }
 

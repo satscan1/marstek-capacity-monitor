@@ -29,7 +29,7 @@ Alle waarden stel je in bij het toevoegen van een batterij. Later wijzigen doe j
 
 | Entiteit | Wat |
 |---|---|
-| `sensor.marstek_mt1_measured_capacity` | Gemeten capaciteit (kWh). Attributen: `trend` (per maand, nieuw → oud) en `history` (laatste 10 volledige ontladingen), allebei met `temp_c` als er celtemperatuur-sensoren zijn ingesteld |
+| `sensor.marstek_mt1_measured_capacity` | Gemeten capaciteit (kWh). Attributen: `trend` (per maand, nieuw → oud), `trend_2w` (alleen het eerste half jaar: per 2 weken vanaf `first_measurement`, de grafiek op de kaart gebruikt die) en `history` (laatste 10 volledige ontladingen), allebei met `temp_c` als er celtemperatuur-sensoren zijn ingesteld |
 | `sensor.marstek_mt1_capacity_pct` | Nog beschikbaar: gemeten capaciteit als % van nieuw |
 | `sensor.marstek_mt1_expected_capacity` | Specificatie fabrikant (%) bij het huidige aantal cycli. Attributen: `cycles`, `initial_cycles` (cycli vóór de monitoring), `cycle_counter` (de teller waar die vandaan komt, leeg = zelf ingevuld) |
 | `sensor.marstek_mt1_margin` | Marge ten opzichte van de specificatie (kWh) |

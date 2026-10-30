@@ -29,7 +29,7 @@ All values are set when you add a battery. Change them later with the **gear ⚙
 
 | Entity | What |
 |---|---|
-| `sensor.marstek_mt1_measured_capacity` | Measured capacity (kWh). Attributes: `trend` (per month, newest → oldest) and `history` (last 10 full discharges), both with `temp_c` when cell temperature sensors are set |
+| `sensor.marstek_mt1_measured_capacity` | Measured capacity (kWh). Attributes: `trend` (per month, newest → oldest), `trend_2w` (first half year only: per 2 weeks from `first_measurement`, the chart on the card uses it) and `history` (last 10 full discharges), both with `temp_c` when cell temperature sensors are set |
 | `sensor.marstek_mt1_capacity_pct` | Remaining capacity: measured capacity as % of new |
 | `sensor.marstek_mt1_expected_capacity` | Manufacturer spec (%) at the current number of cycles. Attributes: `cycles`, `initial_cycles` (cycles before monitoring), `cycle_counter` (the counter it came from, empty = entered by hand) |
 | `sensor.marstek_mt1_margin` | Margin vs spec (kWh) |

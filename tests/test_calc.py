@@ -153,6 +153,16 @@ def test_evaluate_median_status_and_trend():
     assert res["trend"][0]["n"] == 2
     assert res["trend"][0]["status"] in ("good", "attention")
     assert res["warranty_end"] == date(2034, 2, 1)
+    # first half year: also a point per 2 weeks, from the first measurement
+    assert res["first_measurement"] == "2026-08-05"
+    w = res["trend_2w"]
+    # 5 Aug, 6 Sep, 7 + 8 Oct -> periods from 5 Aug, 2 Sep and 30 Sep
+    assert [p["start"] for p in w] == ["2026-09-30", "2026-09-02", "2026-08-05"]
+    assert [p["n"] for p in w] == [2, 1, 1]
+    assert w[-1]["reliable"] is False and w[-1]["why"] == "few"
+    # after half a year: monthly only
+    later = calc.evaluate(spec, recs, 1353.0, datetime(2027, 3, 1, 12, 0))
+    assert later["trend_2w"] == [] and later["trend"]
 
 
 def test_evaluate_without_measurement():
