@@ -51,7 +51,7 @@ This is a **specification, not a warranty**. Marstek gives no capacity guarantee
 |---|---|
 | 🟢 Green | Within spec, or at most 5 points below |
 | 🟠 Orange | Below spec, but above 75 % |
-| 🔴 Red | **75 % or lower**: report it to Marstek **via the Marstek app**. From 0.5.5: after 5 full discharges in a row at or below 75 %, one message under Settings → Repairs and on the phone, with the hint to attach the Marstek report |
+| 🔴 Red | **75 % or lower**: report it to Marstek **via the Marstek app**. From 1.0.0: after 5 full discharges in a row at or below 75 %, one message under Settings → Repairs and on the phone, with the hint to attach the Marstek report |
 
 The margin shows how many kWh the battery is above or below the spec. All thresholds can be adjusted.
 
@@ -120,8 +120,8 @@ The monitor sees by itself how long the battery stayed full and at rest (4 hours
 
 * **Where:** on the card (buttons **SOC** and **Cells** with ⚠ or 🔧), as a message on your phone (Home Assistant app) and under **Settings → Repairs**.
 * **Dismiss:** one click is enough: **Dismiss** on the card, in the message on your phone, or **Ignore** under Repairs. It applies everywhere. The message only comes back with a new series of occurrences.
-* **Completely off:** per battery under **Configure → Notifications** (on by default). The card keeps showing the state; you just get no more messages.
-* **Sensitivity:** per battery under **Configure**, separately for SOC drift and cell calibration: *Off* (only on the card, never attention or advice), *Relaxed* (SOC 8 %, cells 3× normal), *Normal* (5 %, 2×, default) or *Strict* (3 %, 1.5×).
+* **Completely off:** per battery with the gear ⚙ on the card → **Notifications** (on by default). The card keeps showing the state; you just get no more messages.
+* **Sensitivity:** per battery with the gear ⚙ on the card, separately for SOC drift and cell calibration: *Off* (only on the card, never attention or advice), *Relaxed* (SOC 8 %, cells 3× normal), *Normal* (5 %, 2×, default) or *Strict* (3 %, 1.5×).
 * **Extra sensors found:** cell voltages or a *total discharged* counter that are not used yet also show under Repairs; add them there with one click. See [Configuration](02-configuration.md#extra-sensors-found).
 * For automations: the sensors `sensor.marstek_<id>_soc_health` and `sensor.marstek_<id>_cell_health` (ok / letop / advies), the event `marstek_capacity_monitor_advice` and the service `marstek_capacity_monitor.dismiss_advice`.
 

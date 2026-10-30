@@ -31,7 +31,7 @@ Arranging it yourself? Use Home Assistant's standard **Sections** layout. An exa
 1. **Status**: *Good*, *Below spec*, *Report to Marstek (app)* or *Collecting data*. The colour follows the latest measurement.
 2. **Is the monitor working?** Green: working, with the number of full discharges measured. Blue: still collecting data. Orange or red: no new data, or a sensor is missing. While collecting data or during a full discharge, a second line tells the next step; otherwise point at the line to see it.
 3. **Chart · SOC · Cells**: press *Chart* to see the chart in place of the capacities (press again to go back); the card keeps its height. *SOC* and *Cells* open a window in the middle of the screen; ✕ or a click next to it closes it. A ⚠ (attention) or 🔧 (advice) on *SOC* or *Cells* means: look inside. *Cells* only appears when the cell voltages are filled in.
-4. **Settings** (cog): takes you to this battery under Settings → Devices & services; the cog there opens *Configure*.
+4. **Settings** (gear): opens the settings window of this battery, with the tabs Standard and Experiment (from 1.0.0). See [Configuration](02-configuration.md).
 5. **Three capacities**: *Rated* (on the type plate), *Usable* (rated minus the reserve the battery keeps) and *Measured* (what really comes out now, and what percentage of usable that is).
 6. **Bar**: the measured capacity, with a white mark for the manufacturer spec and a red mark at 75 %.
 7. **Margin**: how far above (+) or below (−) the manufacturer spec you are, with the cycles and the age. Point at it for the spec in kWh and where the cycles before monitoring come from.

@@ -41,7 +41,7 @@ Ga naar **Instellingen → Apparaten en diensten → Voeg integratie toe → Mar
 3. Kies het model en vul de installatiedatum in. Bij een bekend model (Venus E v1/v2, v3, 4.0, Max of Pro, Venus C of Venus D) worden de fabrieksgegevens voor je ingevuld (Venus D en Venus E Pro: ook het aantal pakketten). Bij een ander model vul je de fabrieksgegevens zelf in.
    Een **Venus C** kan zich melden met dezelfde code als een Venus E v1/v2. Kies dan zelf **Venus C**, ook als Venus E v1 / v2 al is aangevinkt.
 
-Alle fabrieksgegevens kun je later aanpassen via **Configureer**.
+Alle fabrieksgegevens kun je later aanpassen met het tandwiel ⚙ op de kaart.
 
 Bij het toevoegen kijkt de tool in de geschiedenis van Home Assistant (meestal de laatste 10 dagen) of er al een volledige ontlading was. Zo ja, dan staat er meteen een eerste meting. Anders toont de batterij **verzamelt data** tot de eerste volledige ontlading (≥ 95 % → ≤ 15 %). De statusregel op de kaart vertelt wat de volgende stap is.
 
@@ -53,7 +53,7 @@ Vanaf versie 0.4.0 heeft de integratie zijn eigen kaarten. Je hoeft niets extra'
 
 Na het toevoegen van de eerste batterij en een herstart staat **Batterijcapaciteit** vanzelf in de zijbalk, met al je batterijen erin (1 tot 6, in de [indeling](06-dashboard-gallery.nl.md#indeling) van de galerij). Je hoeft niets in te stellen. Dit dashboard pas je niet aan; wil je een eigen indeling, maak dan zelf een dashboard zoals hieronder.
 
-- **Uitzetten:** Instellingen → Apparaten en diensten → Marstek Capacity Monitor → **Configureren** → **Menu-item in de zijbalk**. Staat het bij één batterij uit, dan verdwijnt het hele menu-item.
+- **Uitzetten:** tandwiel ⚙ op de kaart → **Menu-item in de zijbalk**. Staat het bij één batterij uit, dan verdwijnt het hele menu-item.
 - **Verborgen of op de verkeerde plek?** Houd **Home Assistant** bovenaan de zijbalk ingedrukt (of ga naar je profiel → zijbalk aanpassen). Daar zet je items terug, verberg je ze of verschuif je ze. Dat geldt per apparaat: op je telefoon stel je het apart in.
 - Heb je zelf al een dashboard op het adres `/marstek-capacity`, dan laat de monitor dat met rust.
 

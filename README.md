@@ -20,7 +20,9 @@ Track in Home Assistant whether your Marstek home battery keeps its capacity, me
 - **Shows whether it works:** a status per battery, and "collecting data" until the first full discharge.
 - **Optional cell balance check:** the spread between the highest and lowest cell after a full charge.
 - **SOC drift and cell calibration** (new in 0.5): the monitor sees when the SOC meter drifts or the cells get out of balance, and only for a pattern gives a message with what to do. One click dismisses it.
-- **Cell temperature as context (experimental)** and buttons **Chart · SOC · Cells** on the battery card.
+- **Cell temperature as context (experimental)** and buttons **Chart · SOC · Cells · Report** on the battery card.
+- **Settings on the card** (new in 1.0.0): the gear opens an own settings window with the tabs Standard and Experiment, an ⓘ with the explanation for every setting, sensors to choose with their value of now, and making or restoring a back-up.
+- **Share your data, anonymously:** Report → Anonymous to share, then [Issues → Share data (anonymous)](https://github.com/satscan1/marstek-capacity-monitor/issues/new?template=share-data.yml). That way batteries can be compared.
 - **Light and local:** everything inside Home Assistant, no InfluxDB or cloud.
 
 ## Install in 3 steps
@@ -61,7 +63,11 @@ Changes per version: [CHANGELOG](CHANGELOG.md).
 
 ![Model](screenshots/03-model.png)
 
-**4. Change everything later under Configure: factory data and warranty…**
+**4. Change everything later with the gear ⚙ on the card: an own settings window (from 1.0.0)**
+
+![Settings window](screenshots/07-settings-window.png)
+
+**Or in the settings screen of Home Assistant (Configure): factory data and warranty…**
 
 ![Factory data](screenshots/03-factory-data.png)
 

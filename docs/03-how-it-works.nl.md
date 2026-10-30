@@ -51,7 +51,7 @@ Dit is een **specificatie, geen garantie**. Marstek geeft geen capaciteitsgarant
 |---|---|
 | 🟢 Groen | Volgens specificatie, of maximaal 5 punten eronder |
 | 🟠 Oranje | Onder specificatie, maar boven 75 % |
-| 🔴 Rood | **75 % of lager**: meld het bij Marstek **via de Marstek-app**. Vanaf 0.5.5: na 5 volledige ontladingen op rij op of onder 75 % één melding onder Instellingen → Reparaties en op de telefoon, met de tip het Marstek-rapport mee te sturen |
+| 🔴 Rood | **75 % of lager**: meld het bij Marstek **via de Marstek-app**. Vanaf 1.0.0: na 5 volledige ontladingen op rij op of onder 75 % één melding onder Instellingen → Reparaties en op de telefoon, met de tip het Marstek-rapport mee te sturen |
 
 De marge laat zien hoeveel kWh de batterij boven of onder de specificatie zit. Alle grenzen kun je aanpassen.
 
@@ -120,8 +120,8 @@ De monitor ziet zelf hoe lang de batterij vol en in rust stond (4 uur bij let op
 
 * **Waar:** op de kaart (knoppen **SOC** en **Cellen** met ⚠ of 🔧), als bericht op je telefoon (Home Assistant-app) en onder **Instellingen → Reparaties**.
 * **Wegklikken:** één klik is genoeg: **Wegklikken** op de kaart, in het bericht op je telefoon, of **Negeren** onder Reparaties. Dat geldt overal. De melding komt pas terug bij een nieuwe reeks voorvallen.
-* **Helemaal uit:** per batterij via **Configureren → Seintjes** (staat standaard aan). De kaart blijft de stand tonen; je krijgt alleen geen berichten meer.
-* **Gevoeligheid:** per batterij onder **Configureren**, apart voor SOC-drift en celkalibratie: *Uit* (alleen op de kaart, nooit let op of advies), *Ruim* (SOC 8 %, cellen 3× normaal), *Normaal* (5 %, 2×, standaard) of *Extra* (3 %, 1,5×).
+* **Helemaal uit:** per batterij via het tandwiel ⚙ op de kaart → **Seintjes** (staat standaard aan). De kaart blijft de stand tonen; je krijgt alleen geen berichten meer.
+* **Gevoeligheid:** per batterij via het tandwiel ⚙ op de kaart, apart voor SOC-drift en celkalibratie: *Uit* (alleen op de kaart, nooit let op of advies), *Ruim* (SOC 8 %, cellen 3× normaal), *Normaal* (5 %, 2×, standaard) of *Extra* (3 %, 1,5×).
 * **Extra sensoren gevonden:** celspanningen of een teller *totaal ontladen* die nog niet gebruikt worden, staan ook onder Reparaties; daar voeg je ze met één klik toe. Zie [Instellingen](02-configuration.nl.md#extra-sensoren-gevonden).
 * Voor automatiseringen: de sensoren `sensor.marstek_<id>_soc_health` en `sensor.marstek_<id>_cell_health` (ok / letop / advies), het event `marstek_capacity_monitor_advice` en de dienst `marstek_capacity_monitor.dismiss_advice`.
 

@@ -19,7 +19,7 @@ Integrations such as [marstek_venus_modbus](https://github.com/ViperRNMC/marstek
 
 ## Factory data per model
 
-When adding a battery you pick the model; these values are filled in. You can change them later under **Configure**.
+When adding a battery you pick the model; these values are filled in. You can change them later with the gear ⚙ on the card.
 
 | Model | Rated capacity | Reserve (DoD) | Cycles · capacity after | Warranty period |
 |---|---|---|---|---|
@@ -79,4 +79,4 @@ Checked on 20 October 2026 (new models on 22 October 2026). Where sources disagr
 | Venus E Pro | 2,080 Wh per pack (41.6 V), base unit plus up to 5 extra packs · 90 % DoD · more than 10,000 cycles (25 °C) · LAN with Modbus | [Marstek – Venus E Pro brochure (PDF)](https://cdn.shopify.com/s/files/1/0746/1575/0952/files/VENUS_E_Pro_EU_EN.pdf), [product page](https://marstekenergy.com/de-de/products/venus-e-pro) |
 | Warranty | Material and manufacturing defects; no capacity percentage; normal wear and use with third-party hardware/software excluded | [Marstek – Warranty policy](https://marstekenergy.com/en-us/pages/warranty) |
 
-Check your own terms. You can change the values under **Settings → Devices & services → Marstek Capacity Monitor → Configure**.
+Check your own terms. You can change the values with the gear ⚙ on the card (or under Settings → Devices & services → Marstek Capacity Monitor → Configure).

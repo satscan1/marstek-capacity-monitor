@@ -41,7 +41,7 @@ Go to **Settings → Devices & services → Add integration → Marstek Capacity
 3. Choose the model and fill in the installation date. For a known model (Venus E v1/v2, v3, 4.0, Max or Pro, Venus C or Venus D) the factory data are filled in for you (Venus D and Venus E Pro: also the number of packs). For another model you enter the factory data yourself.
    A **Venus C** can report the same code as a Venus E v1/v2. Then pick **Venus C** yourself, also when Venus E v1 / v2 is already selected.
 
-You can change all factory data later under **Configure**.
+You can change all factory data later with the gear ⚙ on the card.
 
 When you add a battery, the tool looks in the Home Assistant history (usually the last 10 days) for a full discharge that already happened. If there is one, you get a first measurement right away. Otherwise the battery shows **collecting data** until its first full discharge (≥ 95 % → ≤ 15 %). The status line on the card tells you the next step.
 
@@ -53,7 +53,7 @@ From version 0.4.0 the integration has its own cards. You do not need to install
 
 After adding the first battery and a restart, **Battery capacity** appears in the sidebar by itself, with all your batteries in it (1 to 6, in the [layout](06-dashboard-gallery.md#layout) of the gallery). Nothing to set up. You cannot change this dashboard; for a layout of your own, make a dashboard yourself as described below.
 
-- **Turn it off:** Settings → Devices & services → Marstek Capacity Monitor → **Configure** → **Menu item in the sidebar**. Off for one battery means the whole menu item disappears.
+- **Turn it off:** gear ⚙ on the card → **Menu item in the sidebar**. Off for one battery means the whole menu item disappears.
 - **Hidden or in the wrong place?** Long-press **Home Assistant** at the top of the sidebar (or go to your profile → change the sidebar). There you bring items back, hide them or move them. This is per device: set it separately on your phone.
 - If you already have a dashboard of your own at `/marstek-capacity`, the monitor leaves it alone.
 
