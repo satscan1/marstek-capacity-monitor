@@ -39,7 +39,7 @@ Selbst anordnen? Verwende den Ansichtstyp **Abschnitte** (Sections) von Home Ass
 
 **Das Diagramm** zeigt die jüngsten 3 Jahre. Jeder Punkt ist ein Monat: wie viel der nutzbaren Kapazität damals noch vorhanden war. ● gemessen, kalibriert · ○ weniger zuverlässig (in den 14 Tagen davor nicht ganz voll, oder Zellen kälter als 5 °C) · graue gestrichelte Linie: erwartet laut Herstellerangabe · rote gestrichelte Linie: an Marstek melden (75 %). Zeige auf einen Punkt für Wert, Herstellerangabe und Zelltemperatur in diesem Monat.
 
-**SOC und Zellen** beantworten *Stimmt meine SOC-Anzeige noch?* (pro Monat *Tage ganz voll* und *SOC-Anzeige stimmte*) und *Sind meine Zellen noch im Gleichgewicht?* (Zellspannungsdifferenz pro Monat). Bei Achtung oder Empfehlung steht im Fenster, was zu tun ist, und eine Schaltfläche **Ausblenden**.
+**SOC und Zellen** beantworten *Stimmt meine SOC-Anzeige noch?* (pro Monat *Tage auf 100 % geladen* und *SOC-Anzeige stimmte*) und *Sind meine Zellen noch im Gleichgewicht?* (Zellspannungsdifferenz pro Monat). Bei Achtung oder Empfehlung steht im Fenster, was zu tun ist, und eine Schaltfläche **Ausblenden**.
 
 Hast du Sensoren für die höchste und niedrigste Zellspannung verknüpft, steht die **Zellspannungsdifferenz nach Vollladung** im Feld **Zellen** (bis 0.4 unter dem Trend).
 

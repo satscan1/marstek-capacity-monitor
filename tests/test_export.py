@@ -100,3 +100,14 @@ def test_the_report_cannot_be_broken_by_text_in_the_data():
     html = ex.render_html(ex.build("full", bat, DATA, SUMMARY, META))
     assert html.count("</script>") == 2  # data block and download script only
     assert ex.parse(html)["battery"]["name"] == "</script><b>x</b>"
+
+
+def test_model_name_in_the_report() -> None:
+    """1.0.2: an empty model says where to set it; 'other' gets a name."""
+    from custom_components.marstek_capacity_monitor.export import _L, _model_name
+
+    for lang in ("nl", "en", "de"):
+        K = _L[lang]["k"]
+        assert "⚙" in _model_name(None, K)
+        assert _model_name("other", K) == K["model_other"] != "–"
+        assert _model_name("venus_e_v12", K) == "Venus E v1 / v2"

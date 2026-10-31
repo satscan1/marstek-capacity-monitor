@@ -108,6 +108,16 @@ MODEL_NAMES = {
 }
 
 
+def _model_name(model: str | None, K: dict[str, str]) -> str:
+    """The model as the report shows it. Batteries added before the model
+    choice existed have none: say so and where to set it (1.0.2)."""
+    if not model:
+        return K["model_none"]
+    if model == "other":
+        return K["model_other"]
+    return MODEL_NAMES.get(str(model), str(model))
+
+
 class ExportError(ValueError):
     """The file is not a monitor export, or from a newer monitor."""
 
@@ -303,7 +313,7 @@ _L: dict[str, dict[str, Any]] = {
                 "settings": "Instellingen", "runtime": "Werking", "about": "Over dit rapport"},
         "chips": {"summary": "Samenvatting", "share": "Dit deel je", "months": "Per maand", "meas": "Metingen",
                   "soc": "SOC", "cells": "Cellen", "settings": "Instellingen", "runtime": "Werking", "about": "Over"},
-        "k": {"battery": "Batterij", "model": "Model", "status": "Status", "measured": "Gemeten (midden laatste 3)",
+        "k": {"battery": "Batterij", "model": "Model", "model_none": "Niet ingevuld (kies het bij ⚙ Instellingen op de kaart)", "model_other": "Ander model", "status": "Status", "measured": "Gemeten (midden laatste 3)",
               "expected": "Specificatie fabrikant", "margin": "Marge t.o.v. specificatie", "since": "Sinds begin meting",
               "cycles": "Volle cycli", "age": "Leeftijd", "count": "Volledige ontladingen gemeten",
               "first": "Eerste meting", "last": "Laatste meting", "installed": "Installatie", "code": "Code (anoniem)",
@@ -317,7 +327,7 @@ _L: dict[str, dict[str, Any]] = {
         "after": "{eol} % na {life} cycli",
         "th_months": ["Maand", "Gemeten %", "Spec. %", "Verschil", "Metingen", "Temp.", "Betrouwbaar"],
         "th_meas": ["Datum", "SOC", "DC-energie", "Capaciteit", "% van nieuw", "Temp.", "Betrouwbaar"],
-        "th_soc": ["Maand", "Dagen vol", "Grootste afwijking", "Bijladen op 99 %", "Sprong", "Langst niet vol"],
+        "th_soc": ["Maand", "Dagen tot 100 % geladen", "Grootste afwijking", "Bijladen op 99 %", "Sprong", "Langst niet vol"],
         "th_cells": ["Maand", "Celverschil", "Metingen"],
         "rel": {"yes": "● ja", "no": "○ minder"},
         "why": {"no_calibration": "niet helemaal vol in de 14 dagen ervoor", "cold": "cellen kouder dan 5 °C",
@@ -329,7 +339,7 @@ _L: dict[str, dict[str, Any]] = {
         "level": {"ok": "in orde", "letop": "let op", "advies": "advies"},
         "share": [
             ("Metingen", "elke lading en ontlading: tijd, SOC van/naar, DC-energie, duur, geldig of niet met reden, temperatuur"),
-            ("SOC-gebeurtenissen", "ijkpunten, sprongen, bijladen op 99 %, dagen vol"),
+            ("SOC-gebeurtenissen", "ijkpunten, sprongen, bijladen op 99 %, dagen tot 100 % geladen"),
             ("Cellen", "celverschil na volle lading (als ingesteld)"),
             ("Batterij", "model, capaciteit, specificatie, installatie als jaar en maand, koppeling"),
             ("Niet", "je naam en de naam van je batterij, sensornamen, codes van je installatie, je adres of woonplaats, weggeklikte meldingen, de lopende meting"),
@@ -347,7 +357,7 @@ _L: dict[str, dict[str, Any]] = {
                 "settings": "Settings", "runtime": "Runtime", "about": "About this report"},
         "chips": {"summary": "Summary", "share": "You share", "months": "Per month", "meas": "Measurements",
                   "soc": "SOC", "cells": "Cells", "settings": "Settings", "runtime": "Runtime", "about": "About"},
-        "k": {"battery": "Battery", "model": "Model", "status": "Status", "measured": "Measured (middle of last 3)",
+        "k": {"battery": "Battery", "model": "Model", "model_none": "Not set (choose it under ⚙ Settings on the card)", "model_other": "Other model", "status": "Status", "measured": "Measured (middle of last 3)",
               "expected": "Manufacturer spec", "margin": "Margin to spec", "since": "Since monitoring began",
               "cycles": "Full cycles", "age": "Age", "count": "Full discharges measured",
               "first": "First measurement", "last": "Latest measurement", "installed": "Installed", "code": "Code (anonymous)",
@@ -361,7 +371,7 @@ _L: dict[str, dict[str, Any]] = {
         "after": "{eol} % after {life} cycles",
         "th_months": ["Month", "Measured %", "Spec %", "Difference", "Measurements", "Temp.", "Reliable"],
         "th_meas": ["Date", "SOC", "DC energy", "Capacity", "% of new", "Temp.", "Reliable"],
-        "th_soc": ["Month", "Days full", "Largest deviation", "Top-up at 99 %", "Jump", "Longest not full"],
+        "th_soc": ["Month", "Days charged to 100 %", "Largest deviation", "Top-up at 99 %", "Jump", "Longest not full"],
         "th_cells": ["Month", "Cell spread", "Measurements"],
         "rel": {"yes": "● yes", "no": "○ less"},
         "why": {"no_calibration": "not completely full in the 14 days before", "cold": "cells colder than 5 °C",
@@ -373,7 +383,7 @@ _L: dict[str, dict[str, Any]] = {
         "level": {"ok": "fine", "letop": "attention", "advies": "advice"},
         "share": [
             ("Measurements", "every charge and discharge: time, SOC from/to, DC energy, duration, valid or not with reason, temperature"),
-            ("SOC events", "calibration points, jumps, top-up at 99 %, days full"),
+            ("SOC events", "calibration points, jumps, top-up at 99 %, days charged to 100 %"),
             ("Cells", "cell spread after a full charge (when set up)"),
             ("Battery", "model, capacity, spec, installation as year and month, connection"),
             ("Not", "your name and the name of your battery, sensor names, ids of your installation, your address or town, dismissed notices, the running measurement"),
@@ -391,7 +401,7 @@ _L: dict[str, dict[str, Any]] = {
                 "settings": "Einstellungen", "runtime": "Betrieb", "about": "Über diesen Bericht"},
         "chips": {"summary": "Zusammenfassung", "share": "Du teilst", "months": "Pro Monat", "meas": "Messungen",
                   "soc": "SOC", "cells": "Zellen", "settings": "Einstellungen", "runtime": "Betrieb", "about": "Über"},
-        "k": {"battery": "Batterie", "model": "Modell", "status": "Status", "measured": "Gemessen (Mittelwert letzte 3)",
+        "k": {"battery": "Batterie", "model": "Modell", "model_none": "Nicht angegeben (wählbar unter ⚙ Einstellungen auf der Karte)", "model_other": "Anderes Modell", "status": "Status", "measured": "Gemessen (Mittelwert letzte 3)",
               "expected": "Herstellerangabe", "margin": "Abstand zur Herstellerangabe", "since": "Seit Beginn der Messung",
               "cycles": "Volle Zyklen", "age": "Alter", "count": "Vollständige Entladungen gemessen",
               "first": "Erste Messung", "last": "Letzte Messung", "installed": "Inbetriebnahme", "code": "Code (anonym)",
@@ -405,7 +415,7 @@ _L: dict[str, dict[str, Any]] = {
         "after": "{eol} % nach {life} Zyklen",
         "th_months": ["Monat", "Gemessen %", "Herst. %", "Differenz", "Messungen", "Temp.", "Zuverlässig"],
         "th_meas": ["Datum", "SOC", "DC-Energie", "Kapazität", "% von neu", "Temp.", "Zuverlässig"],
-        "th_soc": ["Monat", "Tage voll", "Größte Abweichung", "Nachladen bei 99 %", "Sprung", "Am längsten nicht voll"],
+        "th_soc": ["Monat", "Tage auf 100 % geladen", "Größte Abweichung", "Nachladen bei 99 %", "Sprung", "Am längsten nicht voll"],
         "th_cells": ["Monat", "Zellspannungsdifferenz", "Messungen"],
         "rel": {"yes": "● ja", "no": "○ weniger"},
         "why": {"no_calibration": "in den 14 Tagen davor nicht ganz voll", "cold": "Zellen kälter als 5 °C",
@@ -417,7 +427,7 @@ _L: dict[str, dict[str, Any]] = {
         "level": {"ok": "in Ordnung", "letop": "Achtung", "advies": "Empfehlung"},
         "share": [
             ("Messungen", "jede Ladung und Entladung: Zeit, SOC von/bis, DC-Energie, Dauer, gültig oder nicht mit Grund, Temperatur"),
-            ("SOC-Ereignisse", "Kalibrierpunkte, Sprünge, Nachladen bei 99 %, Tage voll"),
+            ("SOC-Ereignisse", "Kalibrierpunkte, Sprünge, Nachladen bei 99 %, Tage auf 100 % geladen"),
             ("Zellen", "Zellspannungsdifferenz nach Vollladung (wenn eingerichtet)"),
             ("Batterie", "Modell, Kapazität, Herstellerangabe, Inbetriebnahme als Jahr und Monat, Anbindung"),
             ("Nicht", "dein Name und der Name deiner Batterie, Sensornamen, Kennungen deiner Installation, deine Adresse oder dein Wohnort, ausgeblendete Hinweise, die laufende Messung"),
@@ -512,7 +522,7 @@ def render_html(export: dict[str, Any]) -> str:
     sections: list[tuple[str, str]] = []
     summary_rows = [
         (K["battery"] if v == "full" else K["code"], name),
-        (K["model"], escape(MODEL_NAMES.get(str(bat.get("model")), str(bat.get("model") or "–")))),
+        (K["model"], escape(_model_name(bat.get("model"), K))),
         (K["status"], f'<span class="{_cls(status)}">{st}</span>'),
         (K["measured"], f'{n(s.get("measured_kwh"), 2)} kWh · {n(s.get("measured_pct"))} %'),
         (K["expected"], f'{n(s.get("expected_kwh"), 2)} kWh · {n(s.get("expected_pct"))} %'),
@@ -577,7 +587,7 @@ def render_html(export: dict[str, Any]) -> str:
 
     yn = lambda x: L["yes"] if x else L["no"]  # noqa: E731
     settings = [
-        (K["model"], escape(MODEL_NAMES.get(str(bat.get("model")), str(bat.get("model") or "–")))),
+        (K["model"], escape(_model_name(bat.get("model"), K))),
         (K["nominal"], f'{n(bat.get("nominal_kwh"), 2)} kWh'),
         (K["usable"], f'{n(bat.get("usable_kwh"), 2)} kWh'),
         (K["spec"], L["after"].format(eol=n(bat.get("cycle_eol_pct"), 0), life=n(bat.get("cycle_life"), 0))),
