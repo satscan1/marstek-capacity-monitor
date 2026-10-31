@@ -26,6 +26,7 @@ from .const import (
     CONF_CYCLE_EOL,
     CONF_CYCLE_LIFE,
     CONF_INITIAL_CYCLES,
+    CONF_MODEL,
     CONF_NAME,
     CONF_NOMINAL_KWH,
     CONF_NOTIFY,
@@ -44,6 +45,7 @@ from .const import (
     DEFAULTS,
     DOMAIN,
     HIDDEN_OPTIONS,
+    MODELS,
     RESTORE_MODES,
     SENSITIVITIES,
     SIGN_MODES,
@@ -64,6 +66,7 @@ NUMBERS: dict[str, tuple[float, float, float]] = {
 CELL_SENSORS = (CONF_CELL_MAX_ENTITY, CONF_CELL_MIN_ENTITY, CONF_TEMP_MAX_ENTITY, CONF_TEMP_MIN_ENTITY)
 BOOLS = (CONF_NOTIFY, CONF_SIDEBAR)
 CHOICES = {
+    CONF_MODEL: MODELS,
     CONF_POWER_SIGN: SIGN_MODES,
     CONF_SOC_SENSITIVITY: SENSITIVITIES,
     CONF_CELL_SENSITIVITY: SENSITIVITIES,
@@ -89,6 +92,8 @@ def _load_texts() -> None:
             "modes": data["selector"].get("restore_mode", {}).get("options", {}),
             "choices": {
                 CONF_POWER_SIGN: data["selector"]["power_sign"]["options"],
+                # Short names for the chips: "Venus E v3", not "Venus E v3 (5,12 kWh)"
+                CONF_MODEL: {k: v.split(" (")[0].split(":")[0] for k, v in data["selector"]["model"]["options"].items()},
                 "sensitivity": data["selector"]["sensitivity"]["options"],
             },
         }
@@ -195,6 +200,9 @@ def validate(current: dict[str, Any], changes: dict[str, Any]) -> tuple[dict[str
         elif key in BOOLS:
             values[key] = bool(raw)
         elif key in CHOICES:
+            if key == CONF_MODEL and raw is None:
+                values[key] = None
+                continue
             if raw not in CHOICES[key]:
                 errors[key] = "unknown"
                 continue
@@ -240,6 +248,9 @@ def ws_save(hass: HomeAssistant, connection, msg: dict[str, Any]) -> None:
     # A changed start value is the user's own, no longer the counter's
     if float(values[CONF_INITIAL_CYCLES]) != float(current.get(CONF_INITIAL_CYCLES) or 0):
         kept[CONF_CYCLE_COUNTER] = ""
+    if values.get(CONF_MODEL) is None:
+        values.pop(CONF_MODEL, None)  # never store an empty model
+        current.pop(CONF_MODEL, None)
     if values != current:
         # Saving reloads the battery (update listener), as the form does
         hass.config_entries.async_update_entry(entry, options={**kept, **values})

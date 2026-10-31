@@ -103,6 +103,7 @@
       "settings": {
         "title": "Factory data and warranty",
         "data": {
+          "model": "Model",
           "nominal_kwh": "Rated capacity (manufacturer)",
           "reserve_kwh": "Internal reserve (not usable)",
           "purchase_date": "Installation date",
@@ -123,6 +124,7 @@
           "cell_sensitivity": "Sensitivity cell calibration"
         },
         "data_description": {
+          "model": "Only for the name in the report and for the advice. Your factory data below do not change with it.",
           "nominal_kwh": "Total capacity of the cells, e.g. 5.12 kWh.",
           "reserve_kwh": "Part of the nominal capacity the battery never releases. Datasheet: 90 % DoD, so 5.12 − 0.51 = 4.61 kWh = 100 % of new.",
           "cycle_life": "E.g. 6000 full cycles.",
