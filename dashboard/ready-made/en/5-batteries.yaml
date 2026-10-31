@@ -113,11 +113,11 @@ button_card_templates:
               last: v => ` (zuletzt ${v} %)`, lastNoFull: ' (lange nicht ganz voll)',
               letBox: 'Um SOC-Drift vorzubeugen: entlade die Batterie <b>einmal</b> bis zur Entladegrenze und lade sie danach in einem Zug voll, bis das Laden wirklich stoppt.',
               advBox: 'Empfehlung: entlade die Batterie <b>zweimal</b> bis zur Entladegrenze und lade sie jedes Mal in einem Zug voll, bis das Laden wirklich stoppt. Der Monitor erkennt das selbst; danach verschwindet diese Empfehlung.',
-              full: 'Tage ganz voll', ok: 'SOC-Anzeige stimmte', off: v => `⚠ ${v} %`,
+              full: 'Tage auf 100 % geladen', ok: 'SOC-Anzeige stimmte', off: v => `⚠ ${v} %`,
               dev: v => `größte Abweichung ${v} %`, b99: v => `beim Vollladen noch ${v} % nachgeladen, während sie 99 % zeigte`, jump: v => `größter Sprung ${v} %`,
               hang: v => `blieb beim Entladen ${v} % lang auf 100 %`, nofull: v => `am längsten nicht ganz voll: ${v} Tage`,
               words: {up: 'höher', down: 'niedriger', flat: 'stabil', good: 'gut', bad: 'weicht ab'},
-              sub: l => `✓ = weniger als ${l} % daneben · ⚠ = so viel daneben. Details beim Zeigen auf ein Feld.`,
+              sub: l => `✓ = weniger als ${l} % daneben · ⚠ = so viel daneben. Details unter der Tabelle; mehr beim Zeigen auf ein Feld. Ein Tag auf 100 % kalibriert die SOC-Anzeige; das ist keine Kapazitätsmessung.`,
               none: 'Noch keine Daten: der Monitor zeichnet das ab jetzt auf.'},
             cell: {pill: 'Zellen', q: 'Sind meine Zellen noch im Gleichgewicht?',
               normal: b => ` (normal ${b} mV)`,
@@ -176,11 +176,11 @@ button_card_templates:
               last: v => ` (laatst ${v} %)`, lastNoFull: ' (lang niet helemaal vol)',
               letBox: 'Om SOC-drift te voorkomen: ontlaad de batterij <b>één keer</b> tot de ontlaadgrens en laad hem daarna in één keer vol, tot het laden echt stopt.',
               advBox: 'Advies: ontlaad de batterij <b>twee keer</b> tot de ontlaadgrens en laad hem elke keer in één keer vol, tot het laden echt stopt. De monitor ziet dat zelf; daarna verdwijnt dit advies.',
-              full: 'Dagen helemaal vol', ok: 'SOC-meter klopte', off: v => `⚠ ${v} %`,
+              full: 'Dagen tot 100 % geladen', ok: 'SOC-meter klopte', off: v => `⚠ ${v} %`,
               dev: v => `grootste afwijking ${v} %`, b99: v => `bij vol laden nog ${v} % bijgeladen terwijl hij 99 % aangaf`, jump: v => `grootste sprong ${v} %`,
               hang: v => `bleef bij ontladen ${v} % lang op 100 % staan`, nofull: v => `langst niet helemaal vol: ${v} dagen`,
               words: {up: 'hoger', down: 'lager', flat: 'stabiel', good: 'goed', bad: 'wijkt af'},
-              sub: l => `✓ = minder dan ${l} % ernaast · ⚠ = zoveel ernaast. Details bij aanwijzen van een vakje.`,
+              sub: l => `✓ = minder dan ${l} % ernaast · ⚠ = zoveel ernaast. Details onder de tabel; meer bij aanwijzen van een vakje. Een dag op 100 % ijkt de SOC-meter; dat is geen capaciteitsmeting.`,
               none: 'Nog geen gegevens: de monitor houdt dit vanaf nu bij.'},
             cell: {pill: 'Cellen', q: 'Zijn mijn cellen nog in balans?',
               normal: b => ` (normaal ${b} mV)`,
@@ -239,11 +239,11 @@ button_card_templates:
               last: v => ` (last ${v} %)`, lastNoFull: ' (not completely full for a long time)',
               letBox: 'To prevent SOC drift: discharge the battery <b>once</b> down to the discharge limit, then charge it to full in one go, until charging really stops.',
               advBox: 'Advice: discharge the battery <b>twice</b> down to the discharge limit and charge it to full in one go each time, until charging really stops. The monitor sees this itself; then this advice disappears.',
-              full: 'Days completely full', ok: 'SOC meter was right', off: v => `⚠ ${v} %`,
+              full: 'Days charged to 100 %', ok: 'SOC meter was right', off: v => `⚠ ${v} %`,
               dev: v => `largest deviation ${v} %`, b99: v => `when charging, ${v} % more went in while it showed 99 %`, jump: v => `largest jump ${v} %`,
               hang: v => `stayed at 100 % for ${v} % of a discharge`, nofull: v => `longest not completely full: ${v} days`,
               words: {up: 'higher', down: 'lower', flat: 'stable', good: 'good', bad: 'off'},
-              sub: l => `✓ = less than ${l} % off · ⚠ = how much it was off. Details when you point at a cell.`,
+              sub: l => `✓ = less than ${l} % off · ⚠ = how much it was off. Details below the table; more when you point at a cell. A day at 100 % calibrates the SOC meter; it is not a capacity measurement.`,
               none: 'No data yet: the monitor keeps track of this from now on.'},
             cell: {pill: 'Cells', q: 'Are my cells still in balance?',
               normal: b => ` (normally ${b} mV)`,
@@ -407,6 +407,8 @@ button_card_templates:
           };
 
           // SOC panel: is the SOC meter still right?
+          // Details of flagged months, always visible: a tooltip (title) does not work on a phone or tablet.
+          const detail = l => l.length ? `<div style="margin-top:6px;font-size:12px;line-height:1.5">${l.map(x => `<div>⚠ ${x.split('&#10;').join(' · ')}</div>`).join('')}</div>` : '';
           let socPanel = '';
           if (sh) {
             const A = T.soc, sa = sh.attributes;
@@ -423,7 +425,7 @@ button_card_templates:
               <tr><td style="${td1}">${A.ok}</td><td style="${tdS}">${tr[0].dev >= lim ? `<span style="color:${P.orange}">${A.words.bad}</span>` : `<span style="color:${P.green}">${A.words.good}</span>`}</td>
                 ${tr.map(t => `<td title="${tip(t)}" style="${tdS};${t.dev >= lim ? `color:${P.orange};font-weight:600` : `color:${P.green}`}">${t.dev >= lim ? A.off(f(t.dev, 0)) : '✓'}</td>`).join('')}</tr>`;
             socPanel = `<div style="${panelS}"><div style="${qS}">${A.q}</div><div>${sym(sh)} ${head}</div>${advice(sh, 'soc', A)}
-                ${tr.length ? table(tr.map(t => t.month), rows) + `<div style="${subS}">${A.sub(f(lim, 0))}</div>` : `<div style="${subS}">${A.none}</div>`}</div>`;
+                ${tr.length ? table(tr.map(t => t.month), rows) + detail(tr.filter(t => t.dev >= lim).map(tip)) + `<div style="${subS}">${A.sub(f(lim, 0))}</div>` : `<div style="${subS}">${A.none}</div>`}</div>`;
           }
 
           // Cells panel: are the cells still in balance?
@@ -441,7 +443,7 @@ button_card_templates:
             const rows = !tr.length ? '' : `<tr><td style="${td1}">${A.row}</td><td style="${tdS}">${trendWord(tr.map(t => t.spread_mv), A.words, true)}</td>
                 ${tr.map(t => `<td title="${tip(t)}" style="${tdS}${high(t) ? `;color:${P.orange};font-weight:600` : ''}">${high(t) ? '⚠ ' : ''}${f(t.spread_mv, 0)} mV</td>`).join('')}</tr>`;
             cellPanel = `<div style="${panelS}"><div style="${qS}">${A.q}</div>${head ? `<div>${sym(ch)} ${head}</div>` : ''}${advice(ch, 'cells', A)}
-                ${tr.length ? table(tr.map(t => t.month), rows) + `<div style="${subS}">${A.sub(base ? f(base, 0) : null, lim ? f(lim, 0) : null)}</div>` : `<div style="${subS}">${A.none}</div>`}</div>`;
+                ${tr.length ? table(tr.map(t => t.month), rows) + detail(tr.filter(high).map(tip)) + `<div style="${subS}">${A.sub(base ? f(base, 0) : null, lim ? f(lim, 0) : null)}</div>` : `<div style="${subS}">${A.none}</div>`}</div>`;
           }
 
           // Chart: the most recent 3 years (never before the installation date).

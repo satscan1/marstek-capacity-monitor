@@ -464,7 +464,7 @@ class MarstekSettingsWindow {
       `<div class="sec">${T.cells}</div>${this._optSensor("cell_max_entity")}${this._optSensor("cell_min_entity")}${this._chips("cell_sensitivity", tx.choices.sensitivity, !hasCells)}`,
     ];
     const battery = [
-      `<div class="sec">${T.battery}</div>${this._stepper("nominal_kwh")}${this._stepper("reserve_kwh")}${this._date("purchase_date")}${this._stepper("warranty_years")}${this._stepper("cycle_life")}${this._stepper("cycle_eol_pct")}${this._stepper("initial_cycles")}`,
+      `<div class="sec">${T.battery}</div>${this._chips("model", tx.choices.model)}${this._stepper("nominal_kwh")}${this._stepper("reserve_kwh")}${this._date("purchase_date")}${this._stepper("warranty_years")}${this._stepper("cycle_life")}${this._stepper("cycle_eol_pct")}${this._stepper("initial_cycles")}`,
       `<div class="sec">${T.limits}</div>${this._slider("red_pct")}${this._slider("tolerance_pct")}`,
     ];
     const rest = [
