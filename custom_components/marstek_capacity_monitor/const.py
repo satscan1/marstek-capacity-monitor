@@ -54,6 +54,11 @@ MODEL_E_V4 = "venus_e_v4"
 MODEL_E_MAX = "venus_e_max"
 MODEL_E_PRO = "venus_e_pro"
 MODEL_D = "venus_d"
+# B2500 (balcony storage, 1.1.0): test support. V2 reports battery voltage and
+# current (hm2mqtt), the monitor multiplies them into DC power. V1 does not:
+# shown in the list with a message, not measurable yet.
+MODEL_B2500_V2 = "b2500_v2"
+MODEL_B2500_V1 = "b2500_v1"
 MODEL_OTHER = "other"
 MODELS = [
     MODEL_E_V12,
@@ -63,6 +68,8 @@ MODELS = [
     MODEL_E_MAX,
     MODEL_E_PRO,
     MODEL_D,
+    MODEL_B2500_V2,
+    MODEL_B2500_V1,
     MODEL_OTHER,
 ]
 
@@ -93,7 +100,21 @@ MODEL_PRESETS: dict[str, dict[str, float]] = {
     # Venus E Pro brochure (EU): 2.08 kWh per pack (41.6 V, 13S), DoD 90 %,
     # base unit + 0-5 extra packs. Per pack, multiplied by the number of packs.
     MODEL_E_PRO: {CONF_NOMINAL_KWH: 2.08, CONF_RESERVE_KWH: 0.208, **_SPEC_LINE_10K},
+    # B2500-D product page (marstek.de, 02-11-2026): 2240 Wh LiFePO4, 6000+ cycles
+    # to 80 %, 10 years. Depth of discharge is set by the user in the app and not
+    # stated; 90 % assumed as for the other models. Host battery only (no packs).
+    MODEL_B2500_V2: {CONF_NOMINAL_KWH: 2.24, CONF_RESERVE_KWH: 0.224, **_SPEC_LINE},
 }
+# Models in test: a label on the card, measurements still uncertain
+TEST_MODELS = (MODEL_B2500_V2,)
+# B2500 V2: the two sensors the monitor multiplies into DC battery power
+CONF_B2500_VOLTAGE = "b2500_voltage_entity"
+CONF_B2500_CURRENT = "b2500_current_entity"
+
+
+def b2500_power_entity(battery_id: str) -> str:
+    """Entity id of the DC power the monitor computes for a B2500 V2."""
+    return f"sensor.marstek_{battery_id}_b2500_battery_power"
 MAX_PACKS = 6
 PACK_MODELS = (MODEL_D, MODEL_E_PRO)
 

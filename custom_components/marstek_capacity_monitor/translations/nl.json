@@ -49,7 +49,7 @@
         "data_description": {
           "battery_id": "Wordt gebruikt in de entiteitnamen, bv. mt1 geeft sensor.marstek_mt1_capacity_pct. Kleine letters, cijfers en _.",
           "soc_entity": "De eigen SOC van de batterij in %.",
-          "power_entity": "Vermogen gemeten aan de batterijkant (DC). W of kW.",
+          "power_entity": "Vermogen gemeten aan de batterijkant (DC). W of kW. B2500: leeg laten, de monitor rekent het uit.",
           "cell_max_entity": "Spanning van de hoogste cel, in V of mV. Alleen celspanningen, geen temperaturen.",
           "cell_min_entity": "Spanning van de laagste cel, in V of mV.",
           "temp_max_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen.",
@@ -73,6 +73,18 @@
         "data": {
           "packs": "Aantal batterijpakketten"
         }
+      },
+      "b2500": {
+        "title": "B2500 V2 (test): accuspanning en -stroom",
+        "description": "De B2500 heeft geen sensor voor het accuvermogen. De monitor rekent het uit met accuspanning × accustroom van het hoofdtoestel (hm2mqtt, lokale MQTT). Ingevuld als ze gevonden zijn.\n\n**Test:** ondersteuning voor de B2500 is nieuw en nog niet op een echte B2500 geprobeerd. Lijkt een meting van {name} niet te kloppen? Maak dan een issue aan op GitHub.",
+        "data": {
+          "b2500_voltage_entity": "Accuspanning hoofdtoestel (V)",
+          "b2500_current_entity": "Accustroom hoofdtoestel (A)"
+        },
+        "data_description": {
+          "b2500_voltage_entity": "Spanning van de accu in het hoofdtoestel, niet van een extra pakket of een zonne-ingang.",
+          "b2500_current_entity": "Stroom van de accu in het hoofdtoestel. Of laden positief of negatief is, wordt vanzelf herkend."
+        }
       }
     },
     "error": {
@@ -80,11 +92,13 @@
       "same_entity": "SOC en vermogen moeten verschillende sensoren zijn.",
       "reserve_too_large": "De reserve moet kleiner zijn dan de fabriekscapaciteit.",
       "looks_like_ac": "Deze sensor lijkt de AC-/netkant te meten, niet de batterijkant (DC). AC-waarden bevatten omzetverlies en geven een verkeerde capaciteit. Kies de sensor voor het batterijvermogen, of verstuur nogmaals om deze toch te gebruiken.",
-      "cells_both": "Vul zowel de hoogste als de laagste celspanning in, of geen van beide."
+      "cells_both": "Vul zowel de hoogste als de laagste celspanning in, of geen van beide.",
+      "power_required": "Kies in de vorige stap een sensor voor het DC-batterijvermogen. Alleen een B2500 V2 werkt zonder."
     },
     "abort": {
       "already_configured": "Deze code is al in gebruik.",
-      "max_batteries": "Het maximum van 6 batterijen is bereikt."
+      "max_batteries": "Het maximum van 6 batterijen is bereikt.",
+      "b2500_v1": "De B2500 V1 geeft de accuspanning en -stroom niet door, daarom kan de monitor hem (nog) niet meten. Heb je een V1 en een idee hoe het wel kan? Maak dan een issue aan op GitHub."
     },
     "create_entry": {
       "refresh": "Batterij toegevoegd. **Vernieuw de pagina één keer** voordat je Batterijcapaciteit in de zijbalk opent: in een browser met Ctrl+F5, in de Home Assistant-app door de app helemaal te sluiten en opnieuw te openen. Dit is alleen de eerste keer nodig."
@@ -265,6 +279,9 @@
           "letop": "Let op",
           "advies": "Advies"
         }
+      },
+      "b2500_battery_power": {
+        "name": "B2500 accuvermogen"
       }
     }
   },
@@ -325,6 +342,8 @@
         "venus_e_max": "Venus E Max (10,05 kWh)",
         "venus_e_pro": "Venus E Pro (2,08 kWh per pakket)",
         "venus_d": "Venus D (2,56 kWh per pakket)",
+        "b2500_v2": "B2500 V2 (2,24 kWh, test)",
+        "b2500_v1": "B2500 V1: nog niet te meten",
         "other": "Ander model: fabrieksgegevens zelf invullen"
       }
     },

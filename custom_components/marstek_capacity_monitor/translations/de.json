@@ -49,7 +49,7 @@
         "data_description": {
           "battery_id": "Wird in den Entitäts-IDs verwendet, z. B. mt1 ergibt sensor.marstek_mt1_capacity_pct. Kleinbuchstaben, Ziffern und _.",
           "soc_entity": "Der eigene Ladezustand (SOC) der Batterie in %.",
-          "power_entity": "Leistung, gemessen auf der Batterieseite (DC). W oder kW.",
+          "power_entity": "Leistung, gemessen auf der Batterieseite (DC). W oder kW. B2500: leer lassen, der Monitor berechnet sie.",
           "cell_max_entity": "Spannung der höchsten Zelle, in V oder mV. Nur Zellspannungen, keine Temperaturen.",
           "cell_min_entity": "Spannung der niedrigsten Zelle, in V oder mV.",
           "temp_max_entity": "Wird bei jeder Messung gespeichert: eine kalte Batterie gibt weniger ab. Nur Zelltemperaturen, keine MOS- oder Platinentemperaturen.",
@@ -73,6 +73,18 @@
         "data": {
           "packs": "Anzahl Batteriepacks"
         }
+      },
+      "b2500": {
+        "title": "B2500 V2 (Test): Akkuspannung und -strom",
+        "description": "Der B2500 hat keinen Sensor für die Akkuleistung. Der Monitor berechnet sie aus Akkuspannung × Akkustrom des Hauptgeräts (hm2mqtt, lokales MQTT). Ausgefüllt, wenn gefunden.\n\n**Test:** Die Unterstützung für den B2500 ist neu und noch nicht an einem echten B2500 erprobt. Scheint eine Messung von {name} nicht zu stimmen? Bitte erstelle ein Issue auf GitHub.",
+        "data": {
+          "b2500_voltage_entity": "Akkuspannung Hauptgerät (V)",
+          "b2500_current_entity": "Akkustrom Hauptgerät (A)"
+        },
+        "data_description": {
+          "b2500_voltage_entity": "Spannung des Akkus im Hauptgerät, nicht eines Zusatzakkus oder eines Solareingangs.",
+          "b2500_current_entity": "Strom des Akkus im Hauptgerät. Ob Laden positiv oder negativ ist, wird automatisch erkannt."
+        }
       }
     },
     "error": {
@@ -80,11 +92,13 @@
       "same_entity": "SOC und Leistung müssen verschiedene Sensoren sein.",
       "reserve_too_large": "Die Reserve muss kleiner sein als die Nennkapazität.",
       "looks_like_ac": "Dieser Sensor scheint die AC- bzw. Netzseite zu messen, nicht die Batterieseite (DC). AC-Werte enthalten Wandlungsverluste und ergeben eine falsche Kapazität. Wähle den Sensor für die Batterieleistung oder klicke erneut auf „Absenden“, um ihn trotzdem zu verwenden.",
-      "cells_both": "Gib sowohl die höchste als auch die niedrigste Zellspannung an, oder keine von beiden."
+      "cells_both": "Gib sowohl die höchste als auch die niedrigste Zellspannung an, oder keine von beiden.",
+      "power_required": "Wähle im vorigen Schritt einen Sensor für die DC-Akkuleistung. Nur ein B2500 V2 funktioniert ohne."
     },
     "abort": {
       "already_configured": "Dieser Code wird bereits verwendet.",
-      "max_batteries": "Das Maximum von 6 Batterien ist erreicht."
+      "max_batteries": "Das Maximum von 6 Batterien ist erreicht.",
+      "b2500_v1": "Der B2500 V1 meldet Akkuspannung und -strom nicht, deshalb kann der Monitor ihn (noch) nicht messen. Hast du einen V1 und eine Idee, wie es geht? Bitte erstelle ein Issue auf GitHub."
     },
     "create_entry": {
       "refresh": "Batterie hinzugefügt. **Lade die Seite einmal neu**, bevor du Batteriekapazität in der Seitenleiste öffnest: im Browser mit Strg+F5, in der Home-Assistant-App, indem du die App ganz schließt und neu öffnest. Das ist nur beim ersten Mal nötig."
@@ -265,6 +279,9 @@
           "letop": "Achtung",
           "advies": "Empfehlung"
         }
+      },
+      "b2500_battery_power": {
+        "name": "B2500 Akkuleistung"
       }
     }
   },
@@ -325,6 +342,8 @@
         "venus_e_max": "Venus E Max (10,05 kWh)",
         "venus_e_pro": "Venus E Pro (2,08 kWh pro Pack)",
         "venus_d": "Venus D (2,56 kWh pro Pack)",
+        "b2500_v2": "B2500 V2 (2,24 kWh, Test)",
+        "b2500_v1": "B2500 V1: noch nicht messbar",
         "other": "Anderes Modell: Herstellerdaten selbst eingeben"
       }
     },

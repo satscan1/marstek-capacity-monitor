@@ -246,7 +246,7 @@ def find_cell_sensors(hass: HomeAssistant, soc_entity: str) -> dict[str, str]:
 
 def guess_model(hass: HomeAssistant, soc_entity: str) -> str | None:
     """Best guess of the Marstek model from the device registry; None if unsure."""
-    from .const import MODEL_C, MODEL_D, MODEL_E_V12, MODEL_E_V3
+    from .const import MODEL_B2500_V2, MODEL_C, MODEL_D, MODEL_E_V12, MODEL_E_V3
 
     entry = er.async_get(hass).async_get(soc_entity)
     device = (
@@ -258,6 +258,8 @@ def guess_model(hass: HomeAssistant, soc_entity: str) -> str | None:
     if device is not None:
         parts += [device.model or "", device.name or "", device.name_by_user or ""]
     text = re.sub(r"[^a-z0-9]+", "_", " ".join(parts).lower())
+    if re.search(r"b2500", text):
+        return MODEL_B2500_V2
     if re.search(r"vnse3|venus_?e_?(v_?3|3_0|gen_?3)", text):
         return MODEL_E_V3
     if re.search(r"vnsd|venus_?d($|_)", text):
@@ -269,6 +271,40 @@ def guess_model(hass: HomeAssistant, soc_entity: str) -> str | None:
     if re.search(r"(^|_)hmg($|_)|venus_?e_?(v_?[12]|2_0)", text):
         return MODEL_E_V12
     return None
+
+
+B2500_VOLT_RE = re.compile(r"(host_)?battery_voltage")
+B2500_AMP_RE = re.compile(r"(host_)?battery_current")
+NOT_B2500_HOST_RE = re.compile(r"extra|output|input|cell|solar|pv")
+
+
+def find_b2500_sensors(hass: HomeAssistant, soc_entity: str) -> dict[str, str]:
+    """B2500 V2 (hm2mqtt): the host battery's voltage and current on the same
+    device as the SOC sensor. Keys: the config keys of the b2500 step."""
+    from .const import CONF_B2500_CURRENT, CONF_B2500_VOLTAGE
+
+    ent_reg = er.async_get(hass)
+    soc_entry = ent_reg.async_get(soc_entity)
+    dev_id = soc_entry.device_id if soc_entry else None
+    prefix = _prefix(soc_entity, SOC_RE)
+    found: dict[str, str] = {}
+    for state in sorted(hass.states.async_all("sensor"), key=lambda s: s.entity_id):
+        unit = state.attributes.get("unit_of_measurement")
+        if unit not in ("V", "A"):
+            continue
+        entry = ent_reg.async_get(state.entity_id)
+        same_device = dev_id is not None and entry is not None and entry.device_id == dev_id
+        same_name = bool(prefix) and state.entity_id.split(".", 1)[1].startswith(prefix + "_")
+        if not (same_device or same_name):
+            continue
+        text = _text(state, entry)
+        if NOT_B2500_HOST_RE.search(text):
+            continue
+        if unit == "V" and B2500_VOLT_RE.search(text):
+            found.setdefault(CONF_B2500_VOLTAGE, state.entity_id)
+        elif unit == "A" and B2500_AMP_RE.search(text):
+            found.setdefault(CONF_B2500_CURRENT, state.entity_id)
+    return found
 
 
 # ---------------------------------------------------------------------------

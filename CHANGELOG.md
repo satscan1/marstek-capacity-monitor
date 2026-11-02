@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.0-dev1 — 2026-11-02 (test version)
+
+- **Marstek B2500 (test).** The B2500 V2 can be added: it has no battery power sensor, so the monitor calculates the DC power from the battery voltage × battery current of the main unit (hm2mqtt, local MQTT) and finds both sensors itself. Factory data: 2.24 kWh, 6,000 cycles to 80 %, 10 years (depth of discharge 90 % assumed; change it under the gear ⚙). The card shows a small *test* tag: support is new and not tried on a real B2500 yet. A measurement looks wrong? Please open an issue.
+- **B2500 V1** is in the list, but cannot be measured yet: it does not report the battery voltage and current. Choosing it says so.
 ## v1.0.2 — 2026-10-31
 
 **Repair release.** No change to how the monitor measures.

@@ -17,15 +17,17 @@ from homeassistant.const import (
     EntityCategory,
     UnitOfElectricPotential,
     UnitOfEnergy,
+    UnitOfPower,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from . import MonitorConfigEntry
-from .const import CONF_BATTERY_ID, DOMAIN, KIND_CELLS, KIND_SOC, MONITOR_STATUSES
+from .const import CONF_B2500_CURRENT, CONF_B2500_VOLTAGE, CONF_BATTERY_ID, DOMAIN, b2500_power_entity, KIND_CELLS, KIND_SOC, MONITOR_STATUSES
 from .health import LEVELS
 from .monitor import BatteryMonitor
 
@@ -322,6 +324,8 @@ async def async_setup_entry(
     if monitor.has_cells:
         descriptions += [CELL_SENSOR, CELL_HEALTH_SENSOR]
     async_add_entities(CapacitySensor(monitor, d) for d in descriptions)
+    if monitor.entry.data.get(CONF_B2500_VOLTAGE) and monitor.entry.data.get(CONF_B2500_CURRENT):
+        async_add_entities([B2500PowerSensor(monitor)])
 
 
 class CapacitySensor(SensorEntity):
@@ -370,3 +374,63 @@ class CapacitySensor(SensorEntity):
     def extra_state_attributes(self) -> dict[str, Any] | None:
         fn = self.entity_description.attrs_fn
         return fn(self._monitor) if fn else None
+
+
+class B2500PowerSensor(SensorEntity):
+    """B2500 V2 (test): DC battery power = battery voltage x battery current.
+
+    The B2500 has no battery power sensor of its own (hm2mqtt gives voltage and
+    current of the host battery). The monitor uses this sensor as its power
+    sensor; whether charging is positive or negative is learned automatically.
+    """
+
+    _attr_has_entity_name = True
+    _attr_should_poll = False
+    _attr_translation_key = "b2500_battery_power"
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfPower.WATT
+    _attr_suggested_display_precision = 0
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, monitor: BatteryMonitor) -> None:
+        entry = monitor.entry
+        battery_id = entry.data[CONF_BATTERY_ID]
+        self._volt = entry.data[CONF_B2500_VOLTAGE]
+        self._amp = entry.data[CONF_B2500_CURRENT]
+        self._attr_unique_id = f"{battery_id}_b2500_battery_power"
+        self.entity_id = b2500_power_entity(battery_id)
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name=entry.title,
+            manufacturer="Marstek Capacity Monitor",
+            model="DC capacity monitor",
+        )
+
+    async def async_added_to_hass(self) -> None:
+        self.async_on_remove(
+            async_track_state_change_event(self.hass, [self._volt, self._amp], self._changed)
+        )
+        self._update()
+
+    @callback
+    def _changed(self, _event: Any) -> None:
+        self._update()
+        self.async_write_ha_state()
+
+    @staticmethod
+    def _value(state: Any, scale: dict[str, float]) -> float | None:
+        if state is None:
+            return None
+        factor = scale.get(state.attributes.get("unit_of_measurement") or "", 1.0)
+        try:
+            return float(state.state) * factor
+        except (TypeError, ValueError):
+            return None
+
+    @callback
+    def _update(self) -> None:
+        volt = self._value(self.hass.states.get(self._volt), {"mV": 0.001, "kV": 1000.0})
+        amp = self._value(self.hass.states.get(self._amp), {"mA": 0.001})
+        self._attr_available = volt is not None and amp is not None
+        self._attr_native_value = round(volt * amp, 1) if self._attr_available else None

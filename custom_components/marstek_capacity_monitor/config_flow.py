@@ -35,6 +35,11 @@ from .const import (
     MAX_PACKS,
     MODEL_PRESETS,
     MODEL_OTHER,
+    MODEL_B2500_V1,
+    MODEL_B2500_V2,
+    CONF_B2500_CURRENT,
+    CONF_B2500_VOLTAGE,
+    b2500_power_entity,
     PACK_MODELS,
     MODELS,
     MODEL_E_V12,
@@ -61,6 +66,7 @@ from .discovery import (
     Candidate,
     find_candidates,
     counter_kwh,
+    find_b2500_sensors,
     find_cell_sensors,
     find_discharge_counter,
     guess_model,
@@ -263,14 +269,15 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             battery_id = user_input[CONF_BATTERY_ID].strip().lower()
-            power = user_input[CONF_POWER_ENTITY]
+            # Empty power: allowed for a B2500 V2 (the monitor computes it)
+            power = user_input.get(CONF_POWER_ENTITY) or ""
             if not SLUG_RE.match(battery_id):
                 errors[CONF_BATTERY_ID] = "invalid_id"
-            elif user_input[CONF_SOC_ENTITY] == power:
+            elif power and user_input[CONF_SOC_ENTITY] == power:
                 errors[CONF_POWER_ENTITY] = "same_entity"
             elif cell_errors := _validate_cells(user_input):
                 errors.update(cell_errors)
-            elif looks_like_ac(self.hass, power) and self._ac_confirmed != power:
+            elif power and looks_like_ac(self.hass, power) and self._ac_confirmed != power:
                 # Warn once; submitting again with the same sensor accepts it.
                 self._ac_confirmed = power
                 errors[CONF_POWER_ENTITY] = "looks_like_ac"
@@ -309,7 +316,7 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_SOC_ENTITY): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor")
                 ),
-                vol.Required(CONF_POWER_ENTITY): selector.EntitySelector(
+                vol.Optional(CONF_POWER_ENTITY): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor", device_class="power")
                 ),
                 **{vol.Optional(key): make() for key, make in OPTIONAL_SENSORS},
@@ -326,10 +333,20 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Step 3: which Marstek, installed when. Factory data follow from
         the model, so for a known model this is the last step."""
+        errors: dict[str, str] = {}
         if user_input is not None:
             model = user_input[CONF_MODEL]
+            if model == MODEL_B2500_V1:
+                # No battery voltage/current: nothing to measure on the DC side yet
+                return self.async_abort(reason="b2500_v1")
             self._data[CONF_MODEL] = model
             self._data[CONF_PURCHASE_DATE] = user_input[CONF_PURCHASE_DATE]
+            if model == MODEL_B2500_V2:
+                return await self.async_step_b2500()
+            if not self._data.get(CONF_POWER_ENTITY):
+                errors[CONF_MODEL] = "power_required"
+        if user_input is not None and not errors:
+            model = user_input[CONF_MODEL]
             if model in PACK_MODELS:
                 return await self.async_step_packs()
             if model == MODEL_OTHER:
@@ -361,7 +378,40 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="model",
             data_schema=schema,
+            errors=errors,
             description_placeholders={"name": self._data[CONF_NAME], "counter": note},
+        )
+
+    async def async_step_b2500(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """B2500 V2 (test): battery voltage and current; the monitor makes the
+        DC power from them (no power sensor of its own on the B2500)."""
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            volt, amp = user_input[CONF_B2500_VOLTAGE], user_input[CONF_B2500_CURRENT]
+            if volt == amp:
+                errors[CONF_B2500_CURRENT] = "same_entity"
+            else:
+                self._data.update(user_input)
+                self._data[CONF_POWER_ENTITY] = b2500_power_entity(self._data[CONF_BATTERY_ID])
+                return self._create(preset_for(MODEL_B2500_V2))
+        suggested = {**find_b2500_sensors(self.hass, self._data[CONF_SOC_ENTITY]), **(user_input or {})}
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_B2500_VOLTAGE): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="sensor", device_class="voltage")
+                ),
+                vol.Required(CONF_B2500_CURRENT): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="sensor", device_class="current")
+                ),
+            }
+        )
+        return self.async_show_form(
+            step_id="b2500",
+            data_schema=self.add_suggested_values_to_schema(schema, suggested),
+            errors=errors,
+            description_placeholders={"name": self._data[CONF_NAME]},
         )
 
     async def async_step_packs(
