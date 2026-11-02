@@ -8,5 +8,5 @@ For any other use, ask first through an issue in this repository.
 
 Files:
 - `custom_components/marstek_capacity_monitor/brand/`
-- `custom_components/marstek_capacity_monitor/frontend/mcm-logo.png`
+- `custom_components/marstek_capacity_monitor/frontend/mcm-logo.png` and `mcm-logo.webp`
 - `custom_components/marstek_capacity_monitor/frontend/seizoen/`
