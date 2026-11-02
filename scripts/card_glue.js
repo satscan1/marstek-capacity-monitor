@@ -398,6 +398,17 @@ class MarstekCapacityDashboardStrategy {
         ...found.map((b) => battery(b, n === 4 ? 18 : 12)),
       ];
     }
+    // Logo with the version at the top; the logo opens a page with a picture
+    // that follows the season (as in HESC), back with a tap on the picture.
+    const logo = `/${MC_DOMAIN}_frontend/mcm-logo.png?v=${MC_VERSION}`;
+    const header = {
+      card: {
+        type: "markdown", text_only: true,
+        content: `<table><tr><td><a href="seizoen"><img src="${logo}" width="72" height="72" alt="Marstek Capacity Monitor"></a></td><td>Marstek Capacity Monitor<br>v${MC_VERSION}</td></tr></table>`,
+      },
+    };
+    const season = "{%- set m = now().month -%}{%- set s = 'lente' if m in [3, 4, 5] else ('zomer' if m in [6, 7, 8] else ('herfst' if m in [9, 10, 11] else 'winter')) -%}"
+      + `<a href="marstek"><img src="/${MC_DOMAIN}_frontend/seizoen/mcm-seizoen-{{ s }}.webp?v=1" width="100%" alt="Marstek Capacity Monitor · {{ s }}"></a>`;
     return {
       title: T.title,
       views: [{
@@ -405,7 +416,15 @@ class MarstekCapacityDashboardStrategy {
         path: "marstek",
         type: "sections",
         max_columns: 3,
+        header,
         sections: [{ type: "grid", column_span: 3, cards }],
+      }, {
+        title: T.title,
+        path: "seizoen",
+        subview: true,
+        back_path: "marstek",
+        type: "panel",
+        cards: [{ type: "markdown", text_only: true, content: season }],
       }],
     };
   }
