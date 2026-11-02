@@ -1729,14 +1729,16 @@ class MarstekCapacityDashboardStrategy {
     // Logo with the version at the top; the logo opens a page with a picture
     // that follows the season (as in HESC), back with a tap on the picture.
     const logo = `/${MC_DOMAIN}_frontend/mcm-logo.png?v=${MC_VERSION}`;
+    // HA removes relative links from markdown: use the dashboard's own address
+    const base = "/" + ((typeof location !== "undefined" && location.pathname.split("/")[1]) || "marstek-capacity");
     const header = {
       card: {
         type: "markdown", text_only: true,
-        content: `<table><tr><td><a href="seizoen"><img src="${logo}" width="72" height="72" alt="Marstek Capacity Monitor"></a></td><td>Marstek Capacity Monitor<br>v${MC_VERSION}</td></tr></table>`,
+        content: `<table><tr><td><a href="${base}/seizoen"><img src="${logo}" width="72" height="72" alt="Marstek Capacity Monitor"></a></td><td>Marstek Capacity Monitor<br>v${MC_VERSION}</td></tr></table>`,
       },
     };
     const season = "{%- set m = now().month -%}{%- set s = 'lente' if m in [3, 4, 5] else ('zomer' if m in [6, 7, 8] else ('herfst' if m in [9, 10, 11] else 'winter')) -%}"
-      + `<a href="marstek"><img src="/${MC_DOMAIN}_frontend/seizoen/mcm-seizoen-{{ s }}.webp?v=1" width="100%" alt="Marstek Capacity Monitor · {{ s }}"></a>`;
+      + `<a href="${base}/marstek"><img src="/${MC_DOMAIN}_frontend/seizoen/mcm-seizoen-{{ s }}.webp?v=1" width="100%" alt="Marstek Capacity Monitor · {{ s }}"></a>`;
     return {
       title: T.title,
       views: [{
@@ -1750,7 +1752,7 @@ class MarstekCapacityDashboardStrategy {
         title: T.title,
         path: "seizoen",
         subview: true,
-        back_path: "marstek",
+        back_path: `${base}/marstek`,
         type: "panel",
         cards: [{ type: "markdown", text_only: true, content: season }],
       }],
