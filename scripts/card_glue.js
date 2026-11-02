@@ -400,7 +400,7 @@ class MarstekCapacityDashboardStrategy {
     }
     // Logo with the version at the top; the logo opens a page with a picture
     // that follows the season (as in HESC), back with a tap on the picture.
-    const logo = `/${MC_DOMAIN}_frontend/mcm-logo.png?v=${MC_VERSION}-4`;
+    const logo = `/${MC_DOMAIN}_frontend/mcm-logo.png?v=${MC_VERSION}-5`;
     // HA removes relative links from markdown: use the dashboard's own address
     const base = "/" + ((typeof location !== "undefined" && location.pathname.split("/")[1]) || "marstek-capacity");
     const header = {
