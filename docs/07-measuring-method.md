@@ -2,6 +2,28 @@
 
 *[Nederlands](07-measuring-method.nl.md) · [Deutsch](07-measuring-method.de.md)*
 
+## What is 100 %?
+
+**100 % is what the manufacturer says is usable: the capacity on the rating plate minus the fixed reserve (depth of discharge).**
+
+Example with a Venus E of 5.12 kWh and a reserve of 11 %:
+
+| | kWh | % |
+|---|---|---|
+| Rating plate | 5.12 | |
+| Fixed reserve (11 %) | − 0.56 | |
+| **Usable according to spec** | **4.56** | **100 %** |
+| Measured by the monitor | 4.87 | 106.7 % |
+
+### How the monitor gets that number
+The monitor measures a full discharge: start at 95 % or higher, end at 15 % or lower. So it does not need to go from exactly 100 to 0. It scales the measured energy to the whole usable part and puts that next to the spec. In the example that came to 4.87 kWh: a bit more than promised.
+
+### Why the Marstek app shows a different number
+The app shows for example 5.59 kWh for a charge from 11 to 100 %. That is measured on the **AC side**: what goes into the battery, including the losses of inverter and charging. The monitor measures on the **DC side**: what really comes out of the battery. The app number is therefore always higher. You cannot compare the two.
+
+### Why recharging makes a measurement invalid
+A measurement is one discharge in one go, from 95 % or higher to 15 % or lower. If the battery recharges 3 percentage points or more on the way (sun, an automation or EMS), that measurement stops and does not count. Charging costs more energy per percent than discharging delivers. If you mix the two, you cannot determine cleanly how much really came out of the battery. More on this below.
+
 ## Can capacity be measured when the battery charges in between?
 
 The monitor only measures during a full discharge (from 95 % or more down to 15 % or less). Couldn't it be smarter, by separating charging and discharging in between? To find out, almost a year of data from two Venus E batteries was analysed (December 2025 – October 2026). Conclusion: technically it is possible, but you don't get a reliable capacity measurement that way. The limitation lies in the battery's own state-of-charge (SOC) meter.

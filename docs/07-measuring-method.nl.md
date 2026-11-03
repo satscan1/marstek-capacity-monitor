@@ -2,6 +2,28 @@
 
 *[English](07-measuring-method.md) · [Deutsch](07-measuring-method.de.md)*
 
+## Wat is 100 %?
+
+**100 % is wat er volgens de fabrikant bruikbaar is: de capaciteit op het typeplaatje min de vaste reserve (ontlaaddiepte).**
+
+Voorbeeld met een Venus E van 5,12 kWh en een reserve van 11 %:
+
+| | kWh | % |
+|---|---|---|
+| Typeplaatje | 5,12 | |
+| Vaste reserve (11 %) | − 0,56 | |
+| **Bruikbaar volgens specificatie** | **4,56** | **100 %** |
+| Gemeten door de monitor | 4,87 | 106,7 % |
+
+### Hoe de monitor op dat getal komt
+De monitor meet een volledige ontlading: begin op 95 % of hoger, einde op 15 % of lager. Hij hoeft dus niet van precies 100 naar 0 te gaan. Hij rekent de gemeten energie om naar het hele bruikbare deel en zet dat naast de specificatie. In het voorbeeld kwam daar 4,87 kWh uit: iets meer dan beloofd.
+
+### Waarom de Marstek-app een ander getal geeft
+De app toont bijvoorbeeld 5,59 kWh voor een lading van 11 naar 100 %. Dat is gemeten aan de **AC-kant**: wat er de batterij in gaat, inclusief de verliezen van omvormer en laden. De monitor meet aan de **DC-kant**: wat er echt uit de batterij komt. Het app-getal is daarom altijd hoger. Die twee kun je niet vergelijken.
+
+### Waarom bijladen de meting ongeldig maakt
+Een meting is één ontlading in één keer, van 95 % of hoger naar 15 % of lager. Laadt de batterij onderweg 3 procentpunten of meer bij (zon, een automation of EMS), dan stopt die meting en telt hij niet mee. Laden kost meer energie per procent dan ontladen oplevert. Meng je die twee, dan is niet zuiver vast te stellen hoeveel er echt uit de batterij kwam. Meer daarover hieronder.
+
 ## Kun je de capaciteit ook meten als de batterij tussendoor laadt?
 
 De monitor meet alleen bij een volledige ontlading (van 95 % of meer naar 15 % of minder). Kan het niet slimmer, door laden en ontladen tussendoor uit elkaar te halen? Om dat uit te zoeken is bijna een jaar data van twee Venus E's bekeken (december 2025 – oktober 2026). Conclusie: technisch kan het, maar je meet dan niet betrouwbaar de capaciteit. De beperking zit in de SOC-meter van de batterij zelf.
