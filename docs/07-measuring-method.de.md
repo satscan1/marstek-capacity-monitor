@@ -2,6 +2,28 @@
 
 *[English](07-measuring-method.md) · [Nederlands](07-measuring-method.nl.md)*
 
+## Was sind 100 %?
+
+**100 % ist das, was laut Hersteller nutzbar ist: die Kapazität auf dem Typenschild minus der festen Reserve (Entladetiefe).**
+
+Beispiel mit einer Venus E mit 5,12 kWh und einer Reserve von 11 %:
+
+| | kWh | % |
+|---|---|---|
+| Typenschild | 5,12 | |
+| Feste Reserve (11 %) | − 0,56 | |
+| **Nutzbar laut Spezifikation** | **4,56** | **100 %** |
+| Vom Monitor gemessen | 4,87 | 106,7 % |
+
+### Wie der Monitor auf diese Zahl kommt
+Der Monitor misst eine vollständige Entladung: Start bei 95 % oder höher, Ende bei 15 % oder niedriger. Er muss also nicht genau von 100 auf 0 gehen. Er rechnet die gemessene Energie auf den ganzen nutzbaren Teil hoch und stellt sie neben die Spezifikation. Im Beispiel ergab das 4,87 kWh: etwas mehr als versprochen.
+
+### Warum die Marstek-App eine andere Zahl zeigt
+Die App zeigt zum Beispiel 5,59 kWh für eine Ladung von 11 auf 100 %. Das ist auf der **AC-Seite** gemessen: was in die Batterie hineingeht, einschließlich der Verluste von Wechselrichter und Laden. Der Monitor misst auf der **DC-Seite**: was wirklich aus der Batterie herauskommt. Die App-Zahl ist deshalb immer höher. Die beiden lassen sich nicht vergleichen.
+
+### Warum Nachladen die Messung ungültig macht
+Eine Messung ist eine Entladung in einem Zug, von 95 % oder höher auf 15 % oder niedriger. Lädt die Batterie unterwegs 3 Prozentpunkte oder mehr nach (Sonne, eine Automation oder ein EMS), endet diese Messung und zählt nicht. Laden kostet mehr Energie pro Prozent, als Entladen liefert. Vermischt man beides, lässt sich nicht sauber feststellen, wie viel wirklich aus der Batterie kam. Mehr dazu weiter unten.
+
 ## Kann man die Kapazität auch messen, wenn die Batterie zwischendurch lädt?
 
 Der Monitor misst nur bei einer vollständigen Entladung (von 95 % oder mehr auf 15 % oder weniger). Geht das nicht schlauer, indem man Laden und Entladen zwischendurch auseinanderhält? Um das herauszufinden, wurden fast ein Jahr lang Daten von zwei Venus E ausgewertet (Dezember 2025 – Oktober 2026). Fazit: Technisch geht es, aber du misst damit die Kapazität nicht zuverlässig. Die Grenze liegt im Ladezustandsmesser (SOC) der Batterie selbst.
