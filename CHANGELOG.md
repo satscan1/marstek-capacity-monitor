@@ -1,8 +1,14 @@
 # Changelog
 
-## Unreleased
+## v1.1.0-dev2 — 2026-11-04 (test version)
 
-- **B2500: tip when the sensors are missing.** The B2500 step and the documentation now say that *Host Battery Voltage* and *Host Battery Current* only appear when **Enable Extra Battery Data** is turned on in hm2mqtt (off by default). Thanks to ZakOyten for the report (#16).
+**B2500: plug and play.** The monitor now checks the B2500 itself and says what is missing, instead of staying silent. Thanks to ZakOyten for testing (#16).
+
+- **Check when adding.** The B2500 step looks on the device for *Host Battery Voltage* and *Host Battery Current*. Not there: it says to turn on **Enable Extra Battery Data** in hm2mqtt (off by default). Disabled in Home Assistant: it names them. No value yet: it names them and waits; the battery is only added once both give a number.
+- **Wrong sensor refused.** An extra pack, a solar input or output, a cell, or a sensor that is not in V or A cannot be chosen.
+- **Message under Repairs.** When the voltage or current gives no number for 15 minutes, a message under **Settings → Repairs** names the sensor and what to do. It disappears by itself when the values are back.
+- **In the report.** The full report (back-up) shows the two B2500 sensors and their value at that moment.
+- **Fix:** a device name with *PV* in it (for example "Batterie PV Balkon") made the scan skip the B2500 sensors.
 - **Only DC.** The B2500 is measured only with voltage × current of the battery itself. Estimates from solar input minus output or from daily counters are deliberately not used.
 
 ## v1.1.0-dev1 — 2026-11-02 (test version)
