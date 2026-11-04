@@ -76,7 +76,7 @@
       },
       "b2500": {
         "title": "B2500 V2 (Test): Akkuspannung und -strom",
-        "description": "Der B2500 hat keinen Sensor für die Akkuleistung. Der Monitor berechnet sie aus Akkuspannung × Akkustrom des Hauptgeräts (hm2mqtt, lokales MQTT). Ausgefüllt, wenn gefunden.\n\n**Test:** Die Unterstützung für den B2500 ist neu und noch nicht an einem echten B2500 erprobt. Scheint eine Messung von {name} nicht zu stimmen? Bitte erstelle ein Issue auf GitHub.",
+        "description": "Der B2500 hat keinen Sensor für die Akkuleistung. Der Monitor berechnet sie aus Akkuspannung × Akkustrom des Hauptgeräts (hm2mqtt, lokales MQTT). Ausgefüllt, wenn gefunden.\n\n**Sensoren nicht gefunden?** In hm2mqtt **Enable Extra Battery Data** einschalten (Add-on-Option, Docker: `POLL_EXTRA_BATTERY_DATA=true`) und hm2mqtt neu starten. Nach etwa einer Minute erscheinen *Host Battery Voltage* und *Host Battery Current*. *Cell Data* ist dafür nicht nötig.\n\n**Test:** Die Unterstützung für den B2500 ist neu und noch nicht an einem echten B2500 erprobt. Scheint eine Messung von {name} nicht zu stimmen? Bitte erstelle ein Issue auf GitHub.",
         "data": {
           "b2500_voltage_entity": "Akkuspannung Hauptgerät (V)",
           "b2500_current_entity": "Akkustrom Hauptgerät (A)"
