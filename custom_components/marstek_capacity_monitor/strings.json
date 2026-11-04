@@ -76,7 +76,7 @@
       },
       "b2500": {
         "title": "B2500 V2 (test): battery voltage and current",
-        "description": "The B2500 has no sensor for the battery power. The monitor calculates it from the battery voltage × battery current of the main unit (hm2mqtt, local MQTT). Filled in when found.\n\n**Test:** support for the B2500 is new and has not been tried on a real B2500 yet. Does a measurement of {name} look wrong? Please open an issue on GitHub.",
+        "description": "The B2500 has no sensor for the battery power. The monitor calculates it from the battery voltage × battery current of the main unit (hm2mqtt, local MQTT). Filled in when found.\n\n**Sensors not found?** In hm2mqtt, turn on **Enable Extra Battery Data** (add-on option, Docker: `POLL_EXTRA_BATTERY_DATA=true`) and restart hm2mqtt. After about a minute *Host Battery Voltage* and *Host Battery Current* appear. *Cell Data* is not needed for this.\n\n**Test:** support for the B2500 is new and has not been tried on a real B2500 yet. Does a measurement of {name} look wrong? Please open an issue on GitHub.",
         "data": {
           "b2500_voltage_entity": "Host battery voltage (V)",
           "b2500_current_entity": "Host battery current (A)"
