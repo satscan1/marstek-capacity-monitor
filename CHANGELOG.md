@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **B2500: tip when the sensors are missing.** The B2500 step and the documentation now say that *Host Battery Voltage* and *Host Battery Current* only appear when **Enable Extra Battery Data** is turned on in hm2mqtt (off by default). Thanks to ZakOyten for the report (#16).
+- **Only DC.** The B2500 is measured only with voltage × current of the battery itself. Estimates from solar input minus output or from daily counters are deliberately not used.
+
 ## v1.1.0-dev1 — 2026-11-02 (test version)
 
 - **Marstek B2500 (test).** The B2500 V2 can be added: it has no battery power sensor, so the monitor calculates the DC power from the battery voltage × battery current of the main unit (hm2mqtt, local MQTT) and finds both sensors itself. Factory data: 2.24 kWh, 6,000 cycles to 80 %, 10 years (depth of discharge 90 % assumed; change it under the gear ⚙). The card shows a small *test* tag: support is new and not tried on a real B2500 yet. A measurement looks wrong? Please open an issue.
