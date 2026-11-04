@@ -76,7 +76,7 @@
       },
       "b2500": {
         "title": "B2500 V2 (test): accuspanning en -stroom",
-        "description": "De B2500 heeft geen sensor voor het accuvermogen. De monitor rekent het uit met accuspanning × accustroom van het hoofdtoestel (hm2mqtt, lokale MQTT). Ingevuld als ze gevonden zijn.\n\n**Sensoren niet gevonden?** Zet in hm2mqtt **Enable Extra Battery Data** aan (optie van de add-on, Docker: `POLL_EXTRA_BATTERY_DATA=true`) en herstart hm2mqtt. Na ongeveer een minuut verschijnen *Host Battery Voltage* en *Host Battery Current*. *Cell Data* is hiervoor niet nodig.\n\n**Test:** ondersteuning voor de B2500 is nieuw en nog niet op een echte B2500 geprobeerd. Lijkt een meting van {name} niet te kloppen? Maak dan een issue aan op GitHub.",
+        "description": "De B2500 heeft geen sensor voor het accuvermogen. De monitor rekent het uit met accuspanning × accustroom van het hoofdtoestel (hm2mqtt, lokale MQTT). Ingevuld als ze gevonden zijn.{check}\n\n**Test:** ondersteuning voor de B2500 is nieuw en nog niet op een echte B2500 geprobeerd. Lijkt een meting van {name} niet te kloppen? Maak dan een issue aan op GitHub.",
         "data": {
           "b2500_voltage_entity": "Accuspanning hoofdtoestel (V)",
           "b2500_current_entity": "Accustroom hoofdtoestel (A)"
@@ -93,7 +93,10 @@
       "reserve_too_large": "De reserve moet kleiner zijn dan de fabriekscapaciteit.",
       "looks_like_ac": "Deze sensor lijkt de AC-/netkant te meten, niet de batterijkant (DC). AC-waarden bevatten omzetverlies en geven een verkeerde capaciteit. Kies de sensor voor het batterijvermogen, of verstuur nogmaals om deze toch te gebruiken.",
       "cells_both": "Vul zowel de hoogste als de laagste celspanning in, of geen van beide.",
-      "power_required": "Kies in de vorige stap een sensor voor het DC-batterijvermogen. Alleen een B2500 V2 werkt zonder."
+      "power_required": "Kies in de vorige stap een sensor voor het DC-batterijvermogen. Alleen een B2500 V2 werkt zonder.",
+      "b2500_no_value": "Deze sensor geeft nog geen waarde. Zet Enable Extra Battery Data aan in hm2mqtt, wacht een minuut en verstuur opnieuw.",
+      "b2500_not_host": "Dit is niet de accu van het hoofdtoestel (het lijkt een extra pakket, een zonne-ingang/-uitgang of een cel). Kies Host Battery Voltage / Host Battery Current.",
+      "b2500_wrong_unit": "Verkeerde eenheid: accuspanning moet in V (of mV), accustroom in A (of mA)."
     },
     "abort": {
       "already_configured": "Deze code is al in gebruik.",
@@ -439,6 +442,10 @@
     "check_power": {
       "title": "{name}: meting kan niet kloppen, vermogensensor nakijken",
       "description": "De laatste volledige ontlading kwam uit op {pct} % van nieuw ({kwh} kWh). Meer dan {limit} % kan een batterij niet: er is dan meer energie geteld dan erin past. Zo'n meting telt daarom niet mee ({count} keer tot nu toe).\n\nMeestal ligt het aan de vermogensensor:\n- hij blijft na het laden of ontladen op zijn laatste waarde staan en valt niet terug naar 0 W;\n- er is een verkeerde sensor gekozen (bijvoorbeeld de AC-kant of een ander apparaat);\n- de koppeling geeft het vermogen met een verkeerde factor door.\n\nKijk in Geschiedenis of de vermogensensor tijdens een ontlading meebeweegt met de SOC en terugvalt naar 0 W als de batterij stilstaat. Kies zo nodig een andere sensor bij het tandwiel ⚙ op de kaart van deze batterij → **Sensoren** → **Wisselen**. Zet daar **Opnieuw beginnen met meten** aan, dan tellen de oude metingen niet meer mee.\n\nDeze melding verdwijnt vanzelf zodra een volledige ontlading weer een geloofwaardige uitkomst geeft."
+    },
+    "b2500_no_data": {
+      "title": "{name}: geen accuspanning of -stroom van de B2500",
+      "description": "Al {minutes} minuten krijgt de monitor geen waarde van: {sensors}. Zonder die waarden kan hij het accuvermogen niet uitrekenen, dus wordt er niets gemeten.\n\nWat te doen:\n1. Controleer in hm2mqtt of **Enable Extra Battery Data** aan staat (optie van de add-on, Docker: `POLL_EXTRA_BATTERY_DATA=true`), en herstart hm2mqtt na het aanzetten.\n2. Controleer onder Instellingen → Entiteiten of *Host Battery Voltage* en *Host Battery Current* van de B2500 ingeschakeld zijn en een getal tonen.\n3. Nog steeds niets? Kijk in het logboek van hm2mqtt en naar de firmware van de B2500, en meld het in een issue op GitHub.\n\nDeze melding verdwijnt vanzelf zodra beide waarden weer binnenkomen."
     }
   }
 }
