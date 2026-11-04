@@ -76,7 +76,7 @@
       },
       "b2500": {
         "title": "B2500 V2 (test): accuspanning en -stroom",
-        "description": "De B2500 heeft geen sensor voor het accuvermogen. De monitor rekent het uit met accuspanning × accustroom van het hoofdtoestel (hm2mqtt, lokale MQTT). Ingevuld als ze gevonden zijn.\n\n**Test:** ondersteuning voor de B2500 is nieuw en nog niet op een echte B2500 geprobeerd. Lijkt een meting van {name} niet te kloppen? Maak dan een issue aan op GitHub.",
+        "description": "De B2500 heeft geen sensor voor het accuvermogen. De monitor rekent het uit met accuspanning × accustroom van het hoofdtoestel (hm2mqtt, lokale MQTT). Ingevuld als ze gevonden zijn.\n\n**Sensoren niet gevonden?** Zet in hm2mqtt **Enable Extra Battery Data** aan (optie van de add-on, Docker: `POLL_EXTRA_BATTERY_DATA=true`) en herstart hm2mqtt. Na ongeveer een minuut verschijnen *Host Battery Voltage* en *Host Battery Current*. *Cell Data* is hiervoor niet nodig.\n\n**Test:** ondersteuning voor de B2500 is nieuw en nog niet op een echte B2500 geprobeerd. Lijkt een meting van {name} niet te kloppen? Maak dan een issue aan op GitHub.",
         "data": {
           "b2500_voltage_entity": "Accuspanning hoofdtoestel (V)",
           "b2500_current_entity": "Accustroom hoofdtoestel (A)"
