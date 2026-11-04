@@ -76,7 +76,7 @@
       },
       "b2500": {
         "title": "B2500 V2 (test): battery voltage and current",
-        "description": "The B2500 has no sensor for the battery power. The monitor calculates it from the battery voltage × battery current of the main unit (hm2mqtt, local MQTT). Filled in when found.\n\n**Sensors not found?** In hm2mqtt, turn on **Enable Extra Battery Data** (add-on option, Docker: `POLL_EXTRA_BATTERY_DATA=true`) and restart hm2mqtt. After about a minute *Host Battery Voltage* and *Host Battery Current* appear. *Cell Data* is not needed for this.\n\n**Test:** support for the B2500 is new and has not been tried on a real B2500 yet. Does a measurement of {name} look wrong? Please open an issue on GitHub.",
+        "description": "The B2500 has no sensor for the battery power. The monitor calculates it from the battery voltage × battery current of the main unit (hm2mqtt, local MQTT). Filled in when found.{check}\n\n**Test:** support for the B2500 is new and has not been tried on a real B2500 yet. Does a measurement of {name} look wrong? Please open an issue on GitHub.",
         "data": {
           "b2500_voltage_entity": "Host battery voltage (V)",
           "b2500_current_entity": "Host battery current (A)"
@@ -93,7 +93,10 @@
       "reserve_too_large": "The reserve must be smaller than the nominal capacity.",
       "looks_like_ac": "This sensor looks like the AC / grid side, not the battery (DC) side. AC values include conversion losses and give a wrong capacity. Choose the battery power sensor, or submit again to use this one anyway.",
       "cells_both": "Fill in both the highest and the lowest cell voltage, or neither.",
-      "power_required": "Choose a DC battery power sensor in the previous step. Only a B2500 V2 works without one."
+      "power_required": "Choose a DC battery power sensor in the previous step. Only a B2500 V2 works without one.",
+      "b2500_no_value": "This sensor gives no value yet. Turn on Enable Extra Battery Data in hm2mqtt, wait a minute and submit again.",
+      "b2500_not_host": "This is not the battery of the main unit (it looks like an extra pack, a solar input/output or a cell). Choose Host Battery Voltage / Host Battery Current.",
+      "b2500_wrong_unit": "Wrong unit: battery voltage must be in V (or mV), battery current in A (or mA)."
     },
     "abort": {
       "already_configured": "This battery id is already in use.",
@@ -439,6 +442,10 @@
     "check_power": {
       "title": "{name}: measurement cannot be right, check the power sensor",
       "description": "The last full discharge came out at {pct} % of its rated capacity ({kwh} kWh). A battery cannot exceed {limit} %: more energy was counted than fits in it. Such a measurement therefore does not count ({count} so far).\n\nUsually the power sensor is the cause:\n- it stays on its last value after charging or discharging instead of falling back to 0 W;\n- the wrong sensor was chosen (for example the AC side or another device);\n- the integration reports the power with the wrong scaling factor.\n\nCheck in History whether the power sensor moves along with the SOC during a discharge and falls back to 0 W when the battery is idle. If needed, choose another sensor under the gear ⚙ on the card of this battery → **Sensors** → **Change**. Turn on **Start measuring over** there, so the old measurements no longer count.\n\nThis message disappears by itself as soon as a full discharge gives a credible result again."
+    },
+    "b2500_no_data": {
+      "title": "{name}: no battery voltage or current from the B2500",
+      "description": "For {minutes} minutes the monitor has had no value from: {sensors}. Without these it cannot calculate the battery power, so nothing is measured.\n\nWhat to do:\n1. In hm2mqtt, check that **Enable Extra Battery Data** is on (add-on option, Docker: `POLL_EXTRA_BATTERY_DATA=true`), and restart hm2mqtt after turning it on.\n2. Check under Settings → Entities that *Host Battery Voltage* and *Host Battery Current* of the B2500 are enabled and show a number.\n3. Still nothing? Check the hm2mqtt log and the firmware of the B2500, and report it in an issue on GitHub.\n\nThis message disappears by itself as soon as both values come in again."
     }
   }
 }
