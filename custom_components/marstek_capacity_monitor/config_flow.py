@@ -66,13 +66,59 @@ from .discovery import (
     Candidate,
     find_candidates,
     counter_kwh,
+    AMP_UNITS,
+    B2500_DISABLED,
+    B2500_MISSING,
+    B2500_NO_VALUE,
+    VOLT_UNITS,
+    b2500_problem,
     find_b2500_sensors,
+    is_b2500_host,
+    numeric_value,
     find_cell_sensors,
     find_discharge_counter,
     guess_model,
     looks_like_ac,
 )
 from .extras import FLOW_NOTE, lang_of, start_cycles
+
+
+# B2500 (1.1.0-dev2): what the b2500 step says when something is missing
+B2500_CHECK = {
+    "en": {
+        B2500_MISSING: "⚠ **Not found on this B2500.** hm2mqtt only sends *Host Battery Voltage* and *Host Battery Current* when **Enable Extra Battery Data** is on. Turn it on, restart hm2mqtt, wait a minute and press **Submit** again.",
+        B2500_DISABLED: "⚠ **Disabled in Home Assistant:** {entities}. Enable them (Settings → Entities), wait a minute and press **Submit** again.",
+        B2500_NO_VALUE: "⚠ **No value yet:** {entities}. Is **Enable Extra Battery Data** on in hm2mqtt? After turning it on it takes about a minute before the values arrive.",
+    },
+    "nl": {
+        B2500_MISSING: "⚠ **Niet gevonden op deze B2500.** hm2mqtt stuurt *Host Battery Voltage* en *Host Battery Current* alleen als **Enable Extra Battery Data** aan staat. Zet die aan, herstart hm2mqtt, wacht een minuut en druk opnieuw op **Verzenden**.",
+        B2500_DISABLED: "⚠ **Uitgeschakeld in Home Assistant:** {entities}. Schakel ze in (Instellingen → Entiteiten), wacht een minuut en druk opnieuw op **Verzenden**.",
+        B2500_NO_VALUE: "⚠ **Nog geen waarde:** {entities}. Staat **Enable Extra Battery Data** aan in hm2mqtt? Na het aanzetten duurt het ongeveer een minuut voordat de waarden binnenkomen.",
+    },
+    "de": {
+        B2500_MISSING: "⚠ **Auf diesem B2500 nicht gefunden.** hm2mqtt sendet *Host Battery Voltage* und *Host Battery Current* nur, wenn **Enable Extra Battery Data** eingeschaltet ist. Einschalten, hm2mqtt neu starten, eine Minute warten und erneut auf **Senden** drücken.",
+        B2500_DISABLED: "⚠ **In Home Assistant deaktiviert:** {entities}. Aktivieren (Einstellungen → Entitäten), eine Minute warten und erneut auf **Senden** drücken.",
+        B2500_NO_VALUE: "⚠ **Noch kein Wert:** {entities}. Ist **Enable Extra Battery Data** in hm2mqtt eingeschaltet? Nach dem Einschalten dauert es etwa eine Minute, bis die Werte ankommen.",
+    },
+}
+
+
+def _b2500_errors(hass: Any, volt: str, amp: str) -> dict[str, str]:
+    """Both sensors must be the host battery, in V and A, and give a number."""
+    from .const import CONF_B2500_CURRENT, CONF_B2500_VOLTAGE
+
+    if volt == amp:
+        return {CONF_B2500_CURRENT: "same_entity"}
+    errors: dict[str, str] = {}
+    for key, entity, units in ((CONF_B2500_VOLTAGE, volt, VOLT_UNITS), (CONF_B2500_CURRENT, amp, AMP_UNITS)):
+        state = hass.states.get(entity)
+        if not is_b2500_host(hass, entity):
+            errors[key] = "b2500_not_host"
+        elif state is not None and state.attributes.get("unit_of_measurement") not in units:
+            errors[key] = "b2500_wrong_unit"
+        elif numeric_value(hass, entity) is None:
+            errors[key] = "b2500_no_value"
+    return errors
 
 CONF_CANDIDATE = "candidate"
 MANUAL = "manual"
@@ -386,17 +432,26 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """B2500 V2 (test): battery voltage and current; the monitor makes the
-        DC power from them (no power sensor of its own on the B2500)."""
+        DC power from them (no power sensor of its own on the B2500).
+        1.1.0-dev2: checks that both are the host battery and give a number
+        now, and says what to do when they are missing (plug and play)."""
         errors: dict[str, str] = {}
         if user_input is not None:
             volt, amp = user_input[CONF_B2500_VOLTAGE], user_input[CONF_B2500_CURRENT]
-            if volt == amp:
-                errors[CONF_B2500_CURRENT] = "same_entity"
-            else:
+            errors = _b2500_errors(self.hass, volt, amp)
+            if not errors:
                 self._data.update(user_input)
                 self._data[CONF_POWER_ENTITY] = b2500_power_entity(self._data[CONF_BATTERY_ID])
                 return self._create(preset_for(MODEL_B2500_V2))
-        suggested = {**find_b2500_sensors(self.hass, self._data[CONF_SOC_ENTITY]), **(user_input or {})}
+        soc = self._data[CONF_SOC_ENTITY]
+        suggested = {**find_b2500_sensors(self.hass, soc), **(user_input or {})}
+        problem, entities = b2500_problem(self.hass, soc, user_input)
+        check = ""
+        if problem:
+            lang = lang_of(self.hass.config.language)
+            check = "\n\n" + B2500_CHECK[lang][problem].format(
+                entities=", ".join(f"`{e}`" for e in entities) or "–"
+            )
         schema = vol.Schema(
             {
                 vol.Required(CONF_B2500_VOLTAGE): selector.EntitySelector(
@@ -411,7 +466,7 @@ class MarstekCapacityConfigFlow(ConfigFlow, domain=DOMAIN):
             step_id="b2500",
             data_schema=self.add_suggested_values_to_schema(schema, suggested),
             errors=errors,
-            description_placeholders={"name": self._data[CONF_NAME]},
+            description_placeholders={"name": self._data[CONF_NAME], "check": check},
         )
 
     async def async_step_packs(
