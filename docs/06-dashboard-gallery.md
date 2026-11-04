@@ -39,7 +39,7 @@ Arranging it yourself? Use Home Assistant's standard **Sections** layout. An exa
 
 **The chart** shows the most recent 3 years. Each dot is one month: how much of the usable capacity was left. ● measured, calibrated · ○ less reliable (not completely full in the 14 days before, or cells colder than 5 °C) · grey dashed line: expected per spec · red dashed line: report to Marstek (75 %). Point at a dot for the value, the spec and the cell temperature that month.
 
-**SOC and Cells** answer *Is my SOC meter still right?* (per month *Days completely full* and *SOC meter was right*) and *Are my cells still in balance?* (cell spread per month). With attention or advice the window shows what to do and a **Dismiss** button. See [How it works](03-how-it-works.md#soc-drift-from-05).
+**SOC and Cells** answer *Is my SOC meter still right?* (per month *Days charged to 100 %* and *SOC meter was right*) and *Are my cells still in balance?* (cell spread per month). With attention or advice the window shows what to do and a **Dismiss** button. See [How it works](03-how-it-works.md#soc-drift-from-05).
 
 If you linked sensors for the highest and lowest cell voltage, the **cell spread after full charge** is in the **Cells** panel (until 0.4 it was below the trend).
 

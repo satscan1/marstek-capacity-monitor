@@ -103,6 +103,7 @@
       "settings": {
         "title": "Fabrieksgegevens en garantie",
         "data": {
+          "model": "Model",
           "nominal_kwh": "Opgegeven capaciteit (fabrikant)",
           "reserve_kwh": "Interne reserve (niet bruikbaar)",
           "purchase_date": "Installatiedatum",
@@ -123,6 +124,7 @@
           "cell_sensitivity": "Gevoeligheid celkalibratie"
         },
         "data_description": {
+          "model": "Alleen voor de naam in het rapport en voor het advies. Je fabrieksgegevens hieronder veranderen er niet door.",
           "nominal_kwh": "Totale capaciteit van de cellen, bv. 5,12 kWh.",
           "reserve_kwh": "Deel van de fabriekscapaciteit dat de batterij nooit afgeeft. Datasheet: 90% ontlaaddiepte, dus 5,12 − 0,51 = 4,61 kWh = 100% van nieuw.",
           "cycle_life": "Bv. 6000 volle cycli.",

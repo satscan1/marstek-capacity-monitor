@@ -39,7 +39,7 @@ Zelf indelen? Gebruik hiervoor de standaardindeling van Home Assistant met **sec
 
 **De grafiek** toont de meest recente 3 jaar. Elke stip is een maand: hoeveel van de bruikbare capaciteit er toen nog was. ● gemeten, geijkt · ○ minder betrouwbaar (in de 14 dagen ervoor niet helemaal vol, of cellen kouder dan 5 °C) · grijze stippellijn: verwacht volgens specificatie · rode stippellijn: melden bij Marstek (75 %). Wijs een stip aan voor het getal, de specificatie en de celtemperatuur in die maand.
 
-**SOC en Cellen** beantwoorden *Klopt mijn SOC-meter nog?* (per maand *Dagen helemaal vol* en *SOC-meter klopte*) en *Zijn mijn cellen nog in balans?* (celverschil per maand). Bij let op of advies staat in het venster wat je kunt doen en een knop **Wegklikken**. Zie [Hoe het werkt](03-how-it-works.nl.md#soc-drift-vanaf-05).
+**SOC en Cellen** beantwoorden *Klopt mijn SOC-meter nog?* (per maand *Dagen tot 100 % geladen* en *SOC-meter klopte*) en *Zijn mijn cellen nog in balans?* (celverschil per maand). Bij let op of advies staat in het venster wat je kunt doen en een knop **Wegklikken**. Zie [Hoe het werkt](03-how-it-works.nl.md#soc-drift-vanaf-05).
 
 Heb je sensoren voor de hoogste en laagste celspanning gekoppeld, dan staat het **celverschil na volle lading** in het paneel **Cellen** (tot en met 0.4 onder de trend).
 

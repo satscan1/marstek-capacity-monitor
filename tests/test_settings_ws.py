@@ -141,3 +141,33 @@ async def test_make_a_backup_downloads_and_keeps_a_copy(hass: HomeAssistant, has
 
     kept = list(Path(hass.config.path("marstek_capacity_monitor/backup")).glob("mt1-backup-*.html"))
     assert kept
+
+
+async def test_window_sets_a_missing_model(hass: HomeAssistant, hass_ws_client) -> None:
+    """1.0.2: a battery added before the model choice has no model. The window
+    shows that, keeps it empty when other settings are saved, and can set it."""
+    entry = await _setup_with_one_record(hass)
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({"type": f"{DOMAIN}/settings", "entry_id": entry.entry_id, "lang": "nl"})
+    res = (await client.receive_json())["result"]
+    assert res["values"]["model"] is None
+    assert "venus_e_v3" in res["choices"]["model"]
+    assert res["texts"]["choices"]["model"]["venus_e_v3"] == "Venus E v3"
+    assert res["texts"]["choices"]["model"]["other"] == "Ander model"
+    assert res["texts"]["label"]["model"] == "Model" and res["texts"]["help"]["model"]
+    # Saving another setting does not store an empty model
+    await client.send_json_auto_id({"type": f"{DOMAIN}/settings/save", "entry_id": entry.entry_id,
+                                    "values": {**res["values"], "red_pct": 70}})
+    assert (await client.receive_json())["result"]["errors"] == {}
+    await hass.async_block_till_done()
+    assert "model" not in entry.options and entry.options["red_pct"] == 70
+    # An unknown model is refused, a known one is stored; the measurements stay
+    await client.send_json_auto_id({"type": f"{DOMAIN}/settings/save", "entry_id": entry.entry_id, "values": {"model": "venus_x"}})
+    assert (await client.receive_json())["result"]["errors"] == {"model": "unknown"}
+    await client.send_json_auto_id({"type": f"{DOMAIN}/settings/save", "entry_id": entry.entry_id, "values": {"model": "venus_e_v3"}})
+    assert (await client.receive_json())["result"]["errors"] == {}
+    await hass.async_block_till_done()
+    assert entry.options["model"] == "venus_e_v3"
+    assert entry.runtime_data.model == "venus_e_v3"
+    assert entry.options["nominal_kwh"] == 5.12  # factory data unchanged
+    assert len(entry.runtime_data.records) == 1

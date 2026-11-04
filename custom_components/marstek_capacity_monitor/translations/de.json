@@ -103,6 +103,7 @@
       "settings": {
         "title": "Herstellerdaten und Garantie",
         "data": {
+          "model": "Modell",
           "nominal_kwh": "Nennkapazität (Hersteller)",
           "reserve_kwh": "Interne Reserve (nicht nutzbar)",
           "purchase_date": "Datum der Inbetriebnahme",
@@ -123,6 +124,7 @@
           "cell_sensitivity": "Empfindlichkeit Zellkalibrierung"
         },
         "data_description": {
+          "model": "Nur für den Namen im Bericht und für den Rat. Deine Herstellerdaten unten ändern sich dadurch nicht.",
           "nominal_kwh": "Gesamtkapazität der Zellen, z. B. 5,12 kWh.",
           "reserve_kwh": "Teil der Nennkapazität, den die Batterie nie abgibt. Datenblatt: 90 % Entladetiefe, also 5,12 − 0,51 = 4,61 kWh = 100 % im Neuzustand.",
           "cycle_life": "Z. B. 6000 Vollzyklen.",
