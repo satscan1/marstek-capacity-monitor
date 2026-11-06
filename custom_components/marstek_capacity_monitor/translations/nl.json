@@ -100,7 +100,7 @@
     },
     "abort": {
       "already_configured": "Deze code is al in gebruik.",
-      "max_batteries": "Het maximum van 6 batterijen is bereikt.",
+      "max_batteries": "Het maximum van 9 batterijen is bereikt.",
       "b2500_v1": "De B2500 V1 geeft de accuspanning en -stroom niet door, daarom kan de monitor hem (nog) niet meten. Heb je een V1 en een idee hoe het wel kan? Maak dan een issue aan op GitHub."
     },
     "create_entry": {
