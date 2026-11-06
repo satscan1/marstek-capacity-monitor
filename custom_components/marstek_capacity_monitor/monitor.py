@@ -55,6 +55,9 @@ from .calc import (
     to_mv,
 )
 from .const import (
+    CONF_B2500_CURRENT,
+    CONF_B2500_VOLTAGE,
+    MODEL_B2500_V2,
     CONF_BATTERY_ID,
     CONF_CYCLE_COUNTER,
     CONF_EXTRAS_DECLINED,
@@ -144,6 +147,9 @@ def spec_from_entry(entry: ConfigEntry) -> BatterySpec:
 BACKUP_DIR = DOMAIN + "/backup"
 
 
+# B2500 V2: minutes without voltage/current before the Repairs message
+B2500_NO_DATA_S = 15 * 60
+
 class MonitorStore(Store):
     """The monitor's own file in .storage, with a safety net.
 
@@ -189,6 +195,13 @@ class BatteryMonitor:
         self.cell_min_entity: str | None = entry_setting(entry, CONF_CELL_MIN_ENTITY) or None
         self.temp_max_entity: str | None = entry_setting(entry, CONF_TEMP_MAX_ENTITY) or None
         self.temp_min_entity: str | None = entry_setting(entry, CONF_TEMP_MIN_ENTITY) or None
+        # B2500 V2 (1.1.0-dev2): the two sensors behind the computed power,
+        # and since when one of them gives no number (for the Repairs message)
+        self.b2500_entities: list[str] = (
+            [e for e in (entry_setting(entry, CONF_B2500_VOLTAGE), entry_setting(entry, CONF_B2500_CURRENT)) if e]
+            if self.model == MODEL_B2500_V2 else []
+        )
+        self._b2500_bad_since: float | None = None
         # (ts, lowest, highest) once a minute; 2 days is enough for any swing
         self._temps: deque[tuple[float, float | None, float | None]] = deque(maxlen=2880)
         self.cells = CellBalanceTracker()
@@ -515,6 +528,9 @@ class BatteryMonitor:
             "cell_min_entity": self.cell_min_entity,
             "temp_max_entity": self.temp_max_entity,
             "temp_min_entity": self.temp_min_entity,
+            "b2500_voltage_entity": self.b2500_entities[0] if self.b2500_entities else None,
+            "b2500_current_entity": self.b2500_entities[1] if len(self.b2500_entities) > 1 else None,
+            "b2500_values": self.b2500_values() or None,
         }
 
     def export(self, variant: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -771,6 +787,52 @@ class BatteryMonitor:
                 "kwh": f"{r.get('impossible_last_kwh') or 0:.0f}",
                 "limit": f"{r.get('impossible_limit_pct') or 130:.0f}",
                 "count": str(r.get("impossible_count") or 0),
+            },
+        )
+
+    @property
+    def b2500_issue_id(self) -> str:
+        return f"b2500_no_data_{self.entry.entry_id}"
+
+    def b2500_values(self) -> dict[str, str]:
+        """Current state of the B2500 voltage and current (for the report)."""
+        out: dict[str, str] = {}
+        for entity in self.b2500_entities:
+            state = self.hass.states.get(entity)
+            unit = state.attributes.get("unit_of_measurement", "") if state else ""
+            out[entity] = f"{state.state} {unit}".strip() if state else "missing"
+        return out
+
+    def _check_b2500(self, ts: float) -> None:
+        """B2500 V2: voltage or current without a number for B2500_NO_DATA_S
+        -> one message under Settings -> Repairs naming the sensor(s) and what
+        to do. Gone again as soon as both give a number."""
+        if not self.b2500_entities:
+            return
+        from .discovery import numeric_value
+
+        bad = [e for e in self.b2500_entities if numeric_value(self.hass, e) is None]
+        if not bad:
+            if self._b2500_bad_since is not None:
+                self._b2500_bad_since = None
+                ir.async_delete_issue(self.hass, DOMAIN, self.b2500_issue_id)
+            return
+        if self._b2500_bad_since is None:
+            self._b2500_bad_since = ts
+        if ts - self._b2500_bad_since < B2500_NO_DATA_S:
+            return
+        ir.async_create_issue(
+            self.hass,
+            DOMAIN,
+            self.b2500_issue_id,
+            is_fixable=False,
+            is_persistent=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key="b2500_no_data",
+            translation_placeholders={
+                "name": self.entry.title,
+                "sensors": ", ".join(bad),
+                "minutes": str(B2500_NO_DATA_S // 60),
             },
         )
 
@@ -1274,6 +1336,7 @@ class BatteryMonitor:
         note_day(self.full_days, self.alive_days, self.tracker.s.get("soc"), ts)
         self._sample_temps()
         self._check_cells()
+        self._check_b2500(ts)
         if record is not None:
             self._process_record(record)
         self._update_status()

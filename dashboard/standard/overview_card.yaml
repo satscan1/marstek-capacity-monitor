@@ -1,4 +1,4 @@
-# Marstek Capacity Monitor - standard overview for up to 6 batteries
+# Marstek Capacity Monitor - standard overview for up to 9 batteries
 # (no HACS needed). Remove the lines of batteries you do not have.
 type: statistics-graph
 title: Home batteries - remaining capacity % per month

@@ -1,6 +1,6 @@
 # Example cards (after adding marstek_capacity_templates.yaml to your dashboard)
 
-# Overview of all batteries (up to 6)
+# Overview of all batteries (up to 9)
 type: custom:button-card
 template: marstek_capacity_overview
 # Redraw when one of the batteries changes (one line per battery)
@@ -20,7 +20,7 @@ variables:
 
 ---
 # Card for one battery. The small "Chart" button under the status opens or closes the chart.
-# Layout for 1 to 6 batteries: see layout-sections.yaml.
+# Layout for 1 to 9 batteries: see layout-sections.yaml.
 type: custom:button-card
 template: marstek_capacity_battery
 # Only redraw when this battery changes (keeps the chart open while you look)

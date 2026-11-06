@@ -1,7 +1,7 @@
 """Build the ready-made dashboards in dashboard/ready-made/.
 
 Each file is a complete dashboard: the button-card templates plus one
-"Sections" view with 1 to 6 batteries, in English and Dutch. The templates are
+"Sections" view with 1 to 9 batteries, in English and Dutch. The templates are
 copied from dashboard/button-card/marstek_capacity_templates.yaml, so run this
 script after changing that file:
 
@@ -175,7 +175,8 @@ def view(n: int, lang: str) -> list[str]:
             lines += battery_card(i, lang, 12)
         lines += overview_card(n, lang, 12, 3)
     else:
-        # Overview two thirds with a free place, then 3 / 2 x 2 / 3 + 2 / 3 + 3.
+        # Overview two thirds with a free place, then 3 / 2 x 2 / 3 + 2 / 3 + 3,
+        # from 7 on rows of three (3 + 3 + 1 / 3 + 3 + 2 / 3 + 3 + 3).
         lines += overview_card(n, lang, 24, 6)
         lines += free_card(lang)
         width = 18 if n == 4 else 12
@@ -199,7 +200,7 @@ def expected() -> dict[Path, str]:
     return {
         OUT / lang / TEXT[lang]["file"](n): build(n, lang)
         for lang in TEXT
-        for n in range(1, 7)
+        for n in range(1, 10)
     }
 
 

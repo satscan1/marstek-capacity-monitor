@@ -15,7 +15,7 @@ Track in Home Assistant whether your Marstek home battery keeps its capacity, me
 - **Two sensors you already have:** state of charge and DC battery power. The integration finds them itself. 
 - **Measured on a full discharge** (≥ 95 % → ≤ 15 %) and compared with the usable capacity of a new battery.
 - **Manufacturer spec** as reference: 80 % after 6,000 cycles. Green within spec, orange below, red at 75 % or lower: report via the Marstek app.
-- **Any connection that gives the state of charge and DC power:** ESPHome, Modbus (RS485 or LAN) or another integration. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus C, Venus D.
+- **Any connection that gives the state of charge and DC power:** ESPHome, Modbus (RS485 or LAN) or another integration. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus C, Venus D. **B2500 V2 (test)** through hm2mqtt, with *Enable Extra Battery Data* on.
 - **Plug & play:** pick your model and installation date; the factory data are filled in for you. Cycles done before the monitor come from the battery's own counter when it has one (AC side, an estimate). Sensors found later show up under Repairs, ready to add.
 - **Shows whether it works:** a status per battery, and "collecting data" until the first full discharge.
 - **Optional cell balance check:** the spread between the highest and lowest cell after a full charge.
@@ -42,7 +42,7 @@ Then restart Home Assistant and go to **Settings → Dashboards → Add dashboar
 | [03 – How it works](docs/03-how-it-works.md) | Three capacities, measuring, conversion to 100 %, spec and colours |
 | [04 – Troubleshooting](docs/04-troubleshooting.md) | Common messages and what to do |
 | [05 – Supported batteries](docs/05-supported-batteries.md) | Models, depth of discharge per model, **sources for the manufacturer specs** |
-| [06 – Dashboard and gallery](docs/06-dashboard-gallery.md) | Layout for 1 to 6 batteries, the card explained with numbers, gallery with and without chart |
+| [06 – Dashboard and gallery](docs/06-dashboard-gallery.md) | Layout for 1 to 9 batteries, the card explained with numbers, gallery with and without chart |
 | [07 – How the monitor measures](docs/07-measuring-method.md) | Why only full discharges count, and why measuring while the battery charges in between is not reliable |
 
 Changes per version: [CHANGELOG](CHANGELOG.md).
@@ -81,7 +81,7 @@ Changes per version: [CHANGELOG](CHANGELOG.md).
 
 ![Device](screenshots/06-device.png)
 
-**6. The battery card (v0.5.1). More examples, from 1 to 6 batteries: [gallery](docs/06-dashboard-gallery.md)**
+**6. The battery card (v0.5.1). More examples, from 1 to 9 batteries: [gallery](docs/06-dashboard-gallery.md)**
 
 ![Battery card](screenshots/card/en/1-card.png)
 

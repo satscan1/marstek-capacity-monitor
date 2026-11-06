@@ -606,9 +606,11 @@ def render_html(export: dict[str, Any]) -> str:
             (K["notify"], yn(bat.get("notify"))),
         ]
     if v == "full":
-        for key in ("soc_entity", "power_entity", "cell_max_entity", "cell_min_entity", "temp_max_entity", "temp_min_entity"):
+        for key in ("soc_entity", "power_entity", "cell_max_entity", "cell_min_entity", "temp_max_entity", "temp_min_entity", "b2500_voltage_entity", "b2500_current_entity"):
             if bat.get(key):
                 settings.append((escape(key), escape(str(bat[key]))))
+        for entity, value in (bat.get("b2500_values") or {}).items():
+            settings.append((escape(f"{entity} (now)"), escape(str(value))))
     settings += [(K["app"], escape(str(export.get("app_version") or "–"))), (K["ha"], escape(str(export.get("ha_version") or "–")))]
     sections.append(("settings", _kv(settings)))
 

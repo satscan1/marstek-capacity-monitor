@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import re
+from typing import Any
 
 from homeassistant.const import PERCENTAGE, UnitOfPower
 from homeassistant.core import HomeAssistant, State
@@ -246,7 +247,7 @@ def find_cell_sensors(hass: HomeAssistant, soc_entity: str) -> dict[str, str]:
 
 def guess_model(hass: HomeAssistant, soc_entity: str) -> str | None:
     """Best guess of the Marstek model from the device registry; None if unsure."""
-    from .const import MODEL_C, MODEL_D, MODEL_E_V12, MODEL_E_V3
+    from .const import MODEL_B2500_V2, MODEL_C, MODEL_D, MODEL_E_V12, MODEL_E_V3
 
     entry = er.async_get(hass).async_get(soc_entity)
     device = (
@@ -258,6 +259,8 @@ def guess_model(hass: HomeAssistant, soc_entity: str) -> str | None:
     if device is not None:
         parts += [device.model or "", device.name or "", device.name_by_user or ""]
     text = re.sub(r"[^a-z0-9]+", "_", " ".join(parts).lower())
+    if re.search(r"b2500", text):
+        return MODEL_B2500_V2
     if re.search(r"vnse3|venus_?e_?(v_?3|3_0|gen_?3)", text):
         return MODEL_E_V3
     if re.search(r"vnsd|venus_?d($|_)", text):
@@ -269,6 +272,129 @@ def guess_model(hass: HomeAssistant, soc_entity: str) -> str | None:
     if re.search(r"(^|_)hmg($|_)|venus_?e_?(v_?[12]|2_0)", text):
         return MODEL_E_V12
     return None
+
+
+B2500_VOLT_RE = re.compile(r"(host_)?battery_voltage")
+B2500_AMP_RE = re.compile(r"(host_)?battery_current")
+# Not the host battery: an extra pack, a solar input/output or a cell. Whole
+# words only, and no "pv"/"solar": those are often in the device name
+# ("Batterie PV Balkon"), the solar inputs already say "input".
+NOT_B2500_HOST_RE = re.compile(r"(^|_)(extra\d*|output|input|cell)(_|\d|$)")
+
+
+def find_b2500_sensors(hass: HomeAssistant, soc_entity: str) -> dict[str, str]:
+    """B2500 V2 (hm2mqtt): the host battery's voltage and current on the same
+    device as the SOC sensor. Keys: the config keys of the b2500 step."""
+    from .const import CONF_B2500_CURRENT, CONF_B2500_VOLTAGE
+
+    ent_reg = er.async_get(hass)
+    soc_entry = ent_reg.async_get(soc_entity)
+    dev_id = soc_entry.device_id if soc_entry else None
+    prefix = _prefix(soc_entity, SOC_RE)
+    found: dict[str, str] = {}
+    for state in sorted(hass.states.async_all("sensor"), key=lambda s: s.entity_id):
+        unit = state.attributes.get("unit_of_measurement")
+        if unit not in ("V", "A"):
+            continue
+        entry = ent_reg.async_get(state.entity_id)
+        same_device = dev_id is not None and entry is not None and entry.device_id == dev_id
+        same_name = bool(prefix) and state.entity_id.split(".", 1)[1].startswith(prefix + "_")
+        if not (same_device or same_name):
+            continue
+        text = _text(state, entry)
+        if NOT_B2500_HOST_RE.search(text):
+            continue
+        if unit == "V" and B2500_VOLT_RE.search(text):
+            found.setdefault(CONF_B2500_VOLTAGE, state.entity_id)
+        elif unit == "A" and B2500_AMP_RE.search(text):
+            found.setdefault(CONF_B2500_CURRENT, state.entity_id)
+    return found
+
+
+# B2500 checks (1.1.0-dev2): why the voltage/current are not there yet
+B2500_MISSING = "missing"    # not on the device at all: Extra Battery Data off
+B2500_DISABLED = "disabled"  # on the device, but disabled in Home Assistant
+B2500_NO_VALUE = "no_value"  # there, but no number (yet)
+VOLT_UNITS = {"V": 1.0, "mV": 0.001, "kV": 1000.0}
+AMP_UNITS = {"A": 1.0, "mA": 0.001}
+
+
+def numeric_value(hass: HomeAssistant, entity_id: str | None) -> float | None:
+    """The sensor's value as a number, or None (missing, unknown, unavailable)."""
+    state = hass.states.get(entity_id) if entity_id else None
+    if state is None:
+        return None
+    try:
+        return float(state.state)
+    except (TypeError, ValueError):
+        return None
+
+
+def b2500_registry(hass: HomeAssistant, soc_entity: str) -> dict[str, dict[str, Any]]:
+    """Host battery voltage and current on the SOC sensor's device in the
+    entity registry, disabled ones included (those have no state)."""
+    from .const import CONF_B2500_CURRENT, CONF_B2500_VOLTAGE
+
+    ent_reg = er.async_get(hass)
+    soc_entry = ent_reg.async_get(soc_entity)
+    dev_id = soc_entry.device_id if soc_entry else None
+    found: dict[str, dict[str, Any]] = {}
+    if dev_id is None:
+        return found
+    for entry in sorted(er.async_entries_for_device(ent_reg, dev_id, include_disabled_entities=True), key=lambda e: e.entity_id):
+        if entry.domain != "sensor":
+            continue
+        text = re.sub(
+            r"[^a-z0-9]+", "_",
+            " ".join([entry.entity_id.split(".", 1)[1], entry.original_name or "", entry.name or "", entry.unique_id or ""]).lower(),
+        )
+        if NOT_B2500_HOST_RE.search(text):
+            continue
+        info = {"entity_id": entry.entity_id, "disabled": entry.disabled_by is not None}
+        if B2500_VOLT_RE.search(text):
+            found.setdefault(CONF_B2500_VOLTAGE, info)
+        elif B2500_AMP_RE.search(text):
+            found.setdefault(CONF_B2500_CURRENT, info)
+    return found
+
+
+def b2500_problem(
+    hass: HomeAssistant, soc_entity: str, chosen: dict[str, str] | None = None
+) -> tuple[str | None, list[str]]:
+    """What is wrong with the B2500 voltage/current, and which entities.
+    `chosen`: the entities already picked (otherwise those on the device)."""
+    from .const import CONF_B2500_CURRENT, CONF_B2500_VOLTAGE
+
+    keys = (CONF_B2500_VOLTAGE, CONF_B2500_CURRENT)
+    reg = b2500_registry(hass, soc_entity)
+    live = find_b2500_sensors(hass, soc_entity)
+    ids = {k: (chosen or {}).get(k) or live.get(k) or (reg.get(k) or {}).get("entity_id") for k in keys}
+    if not any(ids.values()):
+        return B2500_MISSING, []
+    disabled = [
+        reg[k]["entity_id"] for k in keys
+        if k in reg and reg[k]["disabled"] and ids[k] == reg[k]["entity_id"]
+    ]
+    if disabled:
+        return B2500_DISABLED, disabled
+    missing = [k for k in keys if not ids[k]]
+    if missing:
+        return B2500_MISSING, [ids[k] for k in keys if ids[k]]
+    no_value = [ids[k] for k in keys if numeric_value(hass, ids[k]) is None]
+    if no_value:
+        return B2500_NO_VALUE, no_value
+    return None, []
+
+
+def is_b2500_host(hass: HomeAssistant, entity_id: str) -> bool:
+    """False for an extra pack, a solar input/output or a cell sensor."""
+    state = hass.states.get(entity_id)
+    entry = er.async_get(hass).async_get(entity_id)
+    if state is None:
+        text = re.sub(r"[^a-z0-9]+", "_", entity_id.split(".", 1)[1].lower())
+    else:
+        text = _text(state, entry)
+    return not NOT_B2500_HOST_RE.search(text)
 
 
 # ---------------------------------------------------------------------------

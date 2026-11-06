@@ -368,13 +368,14 @@ const MC_DASH_TEXT = {
   },
 };
 
-// Dashboard that arranges the cards for 1 to 6 batteries:
+// Dashboard that arranges the cards for 1 to 9 batteries:
 //   1-2: batteries a third each, the overview to the right (one row of three)
-//   3-6: overview two thirds plus a free spot, then 3 / 2x2 / 3+2 / 3+3
+//   3-9: overview two thirds plus a free spot, then 3 / 2x2 / 3+2 / 3+3,
+//        and from 7 on rows of three: 3+3+1 / 3+3+2 / 3+3+3
 class MarstekCapacityDashboardStrategy {
   static async generate(config, hass) {
     const T = MC_DASH_TEXT[mcLang(hass, config)] || MC_DASH_TEXT.en;
-    const found = mcBatteries(hass).slice(0, 6);
+    const found = mcBatteries(hass).slice(0, 9);
     const n = found.length;
     // A fixed language for the dashboard (lang: nl/de/en) also goes to the cards
     const lang = config && config.lang ? { lang: config.lang } : {};
@@ -398,6 +399,20 @@ class MarstekCapacityDashboardStrategy {
         ...found.map((b) => battery(b, n === 4 ? 18 : 12)),
       ];
     }
+    // Logo with the version at the top; the logo opens a page with a picture
+    // that follows the season (as in HESC), back with a tap on the picture.
+    const logo = `/${MC_DOMAIN}_frontend/mcm-logo.webp?v=${MC_VERSION}-6`;
+    // HA removes relative links from markdown: use the dashboard's own address
+    const base = "/" + ((typeof location !== "undefined" && location.pathname.split("/")[1]) || "marstek-capacity");
+    const header = {
+      layout: "start",
+      card: {
+        type: "markdown", text_only: true,
+        content: `<table><tr><td><a href="${base}/seizoen"><img src="${logo}" width="72" height="72" alt="Marstek Capacity Monitor"></a></td><td>Marstek Capacity Monitor<br>v${MC_VERSION}</td></tr></table>`,
+      },
+    };
+    const season = "{%- set m = now().month -%}{%- set s = 'lente' if m in [3, 4, 5] else ('zomer' if m in [6, 7, 8] else ('herfst' if m in [9, 10, 11] else 'winter')) -%}"
+      + `<a href="${base}/marstek"><img src="/${MC_DOMAIN}_frontend/seizoen/mcm-seizoen-{{ s }}.webp?v=1" width="100%" alt="Marstek Capacity Monitor · {{ s }}"></a>`;
     return {
       title: T.title,
       views: [{
@@ -405,7 +420,15 @@ class MarstekCapacityDashboardStrategy {
         path: "marstek",
         type: "sections",
         max_columns: 3,
+        header,
         sections: [{ type: "grid", column_span: 3, cards }],
+      }, {
+        title: T.title,
+        path: "seizoen",
+        subview: true,
+        back_path: `${base}/marstek`,
+        type: "panel",
+        cards: [{ type: "markdown", text_only: true, content: season }],
       }],
     };
   }
@@ -461,7 +484,7 @@ function mcDefine() {
     type: "marstek-capacity",
     strategyType: "dashboard",
     name: "Marstek battery capacity",
-    description: "Capacity of your Marstek batteries, arranged for 1 to 6 batteries.",
+    description: "Capacity of your Marstek batteries, arranged for 1 to 9 batteries.",
     documentationURL: `${MC_DOCS}/06-dashboard-gallery.md`,
   });
   console.info(`%c MARSTEK-CAPACITY-CARD %c ${MC_VERSION} `, "background:#42a5f5;color:#000", "");

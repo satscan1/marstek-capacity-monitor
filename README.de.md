@@ -15,7 +15,7 @@ Behalte in Home Assistant im Blick, ob dein Marstek-Heimspeicher seine Kapazitä
 - **Zwei Sensoren, die du schon hast:** Ladezustand und DC-Leistung der Batterie. Die Integration findet sie selbst. 
 - **Gemessen bei einer vollständigen Entladung** (≥ 95 % → ≤ 15 %) und verglichen mit der nutzbaren Kapazität im Neuzustand.
 - **Herstellerangabe** als Maßstab: 80 % nach 6000 Zyklen. Grün im Rahmen der Herstellerangabe, orange darunter, rot bei 75 % oder weniger: über die Marstek-App melden.
-- **Jede Anbindung, die Ladezustand und DC-Leistung liefert:** ESPHome, Modbus (RS485 oder LAN) oder eine andere Integration. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus C, Venus D.
+- **Jede Anbindung, die Ladezustand und DC-Leistung liefert:** ESPHome, Modbus (RS485 oder LAN) oder eine andere Integration. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus C, Venus D. **B2500 V2 (Test)** über hm2mqtt, mit eingeschaltetem *Enable Extra Battery Data*.
 - **Plug & Play:** Modell und Datum der Inbetriebnahme wählen; die Herstellerdaten werden für dich ausgefüllt. Die Zyklen vor dem Monitor kommen aus dem Zähler der Batterie, wenn es einen gibt (AC-Seite, eine Schätzung). Später gefundene Sensoren stehen unter Reparaturen bereit.
 - **Eigene Karten und ein Dashboard mit einem Klick:** kein button-card nötig.
 - **Zeigt, ob es funktioniert:** ein Status pro Batterie und „sammelt Daten“ bis zur ersten vollständigen Entladung. Gab es in den letzten Tagen schon eine, gibt es sofort eine erste Messung.
@@ -37,7 +37,7 @@ Starte Home Assistant danach neu und gehe zu **Einstellungen → Dashboards → 
 | Dokument | Inhalt |
 |---|---|
 | [01 – Installation](docs/01-installation.de.md) | Was du brauchst, HACS, Batterie hinzufügen, Karten |
-| [06 – Dashboard und Galerie](docs/06-dashboard-gallery.de.md) | Aufteilung für 1 bis 6 Batterien, die Karte mit Nummern erklärt, Galerie |
+| [06 – Dashboard und Galerie](docs/06-dashboard-gallery.de.md) | Aufteilung für 1 bis 9 Batterien, die Karte mit Nummern erklärt, Galerie |
 | [02 – Configuration](docs/02-configuration.md) (Englisch) | Einstellungen, Sensoren, Messungen löschen |
 | [03 – How it works](docs/03-how-it-works.md) (Englisch) | Drei Kapazitäten, Messung, Umrechnung auf 100 %, Herstellerangabe und Farben |
 | [04 – Fehlerbehebung](docs/04-troubleshooting.de.md) | Häufige Meldungen und Fragen, und was zu tun ist |

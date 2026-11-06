@@ -2,7 +2,7 @@
 
 *[Nederlands](06-dashboard-gallery.nl.md) · [Deutsch](06-dashboard-gallery.de.md)*
 
-This page shows how the cards look with 1 to 6 batteries, what each part of the battery card means and how to arrange the cards.
+This page shows how the cards look with 1 to 9 batteries, what each part of the battery card means and how to arrange the cards.
 
 > All images on this page use **demo data**: six made-up batteries of different ages and conditions. They show how the cards look, not how a real battery ages. The gallery screenshots are in Dutch; the numbered card below is shown in English.
 
@@ -17,6 +17,7 @@ The battery card is made for **one third of the width**: three batteries side by
 | 4 | Overview two thirds wide, then 2 × 2 |
 | 5 | Overview two thirds wide, then 3 + 2 |
 | 6 | Overview two thirds wide, then 3 + 3 |
+| 7 to 9 | Overview two thirds wide, then rows of three (3 + 3 + 1 / 3 + 3 + 2 / 3 + 3 + 3) |
 
 From 3 batteries on, one third next to the overview is free for a card of your own. If you leave it empty, Home Assistant moves the first battery up next to the overview; to start the batteries on a new row, put a card there (the one-click dashboard and the ready-made dashboards use a text card "Free spot"; the gallery shows the Dutch "Vrije plek").
 
@@ -45,7 +46,7 @@ If you linked sensors for the highest and lowest cell voltage, the **cell spread
 
 ## The overview
 
-The overview lists all batteries (up to 6):
+The overview lists all batteries (up to 9):
 
 - **Battery**: with ✓ (monitor working), ⏳ (collecting data) or ⚠ (check the connection). From 0.5 also ⚠ (attention) or 🔧 (advice) for SOC drift or cell calibration; point at it for which one, and open the card of that battery.
 - **Trend**: ▲ rising, ▬ stable, ▼ falling over the months shown.

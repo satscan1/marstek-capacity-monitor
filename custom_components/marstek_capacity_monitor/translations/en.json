@@ -49,7 +49,7 @@
         "data_description": {
           "battery_id": "Used in entity ids, e.g. mt1 gives sensor.marstek_mt1_capacity_pct. Lowercase letters, digits and _.",
           "soc_entity": "The battery's own SOC in %.",
-          "power_entity": "Power measured on the battery (DC) side. W or kW.",
+          "power_entity": "Power measured on the battery (DC) side. W or kW. B2500: leave empty, the monitor calculates it.",
           "cell_max_entity": "Voltage of the highest cell, in V or mV. Only cell voltages, not temperatures.",
           "cell_min_entity": "Voltage of the lowest cell, in V or mV.",
           "temp_max_entity": "Stored with every measurement: a cold battery gives less. Only cell temperatures, not MOS / board temperatures.",
@@ -73,6 +73,18 @@
         "data": {
           "packs": "Number of battery packs"
         }
+      },
+      "b2500": {
+        "title": "B2500 V2 (test): battery voltage and current",
+        "description": "The B2500 has no sensor for the battery power. The monitor calculates it from the battery voltage × battery current of the main unit (hm2mqtt, local MQTT). Filled in when found.{check}\n\n**Test:** support for the B2500 is new and has not been tried on a real B2500 yet. Does a measurement of {name} look wrong? Please open an issue on GitHub.",
+        "data": {
+          "b2500_voltage_entity": "Host battery voltage (V)",
+          "b2500_current_entity": "Host battery current (A)"
+        },
+        "data_description": {
+          "b2500_voltage_entity": "Voltage of the battery in the main unit, not of an extra pack or a solar input.",
+          "b2500_current_entity": "Current of the battery in the main unit. Charging positive or negative is detected automatically."
+        }
       }
     },
     "error": {
@@ -80,11 +92,16 @@
       "same_entity": "SOC and power must be different sensors.",
       "reserve_too_large": "The reserve must be smaller than the nominal capacity.",
       "looks_like_ac": "This sensor looks like the AC / grid side, not the battery (DC) side. AC values include conversion losses and give a wrong capacity. Choose the battery power sensor, or submit again to use this one anyway.",
-      "cells_both": "Fill in both the highest and the lowest cell voltage, or neither."
+      "cells_both": "Fill in both the highest and the lowest cell voltage, or neither.",
+      "power_required": "Choose a DC battery power sensor in the previous step. Only a B2500 V2 works without one.",
+      "b2500_no_value": "This sensor gives no value yet. Turn on Enable Extra Battery Data in hm2mqtt, wait a minute and submit again.",
+      "b2500_not_host": "This is not the battery of the main unit (it looks like an extra pack, a solar input/output or a cell). Choose Host Battery Voltage / Host Battery Current.",
+      "b2500_wrong_unit": "Wrong unit: battery voltage must be in V (or mV), battery current in A (or mA)."
     },
     "abort": {
       "already_configured": "This battery id is already in use.",
-      "max_batteries": "The maximum of 6 batteries has been reached."
+      "max_batteries": "The maximum of 9 batteries has been reached.",
+      "b2500_v1": "The B2500 V1 does not report the battery voltage and current, so the monitor cannot measure it (yet). Do you have a V1 and an idea how to measure it? Please open an issue on GitHub."
     },
     "create_entry": {
       "refresh": "Battery added. **Refresh the page once** before you open Battery capacity in the sidebar: in a browser with Ctrl+F5, in the Home Assistant app by closing the app completely and opening it again. This is only needed the first time."
@@ -265,6 +282,9 @@
           "letop": "Attention",
           "advies": "Advice"
         }
+      },
+      "b2500_battery_power": {
+        "name": "B2500 battery power"
       }
     }
   },
@@ -325,6 +345,8 @@
         "venus_e_max": "Venus E Max (10.05 kWh)",
         "venus_e_pro": "Venus E Pro (2.08 kWh per pack)",
         "venus_d": "Venus D (2.56 kWh per pack)",
+        "b2500_v2": "B2500 V2 (2.24 kWh, test)",
+        "b2500_v1": "B2500 V1: not measurable yet",
         "other": "Other model: enter factory data yourself"
       }
     },
@@ -420,6 +442,10 @@
     "check_power": {
       "title": "{name}: measurement cannot be right, check the power sensor",
       "description": "The last full discharge came out at {pct} % of its rated capacity ({kwh} kWh). A battery cannot exceed {limit} %: more energy was counted than fits in it. Such a measurement therefore does not count ({count} so far).\n\nUsually the power sensor is the cause:\n- it stays on its last value after charging or discharging instead of falling back to 0 W;\n- the wrong sensor was chosen (for example the AC side or another device);\n- the integration reports the power with the wrong scaling factor.\n\nCheck in History whether the power sensor moves along with the SOC during a discharge and falls back to 0 W when the battery is idle. If needed, choose another sensor under the gear ⚙ on the card of this battery → **Sensors** → **Change**. Turn on **Start measuring over** there, so the old measurements no longer count.\n\nThis message disappears by itself as soon as a full discharge gives a credible result again."
+    },
+    "b2500_no_data": {
+      "title": "{name}: no battery voltage or current from the B2500",
+      "description": "For {minutes} minutes the monitor has had no value from: {sensors}. Without these it cannot calculate the battery power, so nothing is measured.\n\nWhat to do:\n1. In hm2mqtt, check that **Enable Extra Battery Data** is on (add-on option, Docker: `POLL_EXTRA_BATTERY_DATA=true`), and restart hm2mqtt after turning it on.\n2. Check under Settings → Entities that *Host Battery Voltage* and *Host Battery Current* of the B2500 are enabled and show a number.\n3. Still nothing? Check the hm2mqtt log and the firmware of the B2500, and report it in an issue on GitHub.\n\nThis message disappears by itself as soon as both values come in again."
     }
   }
 }
