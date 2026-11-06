@@ -100,7 +100,7 @@
     },
     "abort": {
       "already_configured": "Dieser Code wird bereits verwendet.",
-      "max_batteries": "Das Maximum von 6 Batterien ist erreicht.",
+      "max_batteries": "Das Maximum von 9 Batterien ist erreicht.",
       "b2500_v1": "Der B2500 V1 meldet Akkuspannung und -strom nicht, deshalb kann der Monitor ihn (noch) nicht messen. Hast du einen V1 und eine Idee, wie es geht? Bitte erstelle ein Issue auf GitHub."
     },
     "create_entry": {
