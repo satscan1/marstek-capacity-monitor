@@ -368,13 +368,14 @@ const MC_DASH_TEXT = {
   },
 };
 
-// Dashboard that arranges the cards for 1 to 6 batteries:
+// Dashboard that arranges the cards for 1 to 9 batteries:
 //   1-2: batteries a third each, the overview to the right (one row of three)
-//   3-6: overview two thirds plus a free spot, then 3 / 2x2 / 3+2 / 3+3
+//   3-9: overview two thirds plus a free spot, then 3 / 2x2 / 3+2 / 3+3,
+//        and from 7 on rows of three: 3+3+1 / 3+3+2 / 3+3+3
 class MarstekCapacityDashboardStrategy {
   static async generate(config, hass) {
     const T = MC_DASH_TEXT[mcLang(hass, config)] || MC_DASH_TEXT.en;
-    const found = mcBatteries(hass).slice(0, 6);
+    const found = mcBatteries(hass).slice(0, 9);
     const n = found.length;
     // A fixed language for the dashboard (lang: nl/de/en) also goes to the cards
     const lang = config && config.lang ? { lang: config.lang } : {};
@@ -483,7 +484,7 @@ function mcDefine() {
     type: "marstek-capacity",
     strategyType: "dashboard",
     name: "Marstek battery capacity",
-    description: "Capacity of your Marstek batteries, arranged for 1 to 6 batteries.",
+    description: "Capacity of your Marstek batteries, arranged for 1 to 9 batteries.",
     documentationURL: `${MC_DOCS}/06-dashboard-gallery.md`,
   });
   console.info(`%c MARSTEK-CAPACITY-CARD %c ${MC_VERSION} `, "background:#42a5f5;color:#000", "");
