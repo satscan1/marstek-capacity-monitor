@@ -6,6 +6,7 @@
 |---|---|---|---|
 | Venus E v1 / v2, Venus C | RS485, through ESPHome (LilyGo, M5Stack) or an RS485 network bridge (Elfin EW11) with a Modbus integration | register 32104 | register 32102 |
 | Venus E v3, Venus A, Venus D | Built-in LAN port with Modbus TCP | register 34002 | register 30001 |
+| B2500 V2 (test) | hm2mqtt (local MQTT), *Enable Extra Battery Data* on | *Host Battery SoC* | *Host Battery Voltage* × *Host Battery Current* |
 
 **Modbus is not required.** Any connection works as long as it provides the state of charge and the **DC** battery power as Home Assistant sensors: ESPHome, Modbus (RS485 or LAN) or another integration. The table lists the verified models and Modbus routes; only the registers differ, the data is the same.
 

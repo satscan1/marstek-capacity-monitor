@@ -2,7 +2,7 @@
 
 *[English](06-dashboard-gallery.md) · [Nederlands](06-dashboard-gallery.nl.md)*
 
-Auf dieser Seite siehst du, wie die Karten bei 1 bis 6 Batterien aussehen, was jeder Teil der Batteriekarte bedeutet und wie du die Karten anordnest.
+Auf dieser Seite siehst du, wie die Karten bei 1 bis 9 Batterien aussehen, was jeder Teil der Batteriekarte bedeutet und wie du die Karten anordnest.
 
 > Alle Bilder auf dieser Seite verwenden **Demodaten**: sechs erfundene Batterien mit unterschiedlichem Alter und Zustand. Sie zeigen, wie die Karten aussehen, nicht wie eine echte Batterie altert. Die Karten erscheinen auf Deutsch, wenn Home Assistant auf Deutsch eingestellt ist.
 
@@ -17,6 +17,7 @@ Die Batteriekarte ist für **ein Drittel der Breite** gemacht: drei Batterien ne
 | 4 | Übersicht zwei Drittel breit, darunter 2 × 2 |
 | 5 | Übersicht zwei Drittel breit, darunter 3 + 2 |
 | 6 | Übersicht zwei Drittel breit, darunter 3 + 3 |
+| 7 bis 9 | Übersicht zwei Drittel breit, darunter Reihen zu drei (3 + 3 + 1 / 3 + 3 + 2 / 3 + 3 + 3) |
 
 Ab 3 Batterien ist neben der Übersicht ein Drittel frei für eine eigene Karte. Lässt du den Platz leer, schiebt Home Assistant die erste Batterie nach oben neben die Übersicht; sollen die Batterien in einer neuen Reihe beginnen, setze dort eine Karte hin (das Dashboard mit einem Klick und die fertigen Dashboards verwenden eine Textkarte „Freier Platz“).
 
@@ -45,7 +46,7 @@ Hast du Sensoren für die höchste und niedrigste Zellspannung verknüpft, steht
 
 ## Die Übersicht
 
-Die Übersicht zeigt alle Batterien (bis 6) untereinander:
+Die Übersicht zeigt alle Batterien (bis 9) untereinander:
 
 - **Batterie**: mit ✓ (Messung läuft), ⏳ (sammelt Daten) oder ⚠ (Verbindung prüfen). Ab 0.5 auch ⚠ (Achtung) oder 🔧 (Empfehlung) für SOC-Drift oder Zellkalibrierung; zeige darauf, um zu sehen, welche, und öffne die Karte dieser Batterie.
 - **Trend**: ▲ steigend, ▬ stabil, ▼ fallend über die gezeigten Monate.
