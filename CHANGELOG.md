@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.1.0 — 2026-11-06
+
+**Up to 9 batteries, and the Marstek B2500 (test).** Everything since v1.0.0 in one version; the test versions 1.0.1 to 1.1.0-dev2 below show each step.
+
+- **Up to 9 batteries** instead of 6: Marstek couples up to 9 (3 per phase). The dashboard puts batteries 7 to 9 in rows of three under the overview; the overview lists all 9. Ready-made dashboards for 7, 8 and 9 batteries (EN/NL/DE). Thanks to Hammer-NL for the request (#17).
+- **Marstek B2500 V2 (test).** Measured with battery voltage × battery current of the main unit (hm2mqtt, with *Enable Extra Battery Data* on). The monitor checks the sensors when adding, refuses a wrong sensor and gives a message under Repairs when the values stop. Only a real DC measurement counts. Thanks to ZakOyten for testing (#16).
+- **From 1.0.1 and 1.0.2:** back in the sidebar after an update, choose the model under the gear ⚙, details of every ⚠ month below the table, *Days charged to 100 %*.
+
 ## v1.1.0-dev2 — 2026-11-04 (test version)
 
 **B2500: plug and play.** The monitor now checks the B2500 itself and says what is missing, instead of staying silent. Thanks to ZakOyten for testing (#16).

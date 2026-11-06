@@ -15,7 +15,7 @@ Volg in Home Assistant of je Marstek-thuisbatterij zijn capaciteit houdt, gemete
 - **Twee sensoren die je al hebt:** laadtoestand en DC-vermogen van de batterij. De integratie vindt ze zelf.
 - **Gemeten bij een volle ontlading** (≥ 95 % → ≤ 15 %) en vergeleken met de bruikbare capaciteit van een nieuwe batterij.
 - **Specificatie van de fabrikant** als maatstaf: 80 % na 6.000 cycli. Groen volgens specificatie, oranje eronder, rood bij 75 % of lager: melden via de Marstek-app.
-- **Elke koppeling die laadtoestand en DC-vermogen levert:** ESPHome, Modbus (RS485 of LAN) of een andere integratie. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus C, Venus D.
+- **Elke koppeling die laadtoestand en DC-vermogen levert:** ESPHome, Modbus (RS485 of LAN) of een andere integratie. Venus E v1, v2, v3, 4.0, Max, Pro, Venus A, Venus C, Venus D. **B2500 V2 (test)** via hm2mqtt, met *Enable Extra Battery Data* aan.
 - **Plug & play:** kies je model en installatiedatum; de fabrieksgegevens worden voor je ingevuld. De cycli van vóór de monitor komen uit de teller van de batterij als die er is (AC-kant, een schatting). Later gevonden sensoren staan klaar onder Reparaties.
 - **Laat zien of het werkt:** een status per batterij, en "verzamelt data" tot de eerste volledige ontlading.
 - **Optioneel: celbalans:** het verschil tussen de hoogste en laagste cel na een volle lading.
@@ -40,7 +40,7 @@ Herstart daarna Home Assistant en ga naar **Instellingen → Dashboards → Voeg
 | [03 – Hoe het werkt](docs/03-how-it-works.nl.md) | Drie capaciteiten, meten, omrekening naar 100 %, specificatie en kleuren |
 | [04 – Problemen oplossen](docs/04-troubleshooting.nl.md) | Veelvoorkomende meldingen en wat te doen |
 | [05 – Ondersteunde batterijen](docs/05-supported-batteries.nl.md) | Modellen, ontlaaddiepte per model, **bronnen voor de specificaties van de fabrikant** |
-| [06 – Dashboard en galerij](docs/06-dashboard-gallery.nl.md) | Indeling bij 1 tot 6 batterijen, de kaart genummerd uitgelegd, galerij met en zonder grafiek |
+| [06 – Dashboard en galerij](docs/06-dashboard-gallery.nl.md) | Indeling bij 1 tot 9 batterijen, de kaart genummerd uitgelegd, galerij met en zonder grafiek |
 | [07 – Hoe de monitor meet](docs/07-measuring-method.nl.md) | Waarom alleen volledige ontladingen tellen, en waarom meten terwijl de batterij tussendoor laadt niet betrouwbaar is |
 
 Wijzigingen per versie: [CHANGELOG](CHANGELOG.md) (Engels).
@@ -75,7 +75,7 @@ Wijzigingen per versie: [CHANGELOG](CHANGELOG.md) (Engels).
 
 ![Apparaat](screenshots/06-device.png)
 
-**6. De batterijkaart (v0.5.1). Meer voorbeelden, van 1 tot 6 batterijen: [galerij](docs/06-dashboard-gallery.nl.md)**
+**6. De batterijkaart (v0.5.1). Meer voorbeelden, van 1 tot 9 batterijen: [galerij](docs/06-dashboard-gallery.nl.md)**
 
 ![Batterijkaart](screenshots/card/nl/1-kaart.png)
 
