@@ -530,7 +530,7 @@ button_card_templates:
         ]]]
 
   # -------------------------------------------------------------------------
-  # Up to six batteries: pattern over months, newest -> oldest
+  # Up to nine batteries: pattern over months, newest -> oldest
   # -------------------------------------------------------------------------
   marstek_capacity_overview:
     template: marstek_capacity_base
@@ -557,7 +557,7 @@ button_card_templates:
             : Number(v).toLocaleString(T.loc, {minimumFractionDigits: d, maximumFractionDigits: d});
           const muted = `color:${P.muted}`;
           const S = variables.demo ? {...states, ...variables.demo} : states;
-          const list = (variables.batteries || []).slice(0, 6).map(b => typeof b === 'string' ? {id: b} : b);
+          const list = (variables.batteries || []).slice(0, 9).map(b => typeof b === 'string' ? {id: b} : b);
           const rows = list.map(b => {
             const m = S[`sensor.marstek_${b.id}_measured_capacity`];
             const p = S[`sensor.marstek_${b.id}_capacity_pct`];
