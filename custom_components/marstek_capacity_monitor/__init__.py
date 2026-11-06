@@ -1,6 +1,6 @@
 """Marstek Capacity Monitor.
 
-Tracks the usable capacity of up to six home batteries, measured on the DC
+Tracks the usable capacity of up to nine home batteries, measured on the DC
 side, against factory data and warranty terms.
 """
 

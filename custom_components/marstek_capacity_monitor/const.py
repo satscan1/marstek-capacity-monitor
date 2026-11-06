@@ -1,7 +1,8 @@
 """Constants for Marstek Capacity Monitor."""
 
 DOMAIN = "marstek_capacity_monitor"
-MAX_BATTERIES = 6
+# Marstek couples up to 9 batteries (3 per phase)
+MAX_BATTERIES = 9
 
 # Config entry data (chosen once)
 CONF_BATTERY_ID = "battery_id"  # short slug used in entity ids, e.g. "mt1"

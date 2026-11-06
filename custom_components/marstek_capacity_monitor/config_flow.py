@@ -1,4 +1,4 @@
-"""Config flow: one config entry per battery, at most six."""
+"""Config flow: one config entry per battery, at most nine (Marstek couples up to 9, 3 per phase)."""
 
 from __future__ import annotations
 
