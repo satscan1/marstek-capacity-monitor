@@ -2,7 +2,7 @@
 
 *[English](06-dashboard-gallery.md) · [Deutsch](06-dashboard-gallery.de.md)*
 
-Op deze pagina zie je hoe de kaarten eruitzien bij 1 tot 6 batterijen, wat elk onderdeel van de batterijkaart betekent en hoe je de kaarten neerzet.
+Op deze pagina zie je hoe de kaarten eruitzien bij 1 tot 9 batterijen, wat elk onderdeel van de batterijkaart betekent en hoe je de kaarten neerzet.
 
 > Alle afbeeldingen op deze pagina gebruiken **demogegevens**: zes verzonnen batterijen met verschillende leeftijden en toestanden. Ze laten zien hoe de kaarten eruitzien, niet hoe een echte batterij veroudert.
 
@@ -17,6 +17,7 @@ De batterijkaart is gemaakt voor **een derde van de breedte**: drie batterijen n
 | 4 | Overzicht twee derde breed, daaronder 2 × 2 |
 | 5 | Overzicht twee derde breed, daaronder 3 + 2 |
 | 6 | Overzicht twee derde breed, daaronder 3 + 3 |
+| 7 tot 9 | Overzicht twee derde breed, daaronder rijen van drie (3 + 3 + 1 / 3 + 3 + 2 / 3 + 3 + 3) |
 
 Naast het overzicht is vanaf 3 batterijen een derde vrij voor een eigen kaart. Zet je daar niets neer, dan schuift Home Assistant de eerste batterij omhoog naast het overzicht; wil je de batterijen op een nieuwe rij, zet er dan een kaart neer (het dashboard met één klik, de kant-en-klare dashboards en de galerij gebruiken een tekstkaart "Vrije plek").
 
@@ -45,7 +46,7 @@ Heb je sensoren voor de hoogste en laagste celspanning gekoppeld, dan staat het 
 
 ## Het overzicht
 
-Het overzicht zet alle batterijen (tot 6) onder elkaar:
+Het overzicht zet alle batterijen (tot 9) onder elkaar:
 
 - **Batterij**: met ✓ (meting werkt), ⏳ (verzamelt data) of ⚠ (controleer de koppeling). Vanaf 0.5 ook ⚠ (let op) of 🔧 (advies) voor SOC-drift of celkalibratie; wijs hem aan om te zien welke, en open de kaart van die batterij.
 - **Trend**: ▲ stijgend, ▬ gelijk, ▼ dalend over de getoonde maanden.

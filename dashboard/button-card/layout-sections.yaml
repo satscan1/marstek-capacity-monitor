@@ -6,6 +6,7 @@
 #   4 batteries      : overview, then 2 x 2
 #   5 batteries      : overview, then 3 + 2
 #   6 batteries      : overview, then 3 + 3
+#   7 to 9 batteries : overview, then rows of three (3 + 3 + 1 / 3 + 3 + 2 / 3 + 3 + 3)
 #
 # In the raw configuration editor of a sections dashboard, add this as a view
 # (under `views:`). The section is three columns wide; the grid inside it has

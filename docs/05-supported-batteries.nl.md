@@ -6,10 +6,13 @@
 |---|---|---|---|
 | Venus E v1 / v2, Venus C | RS485 via ESPHome (LilyGo, M5Stack) of via een RS485-netwerkbrug (Elfin EW11) met een Modbus-integratie | register 32104 | register 32102 |
 | Venus E v3, Venus A, Venus D | Ingebouwde LAN-poort met Modbus TCP | register 34002 | register 30001 |
+| B2500 V2 (test) | hm2mqtt (lokale MQTT), *Enable Extra Battery Data* aan | *Host Battery SoC* | *Host Battery Voltage* × *Host Battery Current* |
 
 **Modbus is niet nodig.** Elke koppeling werkt, zolang die de laadtoestand en het **DC**-vermogen van de batterij als sensor in Home Assistant levert: ESPHome, Modbus (RS485 of LAN) of een andere integratie. De tabel geeft de gecontroleerde modellen en Modbus-routes; alleen de registers verschillen, de gegevens zijn hetzelfde.
 
 **MQTT (hm2mqtt):** getest met een nagebootste Venus E v1/v2: de scan vindt *Battery State of Charge* en *Battery Power*, en beide tekens werken. Nog niet bevestigd met een echte batterij; of oudere v1/v2-firmware *Battery Power* meestuurt, is onbekend. Voor de celbalans met hm2mqtt: zet in hm2mqtt *Cell Data* aan en schakel in Home Assistant de entiteiten *Max Cell Voltage* en *Min Cell Voltage* in (die staan standaard uit). Ervaringen zijn welkom via Issues.
+
+**Marstek B2500 V2 (test, vanaf 1.1.0):** de B2500 heeft geen sensor voor het accuvermogen, dus de monitor rekent het DC-vermogen uit met *Host Battery Voltage* × *Host Battery Current* (hm2mqtt). Die twee sensoren bestaan alleen als in hm2mqtt **Enable Extra Battery Data** aan staat (optie van de add-on, Docker: `POLL_EXTRA_BATTERY_DATA=true`); standaard staat die uit. Dit blijft een echte DC-meting aan de batterij zelf. Waarden afgeleid van zonne-input min output, of van dagtellers, worden bewust niet gebruikt: dat is geen DC-meting van de batterij. De B2500 V1 geeft geen spanning en stroom door en is niet te meten.
 
 **Celtemperaturen:** sommige koppelingen (waaronder MQTT bij de v1/v2) geven MOSFET-temperaturen door als "celtemperatuur". Deze tool gebruikt alleen echte celtemperaturen (optioneel, als context bij elke meting), nooit MOS-temperaturen; de scan slaat sensoren met MOS, board of internal in de naam over. Voor de celbalans gebruikt hij de hoogste en laagste cel**spanning**.
 

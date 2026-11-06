@@ -1,5 +1,28 @@
 # Changelog
 
+## v1.1.0 — 2026-11-06
+
+**Up to 9 batteries, and the Marstek B2500 (test).** Everything since v1.0.0 in one version; the test versions 1.0.1 to 1.1.0-dev2 below show each step.
+
+- **Up to 9 batteries** instead of 6: Marstek couples up to 9 (3 per phase). The dashboard puts batteries 7 to 9 in rows of three under the overview; the overview lists all 9. Ready-made dashboards for 7, 8 and 9 batteries (EN/NL/DE). Thanks to Hammer-NL for the request (#17).
+- **Marstek B2500 V2 (test).** Measured with battery voltage × battery current of the main unit (hm2mqtt, with *Enable Extra Battery Data* on). The monitor checks the sensors when adding, refuses a wrong sensor and gives a message under Repairs when the values stop. Only a real DC measurement counts. Thanks to ZakOyten for testing (#16).
+- **From 1.0.1 and 1.0.2:** back in the sidebar after an update, choose the model under the gear ⚙, details of every ⚠ month below the table, *Days charged to 100 %*.
+
+## v1.1.0-dev2 — 2026-11-04 (test version)
+
+**B2500: plug and play.** The monitor now checks the B2500 itself and says what is missing, instead of staying silent. Thanks to ZakOyten for testing (#16).
+
+- **Check when adding.** The B2500 step looks on the device for *Host Battery Voltage* and *Host Battery Current*. Not there: it says to turn on **Enable Extra Battery Data** in hm2mqtt (off by default). Disabled in Home Assistant: it names them. No value yet: it names them and waits; the battery is only added once both give a number.
+- **Wrong sensor refused.** An extra pack, a solar input or output, a cell, or a sensor that is not in V or A cannot be chosen.
+- **Message under Repairs.** When the voltage or current gives no number for 15 minutes, a message under **Settings → Repairs** names the sensor and what to do. It disappears by itself when the values are back.
+- **In the report.** The full report (back-up) shows the two B2500 sensors and their value at that moment.
+- **Fix:** a device name with *PV* in it (for example "Batterie PV Balkon") made the scan skip the B2500 sensors.
+- **Only DC.** The B2500 is measured only with voltage × current of the battery itself. Estimates from solar input minus output or from daily counters are deliberately not used.
+
+## v1.1.0-dev1 — 2026-11-02 (test version)
+
+- **Marstek B2500 (test).** The B2500 V2 can be added: it has no battery power sensor, so the monitor calculates the DC power from the battery voltage × battery current of the main unit (hm2mqtt, local MQTT) and finds both sensors itself. Factory data: 2.24 kWh, 6,000 cycles to 80 %, 10 years (depth of discharge 90 % assumed; change it under the gear ⚙). The card shows a small *test* tag: support is new and not tried on a real B2500 yet. A measurement looks wrong? Please open an issue.
+- **B2500 V1** is in the list, but cannot be measured yet: it does not report the battery voltage and current. Choosing it says so.
 ## v1.0.2 — 2026-10-31
 
 **Repair release.** No change to how the monitor measures.

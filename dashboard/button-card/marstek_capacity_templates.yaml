@@ -74,6 +74,7 @@ button_card_templates:
             none: 'Noch keine vollständige Entladung gemessen (≥ 95 % → ≤ 15 %). Das kann im Winter eine Weile dauern.',
             missing: 'Sensor nicht gefunden:',
             status: {good: 'Gut', attention: 'Unter Herstellerangabe', critical: 'An Marstek melden (App)', no_measurement: 'Sammelt Daten', check_model: 'Modell prüfen', unconfirmed: 'Noch nicht bestätigt', check_power: 'Leistungssensor prüfen'},
+            test: 'Test', testTip: 'B2500-Unterstützung im Test: noch nicht an einem echten B2500 erprobt. Stimmt eine Messung nicht? Bitte erstelle ein Issue auf GitHub.',
             pw: 'kann nicht stimmen', pwVal: 'Sensor prüfen', pwTip: (n, lim) => `Mehr als ${lim} % kann eine Batterie nicht: Es wurde mehr Energie gezählt, als hineinpasst. Fast immer liegt es am Leistungssensor (bleibt auf seinem letzten Wert stehen statt auf 0 W zurückzufallen, falscher Sensor oder falscher Faktor). Diese Messungen zählen nicht mit (${n} bisher). Siehe Einstellungen → Reparaturen.`, chk: 'Modell?', chkTip: 'Etwa die Hälfte der eingestellten Kapazität: meist ein falsch gewähltes Modell, keine verschlissene Batterie. Eine Venus C hat 2,56 kWh, halb so viel wie eine Venus E. Siehe Einstellungen → Reparaturen.',
             collecting: 'sammelt Daten',
             mon: {
@@ -137,6 +138,7 @@ button_card_templates:
             none: 'Nog geen volledige ontlading gemeten (≥95% → ≤15%). Dat kan in de winter even duren.',
             missing: 'Sensor niet gevonden:',
             status: {good: 'Goed', attention: 'Onder specificatie', critical: 'Melden bij Marstek (app)', no_measurement: 'Verzamelt data', check_model: 'Klopt het model?', unconfirmed: 'Nog niet bevestigd', check_power: 'Vermogensensor nakijken'},
+            test: 'test', testTip: 'B2500-ondersteuning in test: nog niet op een echte B2500 geprobeerd. Klopt een meting niet? Maak dan een issue aan op GitHub.',
             pw: 'kan niet kloppen', pwVal: 'sensor nakijken', pwTip: (n, lim) => `Meer dan ${lim} % kan een batterij niet: er is meer energie geteld dan erin past. Bijna altijd ligt het aan de vermogensensor (blijft op zijn laatste waarde staan in plaats van terug te vallen naar 0 W, verkeerde sensor of verkeerde factor). Deze metingen tellen niet mee (${n} tot nu toe). Zie Instellingen → Reparaties.`, chk: 'model?', chkTip: 'Ongeveer de helft van de ingestelde capaciteit: meestal een verkeerd gekozen model, geen versleten batterij. Een Venus C heeft 2,56 kWh, de helft van een Venus E. Zie Instellingen → Reparaties.',
             collecting: 'verzamelt data',
             mon: {
@@ -200,6 +202,7 @@ button_card_templates:
             none: 'No full discharge measured yet (≥95% → ≤15%). This can take a while in winter.',
             missing: 'Sensor not found:',
             status: {good: 'Good', attention: 'Below spec', critical: 'Report to Marstek (app)', no_measurement: 'Collecting data', check_model: 'Check the model', unconfirmed: 'Not confirmed yet', check_power: 'Check the power sensor'},
+            test: 'test', testTip: 'B2500 support in test: not tried on a real B2500 yet. Does a measurement look wrong? Please open an issue on GitHub.',
             pw: 'cannot be right', pwVal: 'check sensor', pwTip: (n, lim) => `A battery cannot do more than ${lim} %: more energy was counted than fits in it. Almost always the power sensor is the cause (stays on its last value instead of falling back to 0 W, wrong sensor or wrong factor). These measurements do not count (${n} so far). See Settings → Repairs.`, chk: 'model?', chkTip: 'About half of the set capacity: usually a wrong model, not a worn battery. A Venus C has 2.56 kWh, half a Venus E. See Settings → Repairs.',
             collecting: 'collecting data',
             mon: {
@@ -278,6 +281,9 @@ button_card_templates:
           // Colour of the latest value: grey while it is not confirmed
           const colNow = v => ['high_provisional', 'drop_unconfirmed'].includes(ds) ? P.muted : col(v);
           const name = variables.name || id.toUpperCase();
+          // Models in test (B2500, 1.1.0): a small orange tag with the explanation
+          const testTag = st && String((st.attributes || {}).model || '').startsWith('b2500') && T.test
+            ? ` <span title="${T.testTip}" style="font-size:11px;font-weight:500;color:${P.orange};border:1px solid ${P.orange};border-radius:8px;padding:0 6px;margin-left:4px;vertical-align:2px">${T.test}</span>` : '';
           const status = st ? (T.status[st.state] || st.state) : '';
           const muted = `color:${P.muted}`;
           const act = js => `onclick="event.stopPropagation();const h=this.getRootNode().host;${js}h._config={...h._config};"`;
@@ -518,13 +524,13 @@ button_card_templates:
 
           return `<div style="display:flex;flex-direction:column;height:100%">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-              <span style="font-size:15px;font-weight:600">${name} · ${T.title}</span>
+              <span style="font-size:15px;font-weight:600">${name} · ${T.title}${testTag}</span>
               <div style="text-align:right;flex-shrink:0;font-size:12px;color:${pw ? P.orange : colNow(pct)}"${pw || chk ? ` title="${infoText}"` : ''}>${status}</div></div>
             ${monLine}${pills}${stack}${none}<div style="margin-top:auto">${foot}</div>${pop}</div>`;
         ]]]
 
   # -------------------------------------------------------------------------
-  # Up to six batteries: pattern over months, newest -> oldest
+  # Up to nine batteries: pattern over months, newest -> oldest
   # -------------------------------------------------------------------------
   marstek_capacity_overview:
     template: marstek_capacity_base
@@ -551,7 +557,7 @@ button_card_templates:
             : Number(v).toLocaleString(T.loc, {minimumFractionDigits: d, maximumFractionDigits: d});
           const muted = `color:${P.muted}`;
           const S = variables.demo ? {...states, ...variables.demo} : states;
-          const list = (variables.batteries || []).slice(0, 6).map(b => typeof b === 'string' ? {id: b} : b);
+          const list = (variables.batteries || []).slice(0, 9).map(b => typeof b === 'string' ? {id: b} : b);
           const rows = list.map(b => {
             const m = S[`sensor.marstek_${b.id}_measured_capacity`];
             const p = S[`sensor.marstek_${b.id}_capacity_pct`];

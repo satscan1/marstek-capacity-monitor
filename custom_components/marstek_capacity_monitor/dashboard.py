@@ -3,7 +3,7 @@
 After installing and adding the first battery, "Battery capacity" (NL
 "Batterijcapaciteit") appears in the sidebar by itself. The dashboard is the
 strategy `custom:marstek-capacity`, so it finds every battery of the monitor and
-arranges 1 to 6 batteries without the user doing anything.
+arranges 1 to 9 batteries without the user doing anything.
 
 The dashboard is not stored anywhere: it is registered while Home Assistant
 runs, read-only (like a YAML dashboard). Anyone who wants to change it can make
