@@ -100,7 +100,7 @@
     },
     "abort": {
       "already_configured": "This battery id is already in use.",
-      "max_batteries": "The maximum of 6 batteries has been reached.",
+      "max_batteries": "The maximum of 9 batteries has been reached.",
       "b2500_v1": "The B2500 V1 does not report the battery voltage and current, so the monitor cannot measure it (yet). Do you have a V1 and an idea how to measure it? Please open an issue on GitHub."
     },
     "create_entry": {
