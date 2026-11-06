@@ -1,0 +1,451 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Batterij toevoegen",
+        "description": "{count} batterij(en) gevonden met een laadtoestand en een DC-vermogensensor. Kies er één, of kies zelf de sensoren. Maximaal {max} batterijen.",
+        "data": {
+          "candidate": "Batterij"
+        }
+      },
+      "specs": {
+        "title": "Fabrieksgegevens (ander model)",
+        "description": "Vul de fabrieksgegevens van je batterij in. Standaardwaarden zijn die van de Marstek Venus E 5,12 kWh (90% ontlaaddiepte, > 6000 cycli, 80% na 6000 cycli). Marstek geeft geen capaciteitsgarantie in jaren.",
+        "data": {
+          "nominal_kwh": "Opgegeven capaciteit (fabrikant)",
+          "reserve_kwh": "Interne reserve (niet bruikbaar)",
+          "purchase_date": "Installatiedatum",
+          "warranty_years": "Garantietermijn",
+          "cycle_life": "Opgegeven aantal cycli",
+          "cycle_eol_pct": "Capaciteit na die cycli",
+          "initial_cycles": "Cycli al gedaan vóór de monitoring",
+          "red_pct": "Rode grens (melden bij Marstek)",
+          "tolerance_pct": "Marge onder specificatie"
+        },
+        "data_description": {
+          "nominal_kwh": "Totale capaciteit van de cellen, bv. 5,12 kWh.",
+          "reserve_kwh": "Deel van de fabriekscapaciteit dat de batterij nooit afgeeft. Datasheet: 90% ontlaaddiepte, dus 5,12 − 0,51 = 4,61 kWh = 100% van nieuw.",
+          "cycle_life": "Bv. 6000 volle cycli.",
+          "cycle_eol_pct": "Specificatie van de fabrikant: bv. 80% na 6000 cycli (Marstek, productpagina Venus E Gen 3.0). Dit is de specificatielijn; geen garantie.",
+          "initial_cycles": "Cycli vóór deze monitor. Wordt ingevuld met de teller totaal ontladen van de batterij als die er is (gedeeld door de bruikbare capaciteit). Die teller meet aan de AC-kant: een schatting, minder precies dan de cycli die de monitor zelf aan de DC-kant telt. Zonder teller: totaal ontladen kWh tot nu toe ÷ bruikbare capaciteit; laat 0 bij een nieuwe batterij.",
+          "red_pct": "Op of onder dit % van nieuw wordt de status rood: het moment om het via de Marstek-app te melden. Standaard 75%.",
+          "tolerance_pct": "Groen zolang de meting hooguit zoveel punten onder de specificatielijn van de fabrikant zit. Standaard 5.",
+          "purchase_date": "De datum waarop de batterij in gebruik ging. Garantie en leeftijd tellen vanaf hier."
+        }
+      },
+      "details": {
+        "title": "Batterij en sensoren",
+        "description": "Controleer het voorstel. De vermogensensor moet de batterijkant (DC) meten, niet de AC-/netkant. Of laden positief of negatief is, wordt automatisch herkend.\n\nOptioneel: de hoogste en laagste celspanning (celbalans) en celtemperatuur (bij elke meting bewaard als context). Ingevuld als ze gevonden zijn; laat leeg als je batterij ze niet levert.",
+        "data": {
+          "battery_id": "Korte code",
+          "name": "Naam",
+          "soc_entity": "Laadtoestand-sensor (%)",
+          "power_entity": "DC-vermogen batterij (W)",
+          "cell_max_entity": "Hoogste celspanning (optioneel)",
+          "cell_min_entity": "Laagste celspanning (optioneel)",
+          "temp_max_entity": "Hoogste celtemperatuur (optioneel, experimenteel)",
+          "temp_min_entity": "Laagste celtemperatuur (optioneel, experimenteel)"
+        },
+        "data_description": {
+          "battery_id": "Wordt gebruikt in de entiteitnamen, bv. mt1 geeft sensor.marstek_mt1_capacity_pct. Kleine letters, cijfers en _.",
+          "soc_entity": "De eigen SOC van de batterij in %.",
+          "power_entity": "Vermogen gemeten aan de batterijkant (DC). W of kW. B2500: leeg laten, de monitor rekent het uit.",
+          "cell_max_entity": "Spanning van de hoogste cel, in V of mV. Alleen celspanningen, geen temperaturen.",
+          "cell_min_entity": "Spanning van de laagste cel, in V of mV.",
+          "temp_max_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen.",
+          "temp_min_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen."
+        }
+      },
+      "model": {
+        "title": "Welke Marstek is {name}?",
+        "description": "Kies je model en de datum waarop de batterij is geïnstalleerd. De fabrieksgegevens (capaciteit, ontlaaddiepte, cycli) worden voor je ingevuld. Je kunt ze later aanpassen via Configureren.\n\nVenus C? Die heeft 2,56 kWh, de helft van een Venus E: kies dan Venus C, ook als Venus E v1 / v2 al is aangevinkt.{counter}",
+        "data": {
+          "model": "Model",
+          "purchase_date": "Installatiedatum"
+        },
+        "data_description": {
+          "purchase_date": "De datum waarop de batterij in gebruik ging. Garantie en leeftijd tellen vanaf hier."
+        }
+      },
+      "packs": {
+        "title": "{model}: aantal batterijpakketten",
+        "description": "Een {model} heeft {kwh} kWh per pakket. Opgegeven capaciteit en reserve worden berekend uit het aantal pakketten.",
+        "data": {
+          "packs": "Aantal batterijpakketten"
+        }
+      },
+      "b2500": {
+        "title": "B2500 V2 (test): accuspanning en -stroom",
+        "description": "De B2500 heeft geen sensor voor het accuvermogen. De monitor rekent het uit met accuspanning × accustroom van het hoofdtoestel (hm2mqtt, lokale MQTT). Ingevuld als ze gevonden zijn.{check}\n\n**Test:** ondersteuning voor de B2500 is nieuw en nog niet op een echte B2500 geprobeerd. Lijkt een meting van {name} niet te kloppen? Maak dan een issue aan op GitHub.",
+        "data": {
+          "b2500_voltage_entity": "Accuspanning hoofdtoestel (V)",
+          "b2500_current_entity": "Accustroom hoofdtoestel (A)"
+        },
+        "data_description": {
+          "b2500_voltage_entity": "Spanning van de accu in het hoofdtoestel, niet van een extra pakket of een zonne-ingang.",
+          "b2500_current_entity": "Stroom van de accu in het hoofdtoestel. Of laden positief of negatief is, wordt vanzelf herkend."
+        }
+      }
+    },
+    "error": {
+      "invalid_id": "Gebruik 1-20 kleine letters, cijfers of _.",
+      "same_entity": "SOC en vermogen moeten verschillende sensoren zijn.",
+      "reserve_too_large": "De reserve moet kleiner zijn dan de fabriekscapaciteit.",
+      "looks_like_ac": "Deze sensor lijkt de AC-/netkant te meten, niet de batterijkant (DC). AC-waarden bevatten omzetverlies en geven een verkeerde capaciteit. Kies de sensor voor het batterijvermogen, of verstuur nogmaals om deze toch te gebruiken.",
+      "cells_both": "Vul zowel de hoogste als de laagste celspanning in, of geen van beide.",
+      "power_required": "Kies in de vorige stap een sensor voor het DC-batterijvermogen. Alleen een B2500 V2 werkt zonder.",
+      "b2500_no_value": "Deze sensor geeft nog geen waarde. Zet Enable Extra Battery Data aan in hm2mqtt, wacht een minuut en verstuur opnieuw.",
+      "b2500_not_host": "Dit is niet de accu van het hoofdtoestel (het lijkt een extra pakket, een zonne-ingang/-uitgang of een cel). Kies Host Battery Voltage / Host Battery Current.",
+      "b2500_wrong_unit": "Verkeerde eenheid: accuspanning moet in V (of mV), accustroom in A (of mA)."
+    },
+    "abort": {
+      "already_configured": "Deze code is al in gebruik.",
+      "max_batteries": "Het maximum van 9 batterijen is bereikt.",
+      "b2500_v1": "De B2500 V1 geeft de accuspanning en -stroom niet door, daarom kan de monitor hem (nog) niet meten. Heb je een V1 en een idee hoe het wel kan? Maak dan een issue aan op GitHub."
+    },
+    "create_entry": {
+      "refresh": "Batterij toegevoegd. **Vernieuw de pagina één keer** voordat je Batterijcapaciteit in de zijbalk opent: in een browser met Ctrl+F5, in de Home Assistant-app door de app helemaal te sluiten en opnieuw te openen. Dit is alleen de eerste keer nodig."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Marstek Capacity Monitor",
+        "menu_options": {
+          "settings": "Instellingen",
+          "sensors": "Sensoren wisselen (SOC en vermogen)",
+          "restore": "Back-up terugzetten"
+        }
+      },
+      "settings": {
+        "title": "Fabrieksgegevens en garantie",
+        "data": {
+          "model": "Model",
+          "nominal_kwh": "Opgegeven capaciteit (fabrikant)",
+          "reserve_kwh": "Interne reserve (niet bruikbaar)",
+          "purchase_date": "Installatiedatum",
+          "warranty_years": "Garantietermijn",
+          "cycle_life": "Opgegeven aantal cycli",
+          "cycle_eol_pct": "Capaciteit na die cycli",
+          "initial_cycles": "Cycli al gedaan vóór de monitoring",
+          "red_pct": "Rode grens (melden bij Marstek)",
+          "tolerance_pct": "Marge onder specificatie",
+          "power_sign": "Teken van de vermogensensor",
+          "cell_max_entity": "Hoogste celspanning (optioneel)",
+          "cell_min_entity": "Laagste celspanning (optioneel)",
+          "temp_max_entity": "Hoogste celtemperatuur (optioneel, experimenteel)",
+          "temp_min_entity": "Laagste celtemperatuur (optioneel, experimenteel)",
+          "notify": "Seintjes",
+          "sidebar": "Menu-item in de zijbalk",
+          "soc_sensitivity": "Gevoeligheid SOC-drift",
+          "cell_sensitivity": "Gevoeligheid celkalibratie"
+        },
+        "data_description": {
+          "model": "Alleen voor de naam in het rapport en voor het advies. Je fabrieksgegevens hieronder veranderen er niet door.",
+          "nominal_kwh": "Totale capaciteit van de cellen, bv. 5,12 kWh.",
+          "reserve_kwh": "Deel van de fabriekscapaciteit dat de batterij nooit afgeeft. Datasheet: 90% ontlaaddiepte, dus 5,12 − 0,51 = 4,61 kWh = 100% van nieuw.",
+          "cycle_life": "Bv. 6000 volle cycli.",
+          "cycle_eol_pct": "Specificatie van de fabrikant: bv. 80% na 6000 cycli (Marstek, productpagina Venus E Gen 3.0). Dit is de specificatielijn; geen garantie.",
+          "initial_cycles": "Cycli vóór deze monitor. Wordt ingevuld met de teller totaal ontladen van de batterij als die er is (gedeeld door de bruikbare capaciteit). Die teller meet aan de AC-kant: een schatting, minder precies dan de cycli die de monitor zelf aan de DC-kant telt. Zonder teller: totaal ontladen kWh tot nu toe ÷ bruikbare capaciteit; laat 0 bij een nieuwe batterij.",
+          "red_pct": "Op of onder dit % van nieuw wordt de status rood: het moment om het via de Marstek-app te melden. Standaard 75%.",
+          "tolerance_pct": "Groen zolang de meting hooguit zoveel punten onder de specificatielijn van de fabrikant zit. Standaard 5.",
+          "power_sign": "Automatisch: wordt herkend bij de eerste laad- of ontlaadbeurt. Alleen aanpassen als de herkenning het mis heeft.",
+          "purchase_date": "De datum waarop de batterij in gebruik ging. Garantie en leeftijd tellen vanaf hier.",
+          "cell_max_entity": "Spanning van de hoogste cel, in V of mV. Alleen celspanningen, geen temperaturen.",
+          "cell_min_entity": "Spanning van de laagste cel, in V of mV.",
+          "temp_max_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen.",
+          "temp_min_entity": "Wordt bij elke meting bewaard: een koude batterij geeft minder af. Alleen celtemperaturen, geen MOS- of printplaattemperaturen.",
+          "notify": "Een bericht op je telefoon (Home Assistant-app) en onder Instellingen → Reparaties als de SOC-meter afwijkt of de cellen uit balans raken, met advies. Alleen bij een patroon: 1× wordt alleen vastgelegd, 2× in 45 dagen is \"let op\", 3× is advies. Uit = geen berichten; de kaart laat het wel zien.",
+          "sidebar": "Batterijcapaciteit in de zijbalk, met al je batterijen erin. Geldt voor het hele menu-item: uit bij één batterij = geen menu-item.",
+          "soc_sensitivity": "Wanneer een afwijking van de SOC-meter meetelt. Normaal: 5 % of meer. Ruim: 8 %. Extra: 3 %. Uit: alleen op de kaart, nooit \"let op\" of advies.",
+          "cell_sensitivity": "Wanneer het celverschil te hoog is. Normaal: 2× de eigen normale waarde. Ruim: 3×. Extra: 1,5×. Uit: alleen op de kaart. Alleen met celspanningssensoren."
+        }
+      },
+      "restore": {
+        "title": "Back-up terugzetten",
+        "description": "Kies een rapport- of back-upbestand van deze monitor (.html of .json). Samenvoegen houdt alle metingen van beide; vervangen laat het bestand winnen (een volledige back-up zet ook de lopende meting terug). Eerst wordt een volledige back-up van de huidige gegevens gemaakt in /config/marstek_capacity_monitor/backup/.",
+        "data": {
+          "file": "Back-upbestand",
+          "mode": "Hoe"
+        }
+      },
+      "sensors": {
+        "title": "Sensoren wisselen",
+        "description": "Kies welke sensoren deze batterij gebruikt. Achter elke keuze staat de waarde van nu: een vermogensensor die niet op (bijna) 0 W staat terwijl de batterij stilstaat, is meestal de verkeerde. De scan vond {count} andere combinatie(s).\n\nJe metingen blijven bij deze batterij. Een ontlading die nu loopt en het automatisch herkennen van plus en min beginnen wel opnieuw.",
+        "data": {
+          "candidate": "Sensoren",
+          "restart": "Opnieuw beginnen met meten (oude metingen wissen)"
+        },
+        "data_description": {
+          "restart": "Zet dit aan als de oude metingen met een verkeerde sensor zijn gemaakt, bijvoorbeeld na de melding \"Vermogensensor nakijken\". Kan niet ongedaan worden gemaakt."
+        }
+      },
+      "sensors_manual": {
+        "title": "Zelf sensoren kiezen",
+        "description": "Het vermogen moet aan de batterijkant (DC) gemeten worden, niet aan de AC- of netkant. Of laden plus of min is, herkent de monitor zelf.",
+        "data": {
+          "soc_entity": "Laadtoestand-sensor (%)",
+          "power_entity": "DC-vermogen van de batterij (W)",
+          "restart": "Opnieuw beginnen met meten (oude metingen wissen)"
+        },
+        "data_description": {
+          "restart": "Zet dit aan als de oude metingen met een verkeerde sensor zijn gemaakt, bijvoorbeeld na de melding \"Vermogensensor nakijken\". Kan niet ongedaan worden gemaakt."
+        }
+      }
+    },
+    "error": {
+      "reserve_too_large": "De reserve moet kleiner zijn dan de fabriekscapaciteit.",
+      "cells_both": "Vul zowel de hoogste als de laagste celspanning in, of geen van beide.",
+      "same_entity": "SOC en vermogen moeten verschillende sensoren zijn.",
+      "restore_invalid": "Dit is geen back-up van Marstek Capacity Monitor, of hij is gemaakt door een nieuwere versie.",
+      "restore_unreadable": "Het bestand kon niet worden gelezen.",
+      "looks_like_ac": "Deze sensor lijkt de AC-/netkant te meten, niet de batterijkant (DC). AC-waarden bevatten omzetverlies en geven een verkeerde capaciteit. Kies de sensor voor het batterijvermogen, of verstuur nogmaals om deze toch te gebruiken."
+    },
+    "abort": {
+      "restored": "Back-up teruggezet: {records} rondes, waarvan {full} volledige ontladingen. De kaart toont ze binnen een minuut."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "measured_capacity": {
+        "name": "Gemeten capaciteit"
+      },
+      "capacity_pct": {
+        "name": "Nog beschikbaar"
+      },
+      "expected_capacity": {
+        "name": "Specificatie fabrikant"
+      },
+      "margin": {
+        "name": "Marge t.o.v. specificatie"
+      },
+      "cycles": {
+        "name": "Volle cycli"
+      },
+      "nominal_capacity": {
+        "name": "Opgegeven capaciteit"
+      },
+      "usable_capacity": {
+        "name": "Bruikbare capaciteit"
+      },
+      "warranty_end": {
+        "name": "Garantie tot"
+      },
+      "dc_discharged": {
+        "name": "DC ontladen (gemonitord)"
+      },
+      "warranty_status": {
+        "name": "Status beschikbare capaciteit",
+        "state": {
+          "good": "Goed",
+          "attention": "Onder specificatie",
+          "critical": "Melden bij Marstek",
+          "no_measurement": "Nog geen volledige ontlading gemeten",
+          "check_model": "Klopt het model?",
+          "unconfirmed": "Nog niet bevestigd",
+          "check_power": "Vermogensensor nakijken"
+        }
+      },
+      "red_threshold": {
+        "name": "Rode grens"
+      },
+      "last_full_discharge": {
+        "name": "Laatste volledige ontlading"
+      },
+      "last_full_charge": {
+        "name": "Laatste volledige lading"
+      },
+      "monitor_status": {
+        "name": "Status meting",
+        "state": {
+          "measuring": "Meet",
+          "collecting": "Verzamelt data",
+          "no_recent_data": "Geen recente data",
+          "sensor_missing": "Sensor niet beschikbaar"
+        }
+      },
+      "cell_spread": {
+        "name": "Celverschil na volle lading"
+      },
+      "soc_health": {
+        "name": "SOC-meter",
+        "state": {
+          "ok": "In orde",
+          "letop": "Let op",
+          "advies": "Advies"
+        }
+      },
+      "cell_health": {
+        "name": "Celbalans",
+        "state": {
+          "ok": "In orde",
+          "letop": "Let op",
+          "advies": "Advies"
+        }
+      },
+      "b2500_battery_power": {
+        "name": "B2500 accuvermogen"
+      }
+    }
+  },
+  "services": {
+    "reset_measurements": {
+      "name": "Metingen wissen",
+      "description": "Vergeet alle metingen van één batterij. Kan niet ongedaan worden gemaakt.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Batterij",
+          "description": "De batterij waarvan de metingen worden gewist."
+        }
+      }
+    },
+    "dismiss_advice": {
+      "name": "Advies wegklikken",
+      "description": "Klik de huidige \"let op\" of het advies van één batterij één keer weg. Komt pas terug bij een nieuwe reeks.",
+      "fields": {
+        "battery": {
+          "name": "Batterij",
+          "description": "Korte code van de batterij, bijv. mt1."
+        },
+        "config_entry_id": {
+          "name": "Batterij (item)",
+          "description": "Of kies de batterij."
+        },
+        "kind": {
+          "name": "Onderwerp",
+          "description": "soc = SOC-drift, cells = celkalibratie."
+        }
+      }
+    },
+    "demo": {
+      "name": "Demo-situatie",
+      "description": "Voegt (één keer) een batterij \"Demo\" toe en vult die met verzonnen gegevens voor één situatie. De kaart, Reparaties en telefoonberichten reageren zoals bij een echte batterij. Je eigen batterijen worden niet aangeraakt; de demobatterij haal je weg zoals elke andere.",
+      "fields": {
+        "scenario": {
+          "name": "Situatie",
+          "description": "Situatie"
+        }
+      }
+    }
+  },
+  "selector": {
+    "power_sign": {
+      "options": {
+        "auto": "Automatisch",
+        "charge_positive": "Laden is positief",
+        "charge_negative": "Laden is negatief"
+      }
+    },
+    "model": {
+      "options": {
+        "venus_e_v12": "Venus E v1 / v2 (5,12 kWh)",
+        "venus_c": "Venus C (2,56 kWh)",
+        "venus_e_v3": "Venus E v3 (5,12 kWh)",
+        "venus_e_v4": "Venus E 4.0 (5,02 kWh)",
+        "venus_e_max": "Venus E Max (10,05 kWh)",
+        "venus_e_pro": "Venus E Pro (2,08 kWh per pakket)",
+        "venus_d": "Venus D (2,56 kWh per pakket)",
+        "b2500_v2": "B2500 V2 (2,24 kWh, test)",
+        "b2500_v1": "B2500 V1: nog niet te meten",
+        "other": "Ander model: fabrieksgegevens zelf invullen"
+      }
+    },
+    "kind": {
+      "options": {
+        "soc": "SOC-drift",
+        "cells": "Celkalibratie"
+      }
+    },
+    "sensitivity": {
+      "options": {
+        "off": "Uit",
+        "relaxed": "Ruim",
+        "normal": "Normaal",
+        "strict": "Extra"
+      }
+    },
+    "restore_mode": {
+      "options": {
+        "merge": "Samenvoegen: alles van beide houden",
+        "replace": "Vervangen: het bestand wint"
+      }
+    },
+    "scenario": {
+      "options": {
+        "normal": "Normaal",
+        "since_start": "Langzame daling sinds begin meting",
+        "high_provisional": "Boven 100 %, voorlopig",
+        "high_confirmed": "Boven 100 %, bevestigd (groen)",
+        "drop_unconfirmed": "Plotselinge daling, nog niet bevestigd",
+        "drop_confirmed": "Plotselinge daling, bevestigd na 5 metingen",
+        "drop_recovered": "Plotselinge daling, hersteld",
+        "below_spec": "Onder specificatie (oranje)",
+        "critical": "Melden bij Marstek (rood)",
+        "critical_confirmed": "Melden bij Marstek, bevestigd (rood + melding)",
+        "check_model": "Klopt het model? (ongeveer de helft)",
+        "check_power": "Vermogensensor nakijken (meting ver boven 100 %)",
+        "soc_letop": "SOC-drift: let op",
+        "soc_advies": "SOC-drift: advies",
+        "cells_letop": "Celkalibratie: let op",
+        "cells_advies": "Celkalibratie: advies",
+        "collecting": "Nog geen meting (verzamelt data)"
+      }
+    }
+  },
+  "issues": {
+    "soc_letop": {
+      "title": "{name}: let op, SOC-meter",
+      "description": "{message}\n\nDeze melding verdwijnt vanzelf zodra de monitor dat heeft gezien. Negeren = wegklikken tot er een nieuwe reeks is."
+    },
+    "soc_advies": {
+      "title": "{name}: SOC-drift geconstateerd",
+      "description": "{message}\n\nDeze melding verdwijnt vanzelf zodra de monitor dat heeft gezien. Negeren = wegklikken tot er een nieuwe reeks is."
+    },
+    "cells_letop": {
+      "title": "{name}: let op, celbalans",
+      "description": "{message}\n\nDeze melding verdwijnt vanzelf zodra de monitor dat heeft gezien. Negeren = wegklikken tot er een nieuwe reeks is."
+    },
+    "cells_advies": {
+      "title": "{name}: celkalibratie aanbevolen",
+      "description": "{message}\n\nDeze melding verdwijnt vanzelf zodra de monitor dat heeft gezien. Negeren = wegklikken tot er een nieuwe reeks is."
+    },
+    "extras_found": {
+      "title": "{name}: extra sensoren gevonden",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "{name}: extra sensoren gevonden",
+            "description": "{found}",
+            "data": {
+              "add_cells": "Celspanningen toevoegen (celbalans)",
+              "add_cycles": "Cycli vóór de monitoring invullen (schatting, AC-kant)"
+            }
+          }
+        },
+        "abort": {
+          "battery_gone": "Deze batterij bestaat niet meer."
+        }
+      }
+    },
+    "check_model": {
+      "title": "{name}: klopt het model?",
+      "description": "De gemeten capaciteit is {pct} % van nieuw: ongeveer de helft van de ingestelde {kwh} kWh. Meestal is dan het model verkeerd gekozen, niet de batterij versleten. Een Venus C heeft 2,56 kWh, de helft van een Venus E.\n\nIs het een Venus C? Zet via het tandwiel ⚙ op de kaart van deze batterij (Batterij en garantie) de opgegeven capaciteit op 2,56 kWh en de reserve op 0,26 kWh. De metingen worden dan opnieuw berekend.\n\nKlopt het model wel? Meld het dan via de Marstek-app.\n\nDeze melding verdwijnt vanzelf als de meting niet meer ongeveer de helft is."
+    },
+    "implausible_power": {
+      "title": "{name}: vermogenssensor geeft onmogelijke waarden",
+      "description": "De sensor {entity} gaf {value} ({watts} W). Zo snel laadt of ontlaadt geen thuisbatterij, dus de monitor telt deze waarden niet mee.\n\nMeestal klopt de eenheid niet (kW terwijl de waarde in W is), of rekent een zelfgemaakte sensor met mA of mV in plaats van A en V. Pas de sensor aan, of kies een andere bij het tandwiel ⚙ op de kaart van deze batterij → **Sensoren** → **Wisselen**.\n\nIs het aantal volle cycli al flink opgelopen? Begin dan opnieuw met tellen met de actie Metingen wissen voor deze batterij.\n\nDeze melding verdwijnt vanzelf na 24 uur zonder zulke waarden."
+    },
+    "critical": {
+      "title": "{name}: capaciteit onder de rode lijn",
+      "description": "Gemeten capaciteit: {pct} % van nieuw. De laatste {count} volledige ontladingen zaten allemaal op of onder de rode lijn van {red} %, dus dit is geen losse rare meting.\n\nWat te doen: open de kaart, druk op Rapport en download het Marstek-rapport (Engels, zonder namen of adres). Meld het via de Marstek-app en stuur het rapport mee. Daarna is het aan Marstek om het verder te onderzoeken.\n\nDeze melding verdwijnt vanzelf als de capaciteit weer boven de rode lijn komt. Negeren = wegklikken voor deze reeks."
+    },
+    "check_power": {
+      "title": "{name}: meting kan niet kloppen, vermogensensor nakijken",
+      "description": "De laatste volledige ontlading kwam uit op {pct} % van nieuw ({kwh} kWh). Meer dan {limit} % kan een batterij niet: er is dan meer energie geteld dan erin past. Zo'n meting telt daarom niet mee ({count} keer tot nu toe).\n\nMeestal ligt het aan de vermogensensor:\n- hij blijft na het laden of ontladen op zijn laatste waarde staan en valt niet terug naar 0 W;\n- er is een verkeerde sensor gekozen (bijvoorbeeld de AC-kant of een ander apparaat);\n- de koppeling geeft het vermogen met een verkeerde factor door.\n\nKijk in Geschiedenis of de vermogensensor tijdens een ontlading meebeweegt met de SOC en terugvalt naar 0 W als de batterij stilstaat. Kies zo nodig een andere sensor bij het tandwiel ⚙ op de kaart van deze batterij → **Sensoren** → **Wisselen**. Zet daar **Opnieuw beginnen met meten** aan, dan tellen de oude metingen niet meer mee.\n\nDeze melding verdwijnt vanzelf zodra een volledige ontlading weer een geloofwaardige uitkomst geeft."
+    },
+    "b2500_no_data": {
+      "title": "{name}: geen accuspanning of -stroom van de B2500",
+      "description": "Al {minutes} minuten krijgt de monitor geen waarde van: {sensors}. Zonder die waarden kan hij het accuvermogen niet uitrekenen, dus wordt er niets gemeten.\n\nWat te doen:\n1. Controleer in hm2mqtt of **Enable Extra Battery Data** aan staat (optie van de add-on, Docker: `POLL_EXTRA_BATTERY_DATA=true`), en herstart hm2mqtt na het aanzetten.\n2. Controleer onder Instellingen → Entiteiten of *Host Battery Voltage* en *Host Battery Current* van de B2500 ingeschakeld zijn en een getal tonen.\n3. Nog steeds niets? Kijk in het logboek van hm2mqtt en naar de firmware van de B2500, en meld het in een issue op GitHub.\n\nDeze melding verdwijnt vanzelf zodra beide waarden weer binnenkomen."
+    }
+  }
+}
