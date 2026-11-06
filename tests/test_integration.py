@@ -116,8 +116,8 @@ async def test_second_battery_needs_no_refresh(hass: HomeAssistant) -> None:
     assert result["description"] is None
 
 
-async def test_max_six_batteries(hass: HomeAssistant) -> None:
-    for i in range(1, 7):
+async def test_max_nine_batteries(hass: HomeAssistant) -> None:
+    for i in range(1, 10):
         _entry(f"mt{i}").add_to_hass(hass)
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
